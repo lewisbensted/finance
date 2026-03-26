@@ -10,8 +10,11 @@ public class DatabaseSetup {
             statement.executeUpdate("""
                                         CREATE TABLE IF NOT EXISTS users (
                                         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                                        username TEXT NOT NULL UNIQUE, hash TEXT NOT NULL,
-                                        cash NUMERIC NOT NULL DEFAULT 10000.00
+                                        username TEXT NOT NULL UNIQUE,
+                                        first_name TEXT,
+                                        last_name TEXT,
+                                        password_hash TEXT NOT NULL,
+                                        balance NUMERIC NOT NULL DEFAULT 0
                     )""");
             statement.executeUpdate("""
                                         CREATE TABLE IF NOT EXISTS transactions (
