@@ -28,7 +28,7 @@ public class StockService {
 
     public StockResponseDTO fetchPrices(String[] symbols) {
         List<StockDTO> stocks = new ArrayList<>(symbols.length);
-        Map<String, String> fields = new HashMap<>();
+        Map<String, List<String>> fields = new HashMap<>();
 
         for (String symbol : symbols) {
             StockDTO price = fetchPrice(symbol, fields);
@@ -38,7 +38,7 @@ public class StockService {
         return new StockResponseDTO(stocks, fields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to fetch %s prices", stocks.isEmpty() ? "all" : "some"), fields));
     }
 
-    StockDTO fetchPrice(String symbol, Map<String, String> fields) {
+    StockDTO fetchPrice(String symbol, Map<String, List<String>> fields) {
         try {
             ResponseEntity<StockDTO> response = restTemplate.exchange(
                     url,
@@ -47,11 +47,11 @@ public class StockService {
             return response.getBody();
         } catch (HttpClientErrorException.BadRequest e) {
             System.out.println("Invalid Symbol: " + symbol);
-            fields.put(symbol, "Invalid Symbol");
+            fields.put(symbol, List.of("Invalid Symbol"));
             return null;
         } catch (Exception e) {
             System.out.println("Unexpected error for symbol " + symbol + ": " + e.getMessage());
-            fields.put(symbol, "Invalid Symbol");
+            fields.put(symbol, List.of("Invalid Symbol"));
             return null;
         }
     }

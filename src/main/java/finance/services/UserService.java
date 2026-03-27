@@ -26,14 +26,13 @@ public class UserService {
             throw new RegistrationException("Username already taken.");
         });
         if (!password.equals(passwordRepeat)) throw new RegistrationException("Passwords do not match.");
-        validatePassword(password);
         User newUser = new User(username, email, firstName, lastName, hash(password));
         return userRepository.save(newUser);
     }
 
     public User login(String username, String password) {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new AuthenticationException("Invalid username or password."));
-        if (!compare(user.getPasswordHash(), password))
+        if (!compare(password, user.getPasswordHash()))
             throw new AuthenticationException("Invalid username or password.");
         return user;
     }

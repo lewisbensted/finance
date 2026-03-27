@@ -19,7 +19,7 @@ public class StockController {
         this.stockService = stockService;
     }
 
-    @GetMapping(value = "api/prices")
+    @GetMapping(value = "/api/prices")
     ResponseEntity<?> getPrice(@RequestParam(required = false) String symbolsStr) {
         if (symbolsStr == null || symbolsStr.isEmpty()) return ResponseEntity.status(400).body("No symbols provided");
         String[] symbols = symbolsStr.split(",");

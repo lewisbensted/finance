@@ -14,14 +14,16 @@ public class User {
     private String email;
 
     @Column(name = "first_name")
-    private final String firstName;
+    private String firstName;
 
     @Column(name = "last_name")
-    private final String lastName;
+    private String lastName;
 
     @Column(name = "password_hash")
     private String passwordHash;
     private double balance;
+
+    protected User() {}
 
     public User(String username, String email,String firstName,String lastName, String passwordHash) {
         this.username = username;
