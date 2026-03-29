@@ -36,11 +36,4 @@ public class UserService {
             throw new AuthenticationException("Invalid username or password.");
         return user;
     }
-
-    public User topUpBalance(long id, double topUp) {
-        if (topUp <= 0) throw new IllegalArgumentException("Top-up amount must be positive");
-        User user = userRepository.findById(id).orElseThrow(() -> new NotFoundException("User not found."));
-        user.setBalance(user.getBalance() + topUp);
-        return user;
-    }
 }

@@ -23,15 +23,13 @@ public class UserController {
 
     @PostMapping(value = "/api/register")
     public ResponseEntity<UserDTO> registerUser (@RequestBody(required = false) @Valid RegisterDTO user, HttpSession session){
-        if (user == null) throw new MissingRequestBodyException("No requests body provided");
         if (session.getAttribute("USER_SESSION")!=null) throw new ForbiddenException("Already registered.");
         User newUser = userService.register(user.username(), user.email(), user.firstName(), user.lastName(), user.password(), user.confirmPassword());
         return ResponseEntity.status(201).body(new UserDTO(newUser));
     }
 
     @PostMapping(value = "/api/login")
-    public ResponseEntity<UserDTO> login(@RequestBody(required=false) LoginDTO user, HttpSession session) {
-        if (user == null) throw new MissingRequestBodyException("No requests body provided");
+    public ResponseEntity<UserDTO> login(@Valid @RequestBody(required=false) LoginDTO user, HttpSession session) {
         if (session.getAttribute("USER_SESSION")!=null) throw new ForbiddenException("Already logged in.");
         User activeUser = userService.login(user.username(), user.password());
         session.setAttribute("USER_SESSION", activeUser);

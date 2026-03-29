@@ -1,10 +1,7 @@
 package finance.controllers;
 
 import finance.dto.ErrorDTO;
-import finance.exceptions.AuthenticationException;
-import finance.exceptions.ForbiddenException;
-import finance.exceptions.MissingRequestBodyException;
-import finance.exceptions.UnauthorisedException;
+import finance.exceptions.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -43,5 +40,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorisedException.class)
     public ResponseEntity<ErrorDTO> UnauthorisedException(UnauthorisedException ex) {
         return ResponseEntity.status(401).body(new ErrorDTO("UNAUTHORISED", ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorDTO> NotFoundException(NotFoundException ex) {
+        return ResponseEntity.status(404).body(new ErrorDTO("NOT_FOUND", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorDTO> IllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", ex.getMessage()));
     }
 }

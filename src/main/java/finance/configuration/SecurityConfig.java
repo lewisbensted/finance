@@ -17,6 +17,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/register").permitAll()
                         .requestMatchers("/api/login").permitAll()
                         .requestMatchers("/api/logout").permitAll()
+                        .requestMatchers("/api/deposit").permitAll()
+                        .requestMatchers("/api/withdraw").permitAll()
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
