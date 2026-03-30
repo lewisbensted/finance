@@ -21,7 +21,7 @@ public class StockController {
 
     @GetMapping(value = "/api/prices")
     ResponseEntity<?> getPrice(@RequestParam(required = false) String symbolsStr) {
-        if (symbolsStr == null || symbolsStr.isEmpty()) return ResponseEntity.status(400).body("No symbols provided");
+        if (symbolsStr == null || symbolsStr.isEmpty()) return ResponseEntity.status(400).body("No symbols provided.");
         String[] symbols = symbolsStr.split(",");
         StockResponseDTO response = stockService.fetchPrices(symbols);
         return ResponseEntity.status(200).body(response);

@@ -5,6 +5,9 @@ import finance.exceptions.NotFoundException;
 import finance.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import static finance.entity.TransferType.DEPOSIT;
+import static finance.entity.TransferType.WITHDRAW;
+
 @Service
 public class AccountService {
     private final UserRepository userRepository;
@@ -14,14 +17,12 @@ public class AccountService {
     }
 
     public void deposit(User user, double amount) {
-        if (amount <= 0) throw new IllegalArgumentException("Top-up amount must be positive");
-        user.setBalance(user.getBalance() + amount);
+        user.updateBalance(DEPOSIT, amount);
         userRepository.save(user);
     }
 
     public void withdraw(User user, double amount) {
-        if (amount > user.getBalance()) throw new IllegalArgumentException("Cannot withdraw more than current balance.");
-        user.setBalance(user.getBalance() - amount);
+        user.updateBalance(WITHDRAW, amount);
         userRepository.save(user);
     }
 }

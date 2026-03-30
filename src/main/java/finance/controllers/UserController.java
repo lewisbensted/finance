@@ -7,11 +7,12 @@ import finance.dto.UserDTO;
 import finance.entity.User;
 import finance.exceptions.*;
 import finance.services.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static finance.controllers.AuthUtils.authenticateUser;
 
 @RestController
 public class UserController {
@@ -38,7 +39,7 @@ public class UserController {
 
     @PostMapping(value = "/api/logout")
     public ResponseEntity<String> logout(HttpSession session) {
-        if (session.getAttribute("USER_SESSION")==null) throw new UnauthorisedException("Not logged in.");
+        authenticateUser(session);
         session.removeAttribute("USER_SESSION");
         return ResponseEntity.status(200).body("Logged out");
     }
