@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
+import org.hibernate.annotations.Check;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDateTime;
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
@@ -31,12 +33,14 @@ public class Transaction {
 
     @Positive
     @NotNull
-    @Column(nullable = false, updatable = false, columnDefinition = "CHECK (shares>0)")
+    @Column(nullable = false, updatable = false)
+    @Check(constraints = "shares > 0")
     private Integer shares;
 
     @PositiveOrZero
     @NotNull
-    @Column(nullable = false, updatable = false, columnDefinition = "CHECK (price>=0)")
+    @Column(nullable = false, updatable = false)
+    @Check(constraints = "price >= 0")
     private Double price;
 
     @NotNull
@@ -44,8 +48,9 @@ public class Transaction {
     @Column(name = "transaction_type", nullable = false, updatable = false)
     private TransactionType transactionType;
 
+    @CreationTimestamp
     @NotNull
-    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     public Transaction(User user, String symbol, String companyName, Integer shares, Double price, TransactionType transactionType, LocalDateTime createdAt) {

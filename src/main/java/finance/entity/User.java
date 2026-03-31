@@ -17,7 +17,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @NotNull
     @Column(nullable = false, updatable = false)
@@ -36,12 +36,12 @@ public class User {
     private String lastName;
 
     @NotNull
-    @Column(name = "password_hash", nullable=false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
     @NotNull
     @Column(nullable = false)
-    private double balance;
+    private Double balance;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
@@ -49,25 +49,27 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Holding> holdings = new ArrayList<>();
 
-    protected User() {}
+    protected User() {
+    }
 
-    public User(String username, String email,String firstName,String lastName, String passwordHash) {
+    public User(String username, String email, String firstName, String lastName, String passwordHash) {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.balance = 0;
+        this.balance = (double) 0;
     }
 
-    public double getBalance() {
+    public Double getBalance() {
         return balance;
     }
 
     public void updateBalance(TransferType transferType, double amount) {
-        if (amount <= 0) throw new IllegalArgumentException("Transfer must be a positive number.");
-        if (transferType==WITHDRAW && amount > this.getBalance()) throw new IllegalArgumentException("Insufficient funds to withdraw.");
-        this.balance += transferType==DEPOSIT ? amount : -amount;
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
+        if (transferType == WITHDRAW && amount > this.getBalance())
+            throw new IllegalArgumentException("Insufficient funds to withdraw.");
+        this.balance += transferType == DEPOSIT ? amount : -amount;
     }
 
     public String getPasswordHash() {
@@ -106,5 +108,9 @@ public class User {
 
     public List<Holding> getHoldings() {
         return this.holdings;
+    }
+
+    public Long getId() {
+        return this.id;
     }
 }
