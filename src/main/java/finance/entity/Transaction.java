@@ -53,13 +53,12 @@ public class Transaction {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public Transaction(User user, String symbol, String companyName, Integer shares, Double price, TransactionType transactionType, LocalDateTime createdAt) {
+    public Transaction(User user, String symbol, String companyName, Integer shares, Double price, TransactionType transactionType) {
         this.user = user;
         this.symbol = symbol;
         this.companyName = companyName;
         this.shares = shares;
         this.price = price;
         this.transactionType = transactionType;
-        this.createdAt = createdAt;
     }
 }

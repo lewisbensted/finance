@@ -46,7 +46,7 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Holding> holdings = new ArrayList<>();
 
     protected User() {
@@ -65,11 +65,16 @@ public class User {
         return balance;
     }
 
-    public void updateBalance(TransferType transferType, double amount) {
+    public void deposit(double amount) {
         if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
-        if (transferType == WITHDRAW && amount > this.getBalance())
-            throw new IllegalArgumentException("Insufficient funds to withdraw.");
-        this.balance += transferType == DEPOSIT ? amount : -amount;
+        this.balance += amount;
+    }
+
+    public void withdraw(double amount){
+        if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
+        if (amount > this.getBalance())
+            throw new IllegalArgumentException("Insufficient funds.");
+        this.balance -= amount;
     }
 
     public String getPasswordHash() {
@@ -104,6 +109,11 @@ public class User {
     public Holding addHolding(Holding holding) {
         this.holdings.add(holding);
         return holding;
+    }
+
+    public void removeHolding(Holding holding) {
+        this.holdings.remove(holding);
+        holding.setUser(null);
     }
 
     public List<Holding> getHoldings() {

@@ -25,14 +25,14 @@ public class AccountController {
     @PostMapping(value = "/api/deposit")
     ResponseEntity<UserDTO> deposit(@Valid @RequestBody AmountDTO request, HttpSession session) {
         User activeUser = authenticateUser(session);
-        accountService.deposit(activeUser, request.amount());
+        accountService.deposit(activeUser.getId(), request.amount());
         return ResponseEntity.status(200).body(new UserDTO(activeUser));
     }
 
     @PostMapping(value = "/api/withdraw")
     ResponseEntity<UserDTO> withdraw(@Valid @RequestBody AmountDTO request, HttpSession session) {
         User activeUser = authenticateUser(session);
-        accountService.withdraw(activeUser, request.amount());
+        accountService.withdraw(activeUser.getId(), request.amount());
         return ResponseEntity.status(200).body(new UserDTO(activeUser));
     }
 

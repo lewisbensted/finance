@@ -29,7 +29,8 @@ public class Holding {
     @Column(nullable = false)
     private Integer shares;
 
-    public Holding() {}
+    public Holding() {
+    }
 
     public Holding(User user, String symbol, String companyName, Integer shares) {
         this();
@@ -39,10 +40,23 @@ public class Holding {
         this.shares = shares;
     }
 
-    public void updateShares(TransactionType transactionType, int amount) {
-        if (amount <= 0) throw new IllegalArgumentException("Transaction must be a positive number of shares.");
-        if (transactionType == SELL && amount > shares)
+    public void remove(int quantity) {
+        if (quantity <= 0) throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+        if (quantity > shares)
             throw new IllegalArgumentException("Insufficient shares to sell.");
-        this.shares += transactionType == BUY ? amount : -amount;
+        this.shares -= quantity;
+    }
+
+    public void add(int quantity) {
+        if (quantity <= 0) throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+        this.shares += quantity;
+    }
+
+    public Integer getShares() {
+        return this.shares;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

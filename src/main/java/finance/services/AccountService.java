@@ -3,6 +3,7 @@ package finance.services;
 import finance.entity.User;
 import finance.exceptions.NotFoundException;
 import finance.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import static finance.entity.TransferType.DEPOSIT;
@@ -16,13 +17,19 @@ public class AccountService {
         this.userRepository = userRepository;
     }
 
-    public void deposit(User user, double amount) {
-        user.updateBalance(DEPOSIT, amount);
+    @Transactional
+    public void deposit(Long userId, double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        user.deposit(amount);
         userRepository.save(user);
     }
 
-    public void withdraw(User user, double amount) {
-        user.updateBalance(WITHDRAW, amount);
+    @Transactional
+    public void withdraw(Long userId, double amount) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        user.withdraw(amount);
         userRepository.save(user);
     }
 }
