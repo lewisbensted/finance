@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static finance.entity.TransactionType.BUY;
-import static finance.entity.TransferType.DEPOSIT;
-import static finance.entity.TransferType.WITHDRAW;
-
 @Entity
 @Table(name = "users")
 public class User {
