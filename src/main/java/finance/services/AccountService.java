@@ -1,9 +1,8 @@
 package finance.services;
 
 import finance.entity.User;
-import finance.exceptions.NotFoundException;
 import finance.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import static finance.entity.TransferType.DEPOSIT;

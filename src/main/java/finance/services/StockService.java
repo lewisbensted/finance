@@ -1,9 +1,7 @@
 package finance.services;
 
-import finance.dto.ErrorDTO;
 import finance.dto.StockDTO;
 import finance.dto.StockFetchDTO;
-import finance.dto.StockResponseDTO;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

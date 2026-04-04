@@ -5,10 +5,11 @@ import finance.entity.Holding;
 import finance.entity.Transaction;
 import finance.entity.TransactionType;
 import finance.entity.User;
+import finance.exceptions.InsufficientFundsException;
 import finance.repository.HoldingRepository;
 import finance.repository.TransactionRepository;
 import finance.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -33,10 +34,10 @@ public class TransactionService {
     }
 
     @Transactional
-    public void buy(User user, TransactionDTO transactionDTO, Double price) {
-        String symbol = transactionDTO.symbol();
-        String companyName = transactionDTO.companyName();
-        Integer quantity = transactionDTO.quantity();
+    public void buy(User user, StockDTO stock, Integer quantity) {
+        String symbol = stock.symbol();
+        String companyName = stock.companyName();
+        Double price = stock.latestPrice();
 
         user.withdraw(quantity * price);
 
@@ -54,10 +55,10 @@ public class TransactionService {
     }
 
     @Transactional
-    public void sell(User user, TransactionDTO transactionDTO, Double price) {
-        String symbol = transactionDTO.symbol();
-        String companyName = transactionDTO.companyName();
-        Integer quantity = transactionDTO.quantity();
+    public void sell(User user, StockDTO stock, Integer quantity) {
+        String symbol = stock.symbol();
+        String companyName = stock.companyName();
+        Double price = stock.latestPrice();
 
         user.deposit(quantity * price);
 
@@ -74,6 +75,7 @@ public class TransactionService {
         }
     }
 
+    @Transactional(rollbackFor = InsufficientFundsException.class)
     public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionDTO> transactions) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
@@ -91,21 +93,25 @@ public class TransactionService {
                 results.add(new TransactionResultDTO(transaction, fetch.error()));
                 continue;
             }
+            StockDTO stock = fetch.stock();
+            double transactionCost = stock.latestPrice() * transaction.quantity();
             try {
-                if (type == BUY)
-                    buy(user, transaction, fetch.stock().latestPrice());
-                else
-                    sell(user, transaction, fetch.stock().latestPrice());
+                if (type == BUY) {
+                    if (transactionCost > user.getBalance())
+                        throw new InsufficientFundsException("Insufficient funds for all transactions");
+                    buy(user, stock, transaction.quantity());
+
+                } else
+                    sell(user, stock, transaction.quantity());
                 results.add(new TransactionResultDTO(transaction, null));
+            } catch (InsufficientFundsException e) {
+                throw e;
             } catch (IllegalArgumentException e) {
                 results.add(new TransactionResultDTO(transaction, e.getMessage()));
             } catch (Exception e) {
                 results.add(new TransactionResultDTO(transaction, "Unexpected Error."));
             }
         }
-
         return results;
     }
-
-
 }

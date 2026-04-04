@@ -1,5 +1,6 @@
 package finance.entity;
 
+import finance.exceptions.InsufficientFundsException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -69,7 +70,7 @@ public class User {
     public void withdraw(double amount){
         if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
         if (amount > this.getBalance())
-            throw new IllegalArgumentException("Insufficient funds.");
+            throw new InsufficientFundsException("Insufficient funds.");
         this.balance -= amount;
     }
 

@@ -41,6 +41,7 @@ public class StockController {
             else stocks.add(fetch.stock());
         }
 
-        return ResponseEntity.status(200).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to fetch %s prices", stocks.isEmpty() ? "all" : "some"), errorFields)));
+        boolean allFailed = stocks.isEmpty();
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to fetch %s prices", allFailed ? "all" : "some"), errorFields)));
     }
 }
