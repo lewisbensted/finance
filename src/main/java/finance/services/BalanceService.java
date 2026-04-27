@@ -5,14 +5,11 @@ import finance.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import static finance.entity.TransferType.DEPOSIT;
-import static finance.entity.TransferType.WITHDRAW;
-
 @Service
-public class AccountService {
+public class BalanceService {
     private final UserRepository userRepository;
 
-    public AccountService(UserRepository userRepository) {
+    public BalanceService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

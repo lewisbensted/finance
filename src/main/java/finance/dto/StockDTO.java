@@ -1,4 +1,4 @@
 package finance.dto;
 
-public record StockDTO(String companyName, String symbol, Double latestPrice, String error) {
+public record StockDTO(String companyName, String symbol, Double latestPrice) {
 }

@@ -2,7 +2,6 @@ package finance.services;
 
 import finance.entity.User;
 import finance.exceptions.AuthenticationException;
-import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
 import finance.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;

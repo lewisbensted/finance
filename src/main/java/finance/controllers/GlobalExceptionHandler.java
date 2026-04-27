@@ -3,6 +3,7 @@ package finance.controllers;
 import finance.dto.ErrorDTO;
 import finance.exceptions.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,13 +18,13 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MissingRequestBodyException.class)
-    public ResponseEntity<ErrorDTO> handleMissingBody(MissingRequestBodyException ex) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorDTO> handleMissingBody(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "Empty Request Body"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDTO> handleMissingBody(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorDTO> handleMissingFields(MethodArgumentNotValidException ex) {
         Map<String, List<String>> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             fieldErrors.putIfAbsent(error.getField(), new ArrayList<>());

@@ -2,7 +2,7 @@ package finance.controllers;
 
 import finance.dto.ErrorDTO;
 import finance.dto.StockDTO;
-import finance.dto.StockFetchDTO;
+import finance.dto.StockResultDTO;
 import finance.dto.StockResponseDTO;
 import finance.services.StockService;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +32,11 @@ public class StockController {
         Map<String, List<String>> errorFields = new HashMap<>();
         List<StockDTO> stocks = new ArrayList<>();
 
-        Map<String, StockFetchDTO> prices = stockService.fetchPrices(symbols);
+        Map<String, StockResultDTO> prices = stockService.fetchPrices(symbols);
 
-        for (Map.Entry<String, StockFetchDTO> entry : prices.entrySet()) {
+        for (Map.Entry<String, StockResultDTO> entry : prices.entrySet()) {
             String symbol = entry.getKey();
-            StockFetchDTO fetch = entry.getValue();
+            StockResultDTO fetch = entry.getValue();
             if (fetch.error() != null) errorFields.put(symbol, List.of(fetch.error()));
             else stocks.add(fetch.stock());
         }

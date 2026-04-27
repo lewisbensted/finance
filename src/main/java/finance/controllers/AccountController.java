@@ -3,7 +3,7 @@ package finance.controllers;
 import finance.dto.AmountDTO;
 import finance.dto.UserDTO;
 import finance.entity.User;
-import finance.services.AccountService;
+import finance.services.BalanceService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +16,9 @@ import static finance.controllers.AuthUtils.authenticateUser;
 
 @RestController
 public class AccountController {
-    AccountService accountService;
+    BalanceService accountService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(BalanceService accountService) {
         this.accountService = accountService;
     }
 

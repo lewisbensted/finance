@@ -11,6 +11,4 @@ public record ErrorDTO(
     public ErrorDTO(String code, String message) {
         this(code, message, null);
     }
-
-
 }

@@ -79,12 +79,12 @@ public class TransactionService {
     public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionDTO> transactions) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        Map<String, StockFetchDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionDTO::symbol).toArray(String[]::new));
+        Map<String, StockResultDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionDTO::symbol).toArray(String[]::new));
 
         List<TransactionResultDTO> results = new ArrayList<>();
 
         for (TransactionDTO transaction : transactions) {
-            StockFetchDTO fetch = prices.get(transaction.symbol());
+            StockResultDTO fetch = prices.get(transaction.symbol());
             if (fetch == null) {
                 results.add(new TransactionResultDTO(transaction, "Unexpected Error."));
                 continue;
