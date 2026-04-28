@@ -5,6 +5,8 @@ import finance.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class BalanceService {
     private final UserRepository userRepository;
@@ -14,7 +16,7 @@ public class BalanceService {
     }
 
     @Transactional
-    public void deposit(Long userId, double amount) {
+    public void deposit(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         user.deposit(amount);
@@ -22,7 +24,7 @@ public class BalanceService {
     }
 
     @Transactional
-    public void withdraw(Long userId, double amount) {
+    public void withdraw(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         user.withdraw(amount);

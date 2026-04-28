@@ -12,6 +12,7 @@ import finance.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,19 +35,19 @@ public class TransactionService {
     }
 
     @Transactional
-    public void buy(User user, StockDTO stock, Integer quantity) {
+    public void buy(User user, StockDTO stock, Long quantity) {
         String symbol = stock.symbol();
         String companyName = stock.companyName();
-        Double price = stock.latestPrice();
+        BigDecimal price = stock.latestPrice();
 
-        user.withdraw(quantity * price);
+        user.withdraw(BigDecimal.valueOf(quantity).multiply(price));
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, BUY);
         transactionRepository.save(transaction);
         user.addTransaction(transaction);
 
         Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
-                .orElseGet(() -> new Holding(user, symbol, companyName, 0));
+                .orElseGet(() -> new Holding(user, symbol, companyName, 0L));
 
         holding.add(quantity);
         if (!user.getHoldings().contains(holding)) {
@@ -55,12 +56,12 @@ public class TransactionService {
     }
 
     @Transactional
-    public void sell(User user, StockDTO stock, Integer quantity) {
+    public void sell(User user, StockDTO stock, Long quantity) {
         String symbol = stock.symbol();
         String companyName = stock.companyName();
-        Double price = stock.latestPrice();
+        BigDecimal price = stock.latestPrice();
 
-        user.deposit(quantity * price);
+        user.deposit(BigDecimal.valueOf(quantity).multiply(price));
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, SELL);
         transactionRepository.save(transaction);
@@ -94,10 +95,10 @@ public class TransactionService {
                 continue;
             }
             StockDTO stock = fetch.stock();
-            double transactionCost = stock.latestPrice() * transaction.quantity();
+            BigDecimal transactionCost = BigDecimal.valueOf(transaction.quantity()).multiply(stock.latestPrice());
             try {
                 if (type == BUY) {
-                    if (transactionCost > user.getBalance())
+                    if (transactionCost.compareTo(user.getBalance()) > 0)
                         throw new InsufficientFundsException("Insufficient funds for all transactions");
                     buy(user, stock, transaction.quantity());
 

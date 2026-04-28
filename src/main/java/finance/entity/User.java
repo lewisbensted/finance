@@ -4,6 +4,7 @@ import finance.exceptions.InsufficientFundsException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,7 @@ public class User {
 
     @NotNull
     @Column(nullable = false)
-    private Double balance;
+    private BigDecimal balance;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
@@ -55,23 +56,28 @@ public class User {
         this.passwordHash = passwordHash;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.balance = (double) 0;
+        this.balance = new BigDecimal(0);
     }
 
-    public Double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void deposit(double amount) {
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
-        this.balance += amount;
+    public void deposit(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be a positive number.");
+        }
+        this.balance = this.balance.add(amount);
     }
 
-    public void withdraw(double amount){
-        if (amount <= 0) throw new IllegalArgumentException("Amount must be a positive number.");
-        if (amount > this.getBalance())
+    public void withdraw(BigDecimal amount) {
+        if (amount == null || amount.signum() <= 0) {
+            throw new IllegalArgumentException("Amount must be a positive number.");
+        }
+        if (amount.compareTo(this.getBalance()) > 0) {
             throw new InsufficientFundsException("Insufficient funds.");
-        this.balance -= amount;
+        }
+        this.balance = this.balance.subtract(amount);
     }
 
     public String getPasswordHash() {

@@ -8,5 +8,4 @@ public record LoginDTO(
 
         @NotBlank(message = "Password is required.")
         String password) {
-
 }

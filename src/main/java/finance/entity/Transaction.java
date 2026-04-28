@@ -8,6 +8,7 @@ import org.hibernate.annotations.Check;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Immutable;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,13 +36,13 @@ public class Transaction {
     @NotNull
     @Column(nullable = false, updatable = false)
     @Check(constraints = "shares > 0")
-    private Integer shares;
+    private Long shares;
 
     @PositiveOrZero
     @NotNull
     @Column(nullable = false, updatable = false)
     @Check(constraints = "price >= 0")
-    private Double price;
+    private BigDecimal price;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -53,7 +54,7 @@ public class Transaction {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public Transaction(User user, String symbol, String companyName, Integer shares, Double price, TransactionType transactionType) {
+    public Transaction(User user, String symbol, String companyName, Long shares, BigDecimal price, TransactionType transactionType) {
         this.user = user;
         this.symbol = symbol;
         this.companyName = companyName;
