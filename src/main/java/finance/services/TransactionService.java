@@ -40,19 +40,18 @@ public class TransactionService {
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
 
+        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
+                .orElseGet(() -> new Holding(user, symbol, companyName, 0L));
+        holding.add(quantity);
+        if (!user.getHoldings().contains(holding)) {
+            user.addHolding(holding);
+        }
+
         user.withdraw(BigDecimal.valueOf(quantity).multiply(price));
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, BUY);
         transactionRepository.save(transaction);
         user.addTransaction(transaction);
-
-        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
-                .orElseGet(() -> new Holding(user, symbol, companyName, 0L));
-
-        holding.add(quantity);
-        if (!user.getHoldings().contains(holding)) {
-            user.addHolding(holding);
-        }
     }
 
     @Transactional
@@ -61,19 +60,18 @@ public class TransactionService {
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
 
+        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
+                .orElseThrow(() -> new IllegalArgumentException("Holding does not exist"));
+        holding.remove(quantity);
+        if (holding.getShares() <= 0) {
+            user.removeHolding(holding);
+        }
+
         user.deposit(BigDecimal.valueOf(quantity).multiply(price));
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, SELL);
         transactionRepository.save(transaction);
         user.addTransaction(transaction);
-
-        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
-                .orElseThrow(() -> new IllegalArgumentException("Holding does not exist"));
-
-        holding.remove(quantity);
-        if (holding.getShares() <= 0) {
-            user.removeHolding(holding);
-        }
     }
 
     @Transactional(rollbackFor = InsufficientFundsException.class)

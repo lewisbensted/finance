@@ -39,7 +39,7 @@ public class User {
 
     @NotNull
     @Column(nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
@@ -47,7 +47,7 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Holding> holdings = new ArrayList<>();
 
-    protected User() {
+    public User() {
     }
 
     public User(String username, String email, String firstName, String lastName, String passwordHash) {
@@ -56,7 +56,6 @@ public class User {
         this.passwordHash = passwordHash;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.balance = new BigDecimal(0);
     }
 
     public BigDecimal getBalance() {
