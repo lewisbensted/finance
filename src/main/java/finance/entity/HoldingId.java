@@ -10,7 +10,7 @@ public class HoldingId implements Serializable {
     private Long userId;
     private String symbol;
 
-    public HoldingId() {
+    protected HoldingId() {
     }
 
     public HoldingId(Long userId, String symbol) {

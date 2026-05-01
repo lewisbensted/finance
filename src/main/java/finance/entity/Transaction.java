@@ -54,6 +54,9 @@ public class Transaction {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    protected Transaction() {
+    }
+
     public Transaction(User user, String symbol, String companyName, Long shares, BigDecimal price, TransactionType transactionType) {
         this.user = user;
         this.symbol = symbol;

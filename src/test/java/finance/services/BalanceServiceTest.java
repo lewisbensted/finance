@@ -28,11 +28,11 @@ public class BalanceServiceTest {
     class DepositTests {
         @Test
         void testSuccess() {
-            User testUser = new User();
+            User testUser = new User(BigDecimal.valueOf(100));
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
             balanceService.deposit(1L, BigDecimal.valueOf(50));
-            assertEquals(BigDecimal.valueOf(50), testUser.getBalance());
+            assertEquals(BigDecimal.valueOf(150), testUser.getBalance());
             verify(mockUserRepo).save(testUser);
         }
 
@@ -40,23 +40,23 @@ public class BalanceServiceTest {
         void testUserNotFound() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
-            assertThrows(IllegalArgumentException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.deposit(1L, BigDecimal.valueOf(50)));
             verify(mockUserRepo).findById(1L);
             verify(mockUserRepo, never()).save(any());
+            assertEquals("User not found.", exception.getMessage());
         }
 
         @Test
         void testDepositFails() {
-            User mockUser = mock(User.class);
+            User testUser = new User(BigDecimal.valueOf(100));
             when(mockUserRepo.findById(any()))
-                    .thenReturn(Optional.of(mockUser));
-            doThrow(new RuntimeException("Invalid deposit"))
-                    .when(mockUser)
-                    .deposit(any(BigDecimal.class));
-            assertThrows(RuntimeException.class,
-                    () -> balanceService.deposit(1L, BigDecimal.valueOf(50)));
+                    .thenReturn(Optional.of(testUser));
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> balanceService.deposit(1L, BigDecimal.valueOf(-50)));
             verify(mockUserRepo, never()).save(any());
+            assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
+            assertEquals("Amount must be a positive number.", exception.getMessage());
         }
     }
 
@@ -64,8 +64,7 @@ public class BalanceServiceTest {
     class WithdrawTests {
         @Test
         void testSuccess() {
-            User testUser = new User();
-            testUser.deposit(BigDecimal.valueOf(100));
+            User testUser = new User(BigDecimal.valueOf(100));
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
 
@@ -78,23 +77,23 @@ public class BalanceServiceTest {
         void testUserNotFound() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
-            assertThrows(IllegalArgumentException.class,
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.withdraw(1L, BigDecimal.valueOf(50)));
             verify(mockUserRepo).findById(1L);
             verify(mockUserRepo, never()).save(any());
+            assertEquals("User not found.", exception.getMessage());
         }
 
         @Test
         void testWithdrawFails() {
-            User mockUser = mock(User.class);
+            User testUser = new User(BigDecimal.valueOf(100));
             when(mockUserRepo.findById(any()))
-                    .thenReturn(Optional.of(mockUser));
-            doThrow(new RuntimeException("Invalid withdrawal"))
-                    .when(mockUser)
-                    .withdraw(any(BigDecimal.class));
-            assertThrows(RuntimeException.class,
-                    () -> balanceService.withdraw(1L, BigDecimal.valueOf(50)));
+                    .thenReturn(Optional.of(testUser));
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                    () -> balanceService.withdraw(1L, BigDecimal.valueOf(-50)));
             verify(mockUserRepo, never()).save(any());
+            assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
+            assertEquals("Amount must be a positive number.", exception.getMessage());
         }
     }
 }

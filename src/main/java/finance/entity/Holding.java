@@ -23,7 +23,7 @@ public class Holding {
     @Column(nullable = false)
     private Long shares;
 
-    public Holding() {
+    protected Holding() {
     }
 
     public Holding(User user, String symbol, String companyName, Long shares) {

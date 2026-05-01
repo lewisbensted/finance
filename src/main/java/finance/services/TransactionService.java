@@ -36,6 +36,8 @@ public class TransactionService {
 
     @Transactional
     public void buy(User user, StockDTO stock, Long quantity) {
+        if (stock == null)
+            throw new IllegalArgumentException("Stock cannot be null");
         String symbol = stock.symbol();
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
@@ -56,6 +58,8 @@ public class TransactionService {
 
     @Transactional
     public void sell(User user, StockDTO stock, Long quantity) {
+        if (stock == null)
+            throw new IllegalArgumentException("Stock cannot be null");
         String symbol = stock.symbol();
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
@@ -84,10 +88,6 @@ public class TransactionService {
 
         for (TransactionDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
-            if (fetch == null) {
-                results.add(new TransactionResultDTO(transaction, "Unexpected Error."));
-                continue;
-            }
             if (fetch.error() != null) {
                 results.add(new TransactionResultDTO(transaction, fetch.error()));
                 continue;

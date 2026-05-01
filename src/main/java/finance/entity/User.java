@@ -47,7 +47,11 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Holding> holdings = new ArrayList<>();
 
-    public User() {
+    protected User() {
+    }
+
+    public User(BigDecimal balance) {
+        this.balance = balance;
     }
 
     public User(String username, String email, String firstName, String lastName, String passwordHash) {
