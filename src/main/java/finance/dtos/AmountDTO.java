@@ -1,4 +1,4 @@
-package finance.dto;
+package finance.dtos;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

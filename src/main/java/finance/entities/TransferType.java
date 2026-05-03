@@ -1,3 +1,3 @@
-package finance.entity;
+package finance.entities;
 
 public enum TransferType {DEPOSIT, WITHDRAW}

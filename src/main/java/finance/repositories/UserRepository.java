@@ -1,6 +1,6 @@
-package finance.repository;
+package finance.repositories;
 
-import finance.entity.User;
+import finance.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

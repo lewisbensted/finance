@@ -1,7 +1,7 @@
 package finance.services;
 
-import finance.dto.StockDTO;
-import finance.dto.StockResultDTO;
+import finance.dtos.StockDTO;
+import finance.dtos.StockResultDTO;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

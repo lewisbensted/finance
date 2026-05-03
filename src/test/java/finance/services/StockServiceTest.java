@@ -1,7 +1,7 @@
 package finance.services;
 
-import finance.dto.StockDTO;
-import finance.dto.StockResultDTO;
+import finance.dtos.StockDTO;
+import finance.dtos.StockResultDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

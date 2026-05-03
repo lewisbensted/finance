@@ -1,7 +1,7 @@
 package finance.services;
 
-import finance.entity.User;
-import finance.repository.UserRepository;
+import finance.entities.User;
+import finance.repositories.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 

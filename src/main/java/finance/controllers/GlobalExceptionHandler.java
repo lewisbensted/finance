@@ -1,6 +1,6 @@
 package finance.controllers;
 
-import finance.dto.ErrorDTO;
+import finance.dtos.ErrorDTO;
 import finance.exceptions.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

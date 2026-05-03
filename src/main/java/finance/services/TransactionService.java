@@ -1,14 +1,14 @@
 package finance.services;
 
-import finance.dto.*;
-import finance.entity.Holding;
-import finance.entity.Transaction;
-import finance.entity.TransactionType;
-import finance.entity.User;
+import finance.dtos.*;
+import finance.entities.Holding;
+import finance.entities.Transaction;
+import finance.entities.TransactionType;
+import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
-import finance.repository.HoldingRepository;
-import finance.repository.TransactionRepository;
-import finance.repository.UserRepository;
+import finance.repositories.HoldingRepository;
+import finance.repositories.TransactionRepository;
+import finance.repositories.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static finance.entity.TransactionType.BUY;
-import static finance.entity.TransactionType.SELL;
+import static finance.entities.TransactionType.BUY;
+import static finance.entities.TransactionType.SELL;
 
 @Service
 public class TransactionService {
@@ -38,21 +38,29 @@ public class TransactionService {
     public void buy(User user, StockDTO stock, Long quantity) {
         if (stock == null)
             throw new IllegalArgumentException("Stock cannot be null");
+        if (quantity == null || quantity <= 0)
+            throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+
         String symbol = stock.symbol();
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
 
-        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
-                .orElseGet(() -> new Holding(user, symbol, companyName, 0L));
-        holding.add(quantity);
-        if (!user.getHoldings().contains(holding)) {
-            user.addHolding(holding);
-        }
+        Holding holding = user.getHoldings()
+                .stream()
+                .filter(h -> h.getSymbol().equals(symbol))
+                .findFirst()
+                .orElseGet(() -> {
+                    Holding h = new Holding(user, symbol, companyName, 0L);
+                    user.addHolding(h);
+                    return h;
+                });
 
+        holding.add(quantity);
         user.withdraw(BigDecimal.valueOf(quantity).multiply(price));
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, BUY);
         transactionRepository.save(transaction);
+        userRepository.save(user);
         user.addTransaction(transaction);
     }
 
@@ -60,11 +68,16 @@ public class TransactionService {
     public void sell(User user, StockDTO stock, Long quantity) {
         if (stock == null)
             throw new IllegalArgumentException("Stock cannot be null");
+        if (quantity == null || quantity <= 0)
+            throw new IllegalArgumentException("Transaction must be a positive number of shares.");
         String symbol = stock.symbol();
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
 
-        Holding holding = holdingRepository.findByIdUserIdAndIdSymbol(user.getId(), symbol)
+        Holding holding = user.getHoldings()
+                .stream()
+                .filter(h -> h.getSymbol().equals(symbol))
+                .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Holding does not exist"));
         holding.remove(quantity);
         if (holding.getShares() <= 0) {
@@ -75,6 +88,7 @@ public class TransactionService {
 
         Transaction transaction = new Transaction(user, symbol, companyName, quantity, price, SELL);
         transactionRepository.save(transaction);
+        userRepository.save(user);
         user.addTransaction(transaction);
     }
 
@@ -82,9 +96,30 @@ public class TransactionService {
     public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionDTO> transactions) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
+
+        if (transactions.isEmpty()) {
+            return List.of();
+        }
+
         Map<String, StockResultDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionDTO::symbol).toArray(String[]::new));
 
         List<TransactionResultDTO> results = new ArrayList<>();
+
+        BigDecimal runningCost = BigDecimal.ZERO;
+
+        for (TransactionDTO transaction : transactions) {
+            StockResultDTO fetch = prices.get(transaction.symbol());
+            if (fetch.error() != null) continue;
+
+            if (type == BUY) {
+                BigDecimal cost = BigDecimal.valueOf(transaction.quantity())
+                        .multiply(fetch.stock().latestPrice());
+                runningCost = runningCost.add(cost);
+                if (runningCost.compareTo(user.getBalance()) > 0)
+                    throw new InsufficientFundsException("Insufficient funds for all transactions");
+            }
+        }
+
 
         for (TransactionDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
@@ -93,18 +128,14 @@ public class TransactionService {
                 continue;
             }
             StockDTO stock = fetch.stock();
-            BigDecimal transactionCost = BigDecimal.valueOf(transaction.quantity()).multiply(stock.latestPrice());
             try {
                 if (type == BUY) {
-                    if (transactionCost.compareTo(user.getBalance()) > 0)
-                        throw new InsufficientFundsException("Insufficient funds for all transactions");
                     buy(user, stock, transaction.quantity());
 
                 } else
                     sell(user, stock, transaction.quantity());
                 results.add(new TransactionResultDTO(transaction, null));
-            } catch (InsufficientFundsException e) {
-                throw e;
+
             } catch (IllegalArgumentException e) {
                 results.add(new TransactionResultDTO(transaction, e.getMessage()));
             } catch (Exception e) {

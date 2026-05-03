@@ -1,9 +1,9 @@
 package finance.controllers;
 
-import finance.dto.ErrorDTO;
-import finance.dto.StockDTO;
-import finance.dto.StockResultDTO;
-import finance.dto.StockResponseDTO;
+import finance.dtos.ErrorDTO;
+import finance.dtos.StockDTO;
+import finance.dtos.StockResultDTO;
+import finance.dtos.StockResponseDTO;
 import finance.services.StockService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

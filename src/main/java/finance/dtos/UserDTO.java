@@ -1,6 +1,6 @@
-package finance.dto;
+package finance.dtos;
 
-import finance.entity.User;
+import finance.entities.User;
 
 import java.math.BigDecimal;
 

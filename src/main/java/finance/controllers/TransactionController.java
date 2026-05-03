@@ -1,7 +1,7 @@
 package finance.controllers;
 
-import finance.dto.*;
-import finance.entity.User;
+import finance.dtos.*;
+import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
 import finance.services.TransactionService;
 import jakarta.servlet.http.HttpSession;
@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.Map;
 
 import static finance.controllers.AuthUtils.authenticateUser;
-import static finance.entity.TransactionType.BUY;
-import static finance.entity.TransactionType.SELL;
+import static finance.entities.TransactionType.BUY;
+import static finance.entities.TransactionType.SELL;
 
 @RestController
 public class TransactionController {

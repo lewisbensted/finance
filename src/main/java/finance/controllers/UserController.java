@@ -1,10 +1,10 @@
 package finance.controllers;
 
-import finance.dto.ErrorDTO;
-import finance.dto.LoginDTO;
-import finance.dto.RegisterDTO;
-import finance.dto.UserDTO;
-import finance.entity.User;
+import finance.dtos.ErrorDTO;
+import finance.dtos.LoginDTO;
+import finance.dtos.RegisterDTO;
+import finance.dtos.UserDTO;
+import finance.entities.User;
 import finance.exceptions.*;
 import finance.services.UserService;
 import jakarta.servlet.http.HttpSession;

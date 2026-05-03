@@ -1,6 +1,6 @@
 package finance.controllers;
 
-import finance.entity.User;
+import finance.entities.User;
 import finance.exceptions.UnauthorisedException;
 import jakarta.servlet.http.HttpSession;
 

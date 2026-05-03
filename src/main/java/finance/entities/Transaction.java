@@ -1,4 +1,4 @@
-package finance.entity;
+package finance.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

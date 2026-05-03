@@ -1,4 +1,4 @@
-package finance.entity;
+package finance.entities;
 
 import finance.exceptions.InsufficientFundsException;
 import jakarta.persistence.*;
@@ -68,14 +68,14 @@ public class User {
 
     public void deposit(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be a positive number.");
+            throw new IllegalArgumentException("Amount must be positive");
         }
         this.balance = this.balance.add(amount);
     }
 
     public void withdraw(BigDecimal amount) {
         if (amount == null || amount.signum() <= 0) {
-            throw new IllegalArgumentException("Amount must be a positive number.");
+            throw new IllegalArgumentException("Amount must be positive");
         }
         if (amount.compareTo(this.getBalance()) > 0) {
             throw new InsufficientFundsException("Insufficient funds.");

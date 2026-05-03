@@ -1,7 +1,9 @@
-package finance.entity;
+package finance.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.Objects;
 
 @Entity
 @Table(name = "holdings")
@@ -35,14 +37,14 @@ public class Holding {
     }
 
     public void remove(Long quantity) {
-        if (quantity <= 0) throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+        if (quantity == null || quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         if (quantity > shares)
             throw new IllegalArgumentException("Insufficient shares to sell.");
         this.shares -= quantity;
     }
 
     public void add(Long quantity) {
-        if (quantity <= 0) throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+        if (quantity == null || quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         this.shares += quantity;
     }
 
@@ -53,4 +55,9 @@ public class Holding {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public String getSymbol() {
+        return id.getSymbol();
+    }
+
 }

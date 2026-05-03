@@ -1,7 +1,7 @@
-package finance.repository;
+package finance.repositories;
 
-import finance.entity.Holding;
-import finance.entity.HoldingId;
+import finance.entities.Holding;
+import finance.entities.HoldingId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

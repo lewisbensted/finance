@@ -1,8 +1,8 @@
 package finance.controllers;
 
-import finance.dto.AmountDTO;
-import finance.dto.UserDTO;
-import finance.entity.User;
+import finance.dtos.AmountDTO;
+import finance.dtos.UserDTO;
+import finance.entities.User;
 import finance.services.BalanceService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
