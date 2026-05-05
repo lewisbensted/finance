@@ -13,7 +13,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BalanceServiceTest {
+public class BalanceServiceTests {
 
     private BalanceService balanceService;
     private UserRepository mockUserRepo;
@@ -43,9 +43,9 @@ public class BalanceServiceTest {
                     .thenReturn(Optional.empty());
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.deposit(1L, BigDecimal.valueOf(50)));
+            assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
-            assertEquals("User not found.", exception.getMessage());
         }
 
         @Test
@@ -54,9 +54,9 @@ public class BalanceServiceTest {
                     .thenReturn(Optional.of(testUser));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.deposit(1L, BigDecimal.valueOf(-50)));
-            verify(mockUserRepo, never()).save(any());
             assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
             assertEquals("Amount must be positive", exception.getMessage());
+            verify(mockUserRepo, never()).save(any());
         }
     }
 
@@ -77,9 +77,9 @@ public class BalanceServiceTest {
                     .thenReturn(Optional.empty());
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.withdraw(1L, BigDecimal.valueOf(50)));
+            assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
-            assertEquals("User not found.", exception.getMessage());
         }
 
         @Test
@@ -88,9 +88,9 @@ public class BalanceServiceTest {
                     .thenReturn(Optional.of(testUser));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                     () -> balanceService.withdraw(1L, BigDecimal.valueOf(-50)));
-            verify(mockUserRepo, never()).save(any());
             assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
             assertEquals("Amount must be positive", exception.getMessage());
+            verify(mockUserRepo, never()).save(any());
         }
     }
 }

@@ -39,7 +39,7 @@ public class Holding {
     public void remove(Long quantity) {
         if (quantity == null || quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         if (quantity > shares)
-            throw new IllegalArgumentException("Insufficient shares to sell.");
+            throw new IllegalArgumentException("Insufficient shares");
         this.shares -= quantity;
     }
 
@@ -59,5 +59,4 @@ public class Holding {
     public String getSymbol() {
         return id.getSymbol();
     }
-
 }

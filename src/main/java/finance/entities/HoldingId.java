@@ -18,10 +18,6 @@ public class HoldingId implements Serializable {
         this.symbol = symbol;
     }
 
-    public Long getUserId() {
-        return userId;
-    }
-
     public String getSymbol() {
         return symbol;
     }

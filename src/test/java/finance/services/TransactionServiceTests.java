@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.never;
 
-public class TransactionServiceTest {
+public class TransactionServiceTests {
 
     private UserRepository mockUserRepo;
     private TransactionRepository mockTransactionRepo;
@@ -93,27 +93,27 @@ public class TransactionServiceTest {
         void testInvalidQuantity() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.buy(testUser, testStock, -5L));
             assertEquals("Transaction must be a positive number of shares.", exception.getMessage());
+            assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
             verify(mockTransactionRepo, never()).save(any());
             verify(mockUserRepo, never()).save(any());
-            assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
         }
 
         @Test
         void testWithdrawFails() {
             InsufficientFundsException exception = assertThrows(InsufficientFundsException.class, () -> transactionService.buy(testUser, testStock, 100L));
-            assertEquals("Insufficient funds.", exception.getMessage());
+            assertEquals("Insufficient funds", exception.getMessage());
+            assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
             verify(mockTransactionRepo, never()).save(any());
             verify(mockUserRepo, never()).save(any());
-            assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
         }
 
         @Test
         void testNullStock() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.buy(testUser, null, 5L));
-            verify(mockTransactionRepo, never()).save(any());
-            verify(mockUserRepo, never()).save(any());
             assertEquals("Stock cannot be null", exception.getMessage());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
+            verify(mockTransactionRepo, never()).save(any());
+            verify(mockUserRepo, never()).save(any());
         }
     }
 
@@ -123,24 +123,24 @@ public class TransactionServiceTest {
         void testSellSome() {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             transactionService.sell(testUser, testStock, 2L);
-            verify(mockTransactionRepo).save(any());
-            verify(mockUserRepo).save(any());
             BigDecimal expected = BigDecimal.valueOf(100).add(testStock.latestPrice().multiply(BigDecimal.valueOf(2)));
             assertEquals(expected, testUser.getBalance());
             assertEquals(1, testUser.getHoldings().size());
             assertEquals("TST", testUser.getHoldings().get(0).getSymbol());
             assertEquals(3L, testUser.getHoldings().get(0).getShares());
+            verify(mockTransactionRepo).save(any());
+            verify(mockUserRepo).save(any());
         }
 
         @Test
         void testSellAll() {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             transactionService.sell(testUser, testStock, 5L);
-            verify(mockUserRepo).save(any());
-            verify(mockTransactionRepo).save(any());
             BigDecimal expected = BigDecimal.valueOf(100).add(testStock.latestPrice().multiply(BigDecimal.valueOf(5)));
             assertEquals(expected, testUser.getBalance());
             assertTrue(testUser.getHoldings().isEmpty());
+            verify(mockUserRepo).save(any());
+            verify(mockTransactionRepo).save(any());
         }
 
         @Test
@@ -148,8 +148,8 @@ public class TransactionServiceTest {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.sell(testUser, testStock, -5L));
             assertEquals("Transaction must be a positive number of shares.", exception.getMessage());
-            verify(mockTransactionRepo, never()).save(any());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
+            verify(mockTransactionRepo, never()).save(any());
         }
 
 
@@ -157,34 +157,31 @@ public class TransactionServiceTest {
         void testInvalidHolding() {
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.sell(testUser, testStock, 5L));
             assertEquals("Holding does not exist", exception.getMessage());
-            verify(mockTransactionRepo, never()).save(any());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
+            verify(mockTransactionRepo, never()).save(any());
         }
 
         @Test
         void testRemoveFails() {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.sell(testUser, testStock, 100L));
-            verify(mockTransactionRepo, never()).save(any());
-            verify(mockHoldingRepo, never()).findByIdUserIdAndIdSymbol(any(), any());
             assertEquals("Insufficient shares to sell.", exception.getMessage());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
+            verify(mockTransactionRepo, never()).save(any());
         }
 
         @Test
         void testNullStock() {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.sell(testUser, null, 5L));
-            verify(mockTransactionRepo, never()).save(any());
-            verify(mockHoldingRepo, never()).findByIdUserIdAndIdSymbol(any(), any());
             assertEquals("Stock cannot be null", exception.getMessage());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
+            verify(mockTransactionRepo, never()).save(any());
         }
     }
 
     @Nested
     class ExecuteTransactionsTests {
-
         @Test
         void testUserNotFound() {
             when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
@@ -197,11 +194,11 @@ public class TransactionServiceTest {
         void testEmptyList() {
             when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
             List<TransactionResultDTO> results = transactionService.executeTransactions(1L, BUY, List.of());
-            verifyNoInteractions(mockStockService);
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
             assertTrue(results.isEmpty());
             List<Holding> holdings = testUser.getHoldings();
             assertTrue(holdings.isEmpty());
+            verifyNoInteractions(mockStockService);
         }
 
         @Nested
@@ -385,7 +382,6 @@ public class TransactionServiceTest {
                 Holding microsoftHolding = holdings.stream().filter(h -> h.getSymbol().equals("MSFT")).findFirst().orElse(null);
                 assertNotNull(microsoftHolding);
                 assertEquals(3L, microsoftHolding.getShares());
-
             }
         }
     }

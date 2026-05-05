@@ -18,7 +18,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class StockServiceTest {
+public class StockServiceTests {
 
     private StockService stockService;
 
