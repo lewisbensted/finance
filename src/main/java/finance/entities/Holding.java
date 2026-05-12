@@ -3,8 +3,6 @@ package finance.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.util.Objects;
-
 @Entity
 @Table(name = "holdings")
 public class Holding {
@@ -58,5 +56,9 @@ public class Holding {
 
     public String getSymbol() {
         return id.getSymbol();
+    }
+
+    public User getUser() {
+        return this.user;
     }
 }

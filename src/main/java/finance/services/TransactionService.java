@@ -24,13 +24,11 @@ import static finance.entities.TransactionType.SELL;
 public class TransactionService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
-    private final HoldingRepository holdingRepository;
     private final StockService stockService;
 
-    public TransactionService(UserRepository userRepository, TransactionRepository transactionRepository, HoldingRepository holdingRepository, StockService stockService) {
+    public TransactionService(UserRepository userRepository, TransactionRepository transactionRepository, StockService stockService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
-        this.holdingRepository = holdingRepository;
         this.stockService = stockService;
     }
 
@@ -93,7 +91,7 @@ public class TransactionService {
     }
 
     @Transactional(rollbackFor = InsufficientFundsException.class)
-    public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionDTO> transactions) {
+    public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionRequestDTO> transactions) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
 
@@ -101,13 +99,13 @@ public class TransactionService {
             return List.of();
         }
 
-        Map<String, StockResultDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionDTO::symbol).toArray(String[]::new));
+        Map<String, StockResultDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionRequestDTO::symbol).toArray(String[]::new));
 
         List<TransactionResultDTO> results = new ArrayList<>();
 
         BigDecimal runningCost = BigDecimal.ZERO;
 
-        for (TransactionDTO transaction : transactions) {
+        for (TransactionRequestDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
             if (fetch.error() != null) continue;
 
@@ -121,7 +119,7 @@ public class TransactionService {
         }
 
 
-        for (TransactionDTO transaction : transactions) {
+        for (TransactionRequestDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
             if (fetch.error() != null) {
                 results.add(new TransactionResultDTO(transaction, fetch.error()));
@@ -143,5 +141,12 @@ public class TransactionService {
             }
         }
         return results;
+    }
+
+    public List<TransactionDTO> fetchTransactions(Long userId){
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return transactions.stream().map(Transaction::toDTO).toList();
     }
 }

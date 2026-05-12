@@ -1,5 +1,6 @@
 package finance.entities;
 
+import finance.dtos.TransactionDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -57,12 +58,28 @@ public class Transaction {
     protected Transaction() {
     }
 
-    public Transaction(User user, String symbol, String companyName, Long shares, BigDecimal price, TransactionType transactionType) {
+    public Transaction(User user, String symbol, String companyName, Long shares, BigDecimal price, TransactionType transactionType, LocalDateTime createdAt) {
         this.user = user;
         this.symbol = symbol;
         this.companyName = companyName;
         this.shares = shares;
         this.price = price;
         this.transactionType = transactionType;
+        this.createdAt = createdAt;
+    }
+
+    public Transaction(User user, String symbol, String companyName, Long shares, BigDecimal price, TransactionType transactionType) {
+        this(user, symbol, companyName, shares, price, transactionType, LocalDateTime.now());
+    }
+
+    public TransactionDTO toDTO() {
+        return new TransactionDTO(
+                this.symbol,
+                this.companyName,
+                this.shares,
+                this.price,
+                this.transactionType,
+                this.createdAt
+        );
     }
 }

@@ -23,7 +23,7 @@ public class BalanceServiceTests {
     void setUp() {
         mockUserRepo = mock(UserRepository.class);
         balanceService = new BalanceService(mockUserRepo);
-        testUser = new User(BigDecimal.valueOf(100));
+        testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
     }
 
     @Nested

@@ -1,4 +1,9 @@
 package finance.dtos;
 
-public record TransactionDTO(String symbol, Long quantity) {
+import finance.entities.TransactionType;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public record TransactionDTO(String symbol, String companyName, Long shares, BigDecimal price,
+                             TransactionType transactionType, LocalDateTime createdAt) {
 }

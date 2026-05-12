@@ -29,11 +29,11 @@ public class TransactionController {
     }
 
     @PostMapping(value ="/api/buy")
-    ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionDTO> transactions) {
+    ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
         Map<String, List<String>> errorFields = new HashMap<>();
-        List<TransactionDTO> successful = new ArrayList<>();
+        List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), BUY, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
@@ -47,11 +47,11 @@ public class TransactionController {
     }
 
     @PostMapping(value ="/api/sell")
-    ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionDTO> transactions) {
+    ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
         Map<String, List<String>> errorFields = new HashMap<>();
-        List<TransactionDTO> successful = new ArrayList<>();
+        List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), SELL, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {

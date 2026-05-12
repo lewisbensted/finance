@@ -1,13 +1,10 @@
 package finance.services;
 
-import finance.dtos.StockDTO;
-import finance.dtos.StockResultDTO;
-import finance.dtos.TransactionDTO;
-import finance.dtos.TransactionResultDTO;
+import finance.dtos.*;
 import finance.entities.Holding;
+import finance.entities.Transaction;
 import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
-import finance.repositories.HoldingRepository;
 import finance.repositories.TransactionRepository;
 import finance.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +12,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +28,6 @@ public class TransactionServiceTests {
 
     private UserRepository mockUserRepo;
     private TransactionRepository mockTransactionRepo;
-    private HoldingRepository mockHoldingRepo;
     private StockService mockStockService;
     private TransactionService transactionService;
     private User testUser;
@@ -39,22 +36,21 @@ public class TransactionServiceTests {
     StockDTO appleStock = new StockDTO("Apple", "AAPL", BigDecimal.valueOf(4));
     StockDTO microsoftStock = new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(5));
 
-    TransactionDTO appleTransaction = new TransactionDTO("AAPL", 5L);
-    TransactionDTO bananaTransaction = new TransactionDTO("BANANA", 5L);
-    TransactionDTO microsoftTransaction = new TransactionDTO("MSFT", 2L);
-    TransactionDTO invalidTransaction = new TransactionDTO("MSFT", -5L);
-    TransactionDTO appleTransactionSecond = new TransactionDTO("AAPL", 3L);
-    TransactionDTO microsoftTransactionSecond = new TransactionDTO("MSFT", 5L);
-    TransactionDTO insufficientFundsTransaction = new TransactionDTO("MSFT", 50L);
+    TransactionRequestDTO appleTransactionRequest = new TransactionRequestDTO("AAPL", 5L);
+    TransactionRequestDTO bananaTransactionRequest = new TransactionRequestDTO("BANANA", 5L);
+    TransactionRequestDTO microsoftTransaction = new TransactionRequestDTO("MSFT", 2L);
+    TransactionRequestDTO invalidTransactionRequest = new TransactionRequestDTO("MSFT", -5L);
+    TransactionRequestDTO appleTransactionSecondRequest = new TransactionRequestDTO("AAPL", 3L);
+    TransactionRequestDTO microsoftTransactionSecond = new TransactionRequestDTO("MSFT", 5L);
+    TransactionRequestDTO insufficientFundsTransaction = new TransactionRequestDTO("MSFT", 50L);
 
     @BeforeEach
     void setUp() {
         mockUserRepo = mock(UserRepository.class);
         mockTransactionRepo = mock(TransactionRepository.class);
-        mockHoldingRepo = mock(HoldingRepository.class);
         mockStockService = mock(StockService.class);
-        transactionService = new TransactionService(mockUserRepo, mockTransactionRepo, mockHoldingRepo, mockStockService);
-        testUser = new User(BigDecimal.valueOf(100));
+        transactionService = new TransactionService(mockUserRepo, mockTransactionRepo, mockStockService);
+        testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
     }
 
     @Nested
@@ -165,7 +161,7 @@ public class TransactionServiceTests {
         void testRemoveFails() {
             testUser.addHolding(new Holding(testUser, "TST", "Test", 5L));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.sell(testUser, testStock, 100L));
-            assertEquals("Insufficient shares to sell.", exception.getMessage());
+            assertEquals("Insufficient shares", exception.getMessage());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
             verify(mockTransactionRepo, never()).save(any());
         }
@@ -206,17 +202,17 @@ public class TransactionServiceTests {
 
             @Test
             void testSuccessPartial() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, bananaTransaction, invalidTransaction);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, bananaTransactionRequest, invalidTransactionRequest);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "BANANA", new StockResultDTO(null, "Invalid symbol"), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
                 assertEquals(3, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
-                assertEquals(transactions.get(1).transaction(), bananaTransaction);
+                assertEquals(transactions.get(1).transaction(), bananaTransactionRequest);
                 assertEquals("Invalid symbol", transactions.get(1).error());
-                assertEquals(transactions.get(2).transaction(), invalidTransaction);
+                assertEquals(transactions.get(2).transaction(), invalidTransactionRequest);
                 assertEquals("Transaction must be a positive number of shares.", transactions.get(2).error());
 
                 assertEquals(BigDecimal.valueOf(80), testUser.getBalance());
@@ -233,13 +229,13 @@ public class TransactionServiceTests {
 
             @Test
             void testSuccessAll() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, microsoftTransaction);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, microsoftTransaction);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
                 assertEquals(2, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
                 assertEquals(transactions.get(1).transaction(), microsoftTransaction);
                 assertNull(transactions.get(1).error());
@@ -257,7 +253,7 @@ public class TransactionServiceTests {
 
             @Test
             void testInsufficientFunds() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, insufficientFundsTransaction);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, insufficientFundsTransaction);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "MSFT", new StockResultDTO(appleStock, null)));
@@ -272,17 +268,17 @@ public class TransactionServiceTests {
 
             @Test
             void testCumulative() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, microsoftTransaction, appleTransactionSecond);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, microsoftTransaction, appleTransactionSecondRequest);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
                 assertEquals(3, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
                 assertEquals(transactions.get(1).transaction(), microsoftTransaction);
                 assertNull(transactions.get(1).error());
-                assertEquals(transactions.get(2).transaction(), appleTransactionSecond);
+                assertEquals(transactions.get(2).transaction(), appleTransactionSecondRequest);
                 assertNull(transactions.get(2).error());
                 assertEquals(BigDecimal.valueOf(58), testUser.getBalance());
                 List<Holding> holdings = testUser.getHoldings();
@@ -308,15 +304,15 @@ public class TransactionServiceTests {
 
             @Test
             void testSuccessAll() {
-                List<TransactionDTO> transactionRequests = List.of(
-                        appleTransaction, microsoftTransaction
+                List<TransactionRequestDTO> transactionRequests = List.of(
+                        appleTransactionRequest, microsoftTransaction
                 );
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
                 assertEquals(2, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
                 assertEquals(transactions.get(1).transaction(), microsoftTransaction);
                 assertNull(transactions.get(1).error());
@@ -333,17 +329,17 @@ public class TransactionServiceTests {
 
             @Test
             void testSuccessPartial() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, bananaTransaction, invalidTransaction);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, bananaTransactionRequest, invalidTransactionRequest);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "BANANA", new StockResultDTO(null, "Invalid symbol"), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
                 assertEquals(3, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
-                assertEquals(transactions.get(1).transaction(), bananaTransaction);
+                assertEquals(transactions.get(1).transaction(), bananaTransactionRequest);
                 assertEquals("Invalid symbol", transactions.get(1).error());
-                assertEquals(transactions.get(2).transaction(), invalidTransaction);
+                assertEquals(transactions.get(2).transaction(), invalidTransactionRequest);
                 assertEquals("Transaction must be a positive number of shares.", transactions.get(2).error());
 
                 assertEquals(BigDecimal.valueOf(120), testUser.getBalance());
@@ -361,15 +357,15 @@ public class TransactionServiceTests {
 
             @Test
             void testCumulative() {
-                List<TransactionDTO> transactionRequests = List.of(appleTransaction, appleTransaction, microsoftTransaction, microsoftTransactionSecond);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, appleTransactionRequest, microsoftTransaction, microsoftTransactionSecond);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 when(mockStockService.fetchPrices(any())).thenReturn(Map.of("AAPL", new StockResultDTO(appleStock, null), "MSFT", new StockResultDTO(microsoftStock, null)));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
                 assertEquals(4, transactions.size());
-                assertEquals(transactions.get(0).transaction(), appleTransaction);
+                assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
-                assertEquals(transactions.get(1).transaction(), appleTransaction);
+                assertEquals(transactions.get(1).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(1).error());
                 assertEquals(transactions.get(2).transaction(), microsoftTransaction);
                 assertNull(transactions.get(2).error());
@@ -383,6 +379,31 @@ public class TransactionServiceTests {
                 assertNotNull(microsoftHolding);
                 assertEquals(3L, microsoftHolding.getShares());
             }
+        }
+    }
+
+    @Nested
+    class FetchTransactionsTests {
+        @Test
+        void testUserNotFound() {
+            when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.fetchTransactions(1L));
+            assertEquals("User not found.", exception.getMessage());
+            verifyNoInteractions(mockTransactionRepo);
+        }
+
+        @Test
+        void testSuccess() {
+            Transaction appleTransaction = new Transaction(testUser, "AAPL", "Apple", 5L, BigDecimal.valueOf(20), BUY, LocalDateTime.of(2024, 1, 1, 12, 0));
+            Transaction microsoftTransaction = new Transaction(testUser, "MSFT", "Microsoft", 5L, BigDecimal.valueOf(20), BUY, LocalDateTime.of(2024, 1, 1, 12, 1));
+
+            when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
+            when(mockTransactionRepo.findByUserIdOrderByCreatedAtDesc(any())).thenReturn(List.of(appleTransaction, microsoftTransaction));
+            List<TransactionDTO> result = transactionService.fetchTransactions(1L);
+
+            assertEquals(2, result.size());
+            assertEquals("AAPL", result.get(0).symbol());
+            assertEquals("MSFT", result.get(1).symbol());
         }
     }
 }
