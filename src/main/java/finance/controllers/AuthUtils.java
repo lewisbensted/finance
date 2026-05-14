@@ -8,7 +8,7 @@ public class AuthUtils {
     public static User authenticateUser(HttpSession session) {
         User activeUser = (User) session.getAttribute("USER_SESSION");
         if (activeUser == null) {
-            throw new UnauthorisedException("Not logged in.");
+            throw new UnauthorisedException("Not logged in");
         }
         return activeUser;
     }
