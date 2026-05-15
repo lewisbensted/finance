@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.dtos.LoginDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
-import finance.exceptions.AuthenticationException;
 import finance.exceptions.RegistrationException;
+import finance.exceptions.UnauthorisedException;
 import finance.services.UserService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -104,7 +104,15 @@ public class UserControllerTests {
         }
 
         @Test
-        void test400UserTaken() throws Exception {
+        void test400NullBody() throws Exception {
+            mockMvc.perform(post("/api/register")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+        }
+
+        @Test
+        void test422UserTaken() throws Exception {
             RegisterDTO request = new RegisterDTO(
                     "testuser",
                     "testuser@test.com",
@@ -117,7 +125,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().is(400))
+                    .andExpect(status().is(422))
                     .andExpect(jsonPath("$.message").value("User taken"));
         }
     }
@@ -154,16 +162,24 @@ public class UserControllerTests {
         }
 
         @Test
-        void test400IncorrectCredentials() throws Exception {
+        void test400NullBody() throws Exception {
+            mockMvc.perform(post("/api/login")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+        }
+
+        @Test
+        void test401IncorrectCredentials() throws Exception {
             LoginDTO request = new LoginDTO(
                     "testuser",
                     "password123!"
             );
-            when(userService.login(anyString(), anyString())).thenThrow(new AuthenticationException("Invalid"));
-            mockMvc.perform(post("/api/register")
+            when(userService.login(anyString(), anyString())).thenThrow(new UnauthorisedException("Invalid"));
+            mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().is(400))
+                    .andExpect(status().is(401))
                     .andExpect(jsonPath("$.message").value("Invalid"));
         }
     }
@@ -186,7 +202,7 @@ public class UserControllerTests {
         void test403NotLoggedIn() throws Exception {
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().is(401))
+                    .andExpect(status().is(200))
                     .andExpect(content().string("Logged out"));
         }
     }

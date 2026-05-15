@@ -3,6 +3,7 @@ package finance.services;
 import finance.entities.User;
 import finance.exceptions.AuthenticationException;
 import finance.exceptions.RegistrationException;
+import finance.exceptions.UnauthorisedException;
 import finance.repositories.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -33,9 +34,9 @@ public class UserService {
 
     @Transactional
     public User login(String username, String password) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new AuthenticationException("Invalid username or password"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UnauthorisedException("Invalid username or password"));
         if (!compare(password, user.getPasswordHash()))
-            throw new AuthenticationException("Invalid username or password");
+            throw new UnauthorisedException("Invalid username or password");
         return user;
     }
 }

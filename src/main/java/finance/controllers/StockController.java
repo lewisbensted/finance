@@ -26,7 +26,8 @@ public class StockController {
 
     @GetMapping(value = "/api/prices")
     ResponseEntity<?> getPrice(@RequestParam(required = false) String symbolsStr) {
-        if (symbolsStr == null || symbolsStr.isEmpty()) return ResponseEntity.status(400).body("No symbols provided.");
+        if (symbolsStr == null || symbolsStr.isEmpty())
+            return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "No symbols provided"));
         String[] symbols = symbolsStr.split(",");
 
         Map<String, List<String>> errorFields = new HashMap<>();
@@ -42,6 +43,6 @@ public class StockController {
         }
 
         boolean allFailed = stocks.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to fetch %s prices", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? "UNPROCESSABLE" : "PARTIAL_FAILURE", String.format("Failed to fetch %s prices", allFailed ? "all" : "some"), errorFields)));
     }
 }

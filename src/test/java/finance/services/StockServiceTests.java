@@ -60,7 +60,7 @@ public class StockServiceTests {
 
     @Test
     void testFetchPrices() {
-        Map<String, StockResultDTO> result = stockService.fetchPrices(new String[]{"AAPL", "BANANA", "MSFT"});
+        Map<String, StockResultDTO> result = stockService.fetchPrices(new String[]{"AAPL ", "BANANA", "MSFT", "  "});
         assertEquals(3, result.size());
         assertTrue(result.containsKey("AAPL"));
         assertTrue(result.containsKey("BANANA"));

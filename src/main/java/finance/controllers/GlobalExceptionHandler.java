@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDTO> handleMissingFields(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorDTO> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, List<String>> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             fieldErrors.putIfAbsent(error.getField(), new ArrayList<>());
@@ -32,22 +32,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorDTO> ForbiddenException(ForbiddenException ex) {
+    public ResponseEntity<ErrorDTO> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(403).body(new ErrorDTO("FORBIDDEN", ex.getMessage()));
     }
 
     @ExceptionHandler(UnauthorisedException.class)
-    public ResponseEntity<ErrorDTO> UnauthorisedException(UnauthorisedException ex) {
+    public ResponseEntity<ErrorDTO> handleUnauthorised(UnauthorisedException ex) {
         return ResponseEntity.status(401).body(new ErrorDTO("UNAUTHORISED", ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorDTO> NotFoundException(NotFoundException ex) {
+    public ResponseEntity<ErrorDTO> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(404).body(new ErrorDTO("NOT_FOUND", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorDTO> IllegalArgumentException(IllegalArgumentException ex) {
+    public ResponseEntity<ErrorDTO> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", ex.getMessage()));
     }
 }

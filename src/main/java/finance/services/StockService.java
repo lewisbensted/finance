@@ -26,14 +26,16 @@ public class StockService {
         Map<String, StockResultDTO> stockMap = new HashMap<>();
 
         for (String symbol : symbols) {
-            StockResultDTO price = fetchPrice(symbol);
-            stockMap.put(symbol, price);
+            String trimmed = symbol.trim();
+            if (trimmed.isEmpty()) continue;
+            StockResultDTO price = fetchPrice(trimmed);
+            stockMap.put(trimmed, price);
         }
 
         return stockMap;
     }
 
-    StockResultDTO fetchPrice(String symbol) {
+    public StockResultDTO fetchPrice(String symbol) {
         try {
             ResponseEntity<StockDTO> response = restTemplate.exchange(
                     url,
