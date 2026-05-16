@@ -1,4 +1,4 @@
 package finance.dtos;
 
-public record TransactionResultDTO(TransactionRequestDTO transaction, String error) {
+public record TransactionResultDTO(TransactionRequestDTO transaction, ItemErrorDTO error) {
 }

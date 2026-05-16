@@ -16,10 +16,6 @@ public class Holding {
     private User user;
 
     @NotNull
-    @Column(name = "company_name", nullable = false, updatable = false)
-    private String companyName;
-
-    @NotNull
     @Column(nullable = false)
     private Long shares;
 
@@ -30,7 +26,6 @@ public class Holding {
         this();
         this.user = user;
         this.id = new HoldingId(user.getId(), symbol);
-        this.companyName = companyName;
         this.shares = shares;
     }
 

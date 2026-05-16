@@ -16,6 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,6 +45,11 @@ public class UserControllerTests {
 
     @Nested
     class RegisterControllerTests {
+        @Test
+        void test400MalformedJSON() {
+            assertTrue(false);
+        }
+
         @Test
         void test201Success() throws Exception {
             RegisterDTO request = new RegisterDTO(
@@ -132,6 +138,11 @@ public class UserControllerTests {
 
     @Nested
     class LoginControllerTests {
+        @Test
+        void test400MalformedJSON() {
+            assertTrue(false);
+        }
+
         @Test
         void test200Success() throws Exception {
             LoginDTO request = new LoginDTO(

@@ -1,6 +1,7 @@
 package finance.services;
 
 import finance.entities.User;
+import finance.exceptions.NotFoundException;
 import finance.repositories.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ public class BalanceService {
     @Transactional
     public void deposit(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new NotFoundException("User not found."));
         user.deposit(amount);
         userRepository.save(user);
     }
@@ -26,7 +27,7 @@ public class BalanceService {
     @Transactional
     public void withdraw(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new NotFoundException("User not found."));
         user.withdraw(amount);
         userRepository.save(user);
     }

@@ -1,5 +1,6 @@
 package finance.services;
 
+import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
 import org.springframework.http.HttpMethod;
@@ -44,12 +45,12 @@ public class StockService {
             return new StockResultDTO(response.getBody(), null);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-                return new StockResultDTO(null, "Invalid Symbol");
+                return new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found"));
             } else {
-                return new StockResultDTO(null, "Unexpected Error");
+                return new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error"));
             }
         } catch (Exception e) {
-            return new StockResultDTO(null, "Unexpected Error");
+            return new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error"));
         }
     }
 }

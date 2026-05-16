@@ -1,9 +1,6 @@
 package finance.controllers;
 
-import finance.dtos.ErrorDTO;
-import finance.dtos.StockDTO;
-import finance.dtos.StockResultDTO;
-import finance.dtos.StockResponseDTO;
+import finance.dtos.*;
 import finance.services.StockService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +27,7 @@ public class StockController {
             return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "No symbols provided"));
         String[] symbols = symbolsStr.split(",");
 
-        Map<String, List<String>> errorFields = new HashMap<>();
+        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
         List<StockDTO> stocks = new ArrayList<>();
 
         Map<String, StockResultDTO> prices = stockService.fetchPrices(symbols);

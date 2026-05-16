@@ -1,6 +1,7 @@
 package finance.controllers;
 
 import finance.dtos.ErrorDTO;
+import finance.dtos.ValidationErrorDTO;
 import finance.exceptions.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -22,13 +23,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDTO> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ValidationErrorDTO> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, List<String>> fieldErrors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             fieldErrors.putIfAbsent(error.getField(), new ArrayList<>());
             fieldErrors.get(error.getField()).add(error.getDefaultMessage());
         });
-        return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "Validation Error(s)", fieldErrors));
+        return ResponseEntity.status(400).body(new ValidationErrorDTO("BAD_REQUEST", "Validation Error(s)", fieldErrors));
     }
 
     @ExceptionHandler(ForbiddenException.class)

@@ -32,7 +32,7 @@ public class TransactionController {
     ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
-        Map<String, List<String>> errorFields = new HashMap<>();
+        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), BUY, transactions);
 
@@ -43,14 +43,14 @@ public class TransactionController {
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? "UNPROCESSABLE" : "PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @PostMapping(value ="/api/sell")
     ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
-        Map<String, List<String>> errorFields = new HashMap<>();
+        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), SELL, transactions);
 
@@ -66,6 +66,6 @@ public class TransactionController {
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
-        return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", ex.getMessage()));
+        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
     }
 }

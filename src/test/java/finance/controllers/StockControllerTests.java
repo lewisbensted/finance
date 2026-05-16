@@ -1,5 +1,6 @@
 package finance.controllers;
 
+import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
 import finance.services.StockService;
@@ -32,7 +33,6 @@ public class StockControllerTests {
     @MockBean
     private StockService stockService;
 
-
     @Test
     void test400NoSymbolParam() throws Exception {
         mockMvc.perform(get("/api/prices")
@@ -56,9 +56,9 @@ public class StockControllerTests {
                         "AAPL", new StockResultDTO(new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)), null),
                         "MSFT", new StockResultDTO(new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), null),
                         "ORCL", new StockResultDTO(new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), null),
-                        "BANANA", new StockResultDTO(null, "Invalid symbol"),
-                        "LINUX", new StockResultDTO(null, "Unexpected Error")
-                ));
+                        "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
+                        "LINUX", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error")
+                        )));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT,BANANA,LINUX")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -78,8 +78,8 @@ public class StockControllerTests {
     void test422AllFailed() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "BANANA", new StockResultDTO(null, "Invalid symbol"),
-                        "LINUX", new StockResultDTO(null, "Unexpected Error")
+                        "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
+                        "LINUX", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error"))
                 ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "BANANA,LINUX")
@@ -103,7 +103,7 @@ public class StockControllerTests {
                         "AAPL", new StockResultDTO(new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)), null),
                         "MSFT", new StockResultDTO(new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), null),
                         "ORCL", new StockResultDTO(new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), null)
-                        ));
+                ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT")
                         .contentType(MediaType.APPLICATION_JSON))

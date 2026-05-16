@@ -113,10 +113,11 @@ public class TransactionService {
                 BigDecimal cost = BigDecimal.valueOf(transaction.quantity())
                         .multiply(fetch.stock().latestPrice());
                 runningCost = runningCost.add(cost);
-                if (runningCost.compareTo(user.getBalance()) > 0)
-                    throw new InsufficientFundsException("Insufficient funds for all transactions");
             }
         }
+
+        if (type == BUY && runningCost.compareTo(user.getBalance()) > 0)
+            throw new InsufficientFundsException("Insufficient funds for all transactions");
 
 
         for (TransactionRequestDTO transaction : transactions) {
@@ -135,15 +136,15 @@ public class TransactionService {
                 results.add(new TransactionResultDTO(transaction, null));
 
             } catch (IllegalArgumentException e) {
-                results.add(new TransactionResultDTO(transaction, e.getMessage()));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("BAD_REQUEST", e.getMessage())));
             } catch (Exception e) {
-                results.add(new TransactionResultDTO(transaction, "Unexpected Error."));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")));
             }
         }
         return results;
     }
 
-    public List<TransactionDTO> fetchTransactions(Long userId){
+    public List<TransactionDTO> fetchTransactions(Long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
         List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);

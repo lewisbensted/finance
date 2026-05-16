@@ -43,6 +43,6 @@ public class UserController {
 
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<ErrorDTO> handleRegistrationException(RegistrationException ex) {
-        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE_ENTITY", ex.getMessage()));
+        return ResponseEntity.status(409).body(new ErrorDTO("CONFLICT", ex.getMessage()));
     }
 }
