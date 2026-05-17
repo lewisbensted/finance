@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(403).body(new ErrorDTO("FORBIDDEN", ex.getMessage()));
     }
 
-    @ExceptionHandler(UnauthorisedException.class)
-    public ResponseEntity<ErrorDTO> handleUnauthorised(UnauthorisedException ex) {
+    @ExceptionHandler(AuthorisationException.class)
+    public ResponseEntity<ErrorDTO> handleUnauthorised(AuthorisationException ex) {
         return ResponseEntity.status(401).body(new ErrorDTO("UNAUTHORISED", ex.getMessage()));
     }
 

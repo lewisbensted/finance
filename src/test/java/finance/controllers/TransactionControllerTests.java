@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(TransactionController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class TransactionControllerTests {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -103,11 +104,13 @@ public class TransactionControllerTests {
                     .andExpect(status().is(422))
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
-                    .andExpect(jsonPath("$.error.message")
-                            .value("Failed to execute all transactions"))
-                    .andExpect(jsonPath("$.error.fields.BANANA[0]")
-                            .value("Invalid symbol"))
-                    .andExpect(jsonPath("$.error.fields.ORCL[0]")
+                    .andExpect(jsonPath("$.error.fields.BANANA.code")
+                            .value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.error.fields.BANANA.message")
+                            .value("Stock symbol not found"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.code")
+                            .value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
 
@@ -131,9 +134,13 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
-                    .andExpect(jsonPath("$.error.fields.BANANA[0]")
-                            .value("Invalid symbol"))
-                    .andExpect(jsonPath("$.error.fields.ORCL[0]")
+                    .andExpect(jsonPath("$.error.fields.BANANA.code")
+                            .value("NOT_FOUND"))
+                    .andExpect(jsonPath("$.error.fields.BANANA.message")
+                            .value("Stock symbol not found"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.code")
+                            .value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
 
@@ -146,6 +153,94 @@ public class TransactionControllerTests {
                     ));
 
             mockMvc.perform(post("/api/buy")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestFailure))
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(200))
+                    .andExpect(jsonPath("$.transactions[*].symbol")
+                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
+        }
+    }
+
+    @Nested
+    class SellTests {
+        @Test
+        void test400NullBody() throws Exception {
+            mockMvc.perform(post("/api/sell")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+        }
+
+        @Test
+        void test401Unauthorised() throws Exception {
+            mockMvc.perform(post("/api/sell")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestSuccess)))
+                    .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.message").value("Not logged in"));
+        }
+
+        @Test
+        void test422AllFailed() throws Exception {
+            when(transactionService.executeTransactions(any(), any(), any()))
+                    .thenReturn(List.of(
+                            new TransactionResultDTO(appleTransactionRequest, new ItemErrorDTO("UNPROCESSABLE", "Insufficient shares")),
+                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
+                    ));
+            mockMvc.perform(post("/api/sell")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestSuccess))
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(422))
+                    .andExpect(jsonPath("$.transactions").isEmpty())
+                    .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
+                    .andExpect(jsonPath("$.error.fields.AAPL.code")
+                            .value("UNPROCESSABLE"))
+                    .andExpect(jsonPath("$.error.fields.AAPL.message")
+                            .value("Insufficient shares"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.code")
+                            .value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.message")
+                            .value("Invalid quantity"));
+        }
+
+        @Test
+        void test200PartialFailure() throws Exception {
+            when(transactionService.executeTransactions(any(), any(), any()))
+                    .thenReturn(List.of(
+                            new TransactionResultDTO(appleTransactionRequest, null),
+                            new TransactionResultDTO(microsoftTransactionRequest, null),
+                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
+                    ));
+
+            mockMvc.perform(post("/api/sell")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestPartial))
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(200))
+                    .andExpect(jsonPath("$.transactions[*].symbol")
+                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
+                    .andExpect(jsonPath("$.error.message")
+                            .value("Failed to execute some transactions"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.code")
+                            .value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.error.fields.ORCL.message")
+                            .value("Invalid quantity"));
+        }
+
+        @Test
+        void test200Success() throws Exception {
+            when(transactionService.executeTransactions(any(), any(), any()))
+                    .thenReturn(List.of(
+                            new TransactionResultDTO(appleTransactionRequest, null),
+                            new TransactionResultDTO(microsoftTransactionRequest, null)
+                    ));
+
+            mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testUser))

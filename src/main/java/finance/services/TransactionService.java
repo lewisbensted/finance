@@ -6,6 +6,7 @@ import finance.entities.Transaction;
 import finance.entities.TransactionType;
 import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
+import finance.exceptions.InsufficientSharesException;
 import finance.repositories.HoldingRepository;
 import finance.repositories.TransactionRepository;
 import finance.repositories.UserRepository;
@@ -37,7 +38,7 @@ public class TransactionService {
         if (stock == null)
             throw new IllegalArgumentException("Stock cannot be null");
         if (quantity == null || quantity <= 0)
-            throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+            throw new IllegalArgumentException("Transaction must be a positive number of shares");
 
         String symbol = stock.symbol();
         String companyName = stock.companyName();
@@ -67,7 +68,7 @@ public class TransactionService {
         if (stock == null)
             throw new IllegalArgumentException("Stock cannot be null");
         if (quantity == null || quantity <= 0)
-            throw new IllegalArgumentException("Transaction must be a positive number of shares.");
+            throw new IllegalArgumentException("Transaction must be a positive number of shares");
         String symbol = stock.symbol();
         String companyName = stock.companyName();
         BigDecimal price = stock.latestPrice();
@@ -76,7 +77,7 @@ public class TransactionService {
                 .stream()
                 .filter(h -> h.getSymbol().equals(symbol))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Holding does not exist"));
+                .orElseThrow(() -> new InsufficientSharesException("Holding does not exist"));
         holding.remove(quantity);
         if (holding.getShares() <= 0) {
             user.removeHolding(holding);
@@ -93,7 +94,7 @@ public class TransactionService {
     @Transactional(rollbackFor = InsufficientFundsException.class)
     public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionRequestDTO> transactions) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (transactions.isEmpty()) {
             return List.of();
@@ -135,6 +136,8 @@ public class TransactionService {
                     sell(user, stock, transaction.quantity());
                 results.add(new TransactionResultDTO(transaction, null));
 
+            } catch (InsufficientSharesException e) {
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("UNPROCESSABLE", e.getMessage())));
             } catch (IllegalArgumentException e) {
                 results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("BAD_REQUEST", e.getMessage())));
             } catch (Exception e) {

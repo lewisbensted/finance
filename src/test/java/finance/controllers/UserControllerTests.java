@@ -5,7 +5,7 @@ import finance.dtos.LoginDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
 import finance.exceptions.RegistrationException;
-import finance.exceptions.UnauthorisedException;
+import finance.exceptions.AuthorisationException;
 import finance.services.UserService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -131,7 +131,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().is(422))
+                    .andExpect(status().is(409))
                     .andExpect(jsonPath("$.message").value("User taken"));
         }
     }
@@ -186,7 +186,7 @@ public class UserControllerTests {
                     "testuser",
                     "password123!"
             );
-            when(userService.login(anyString(), anyString())).thenThrow(new UnauthorisedException("Invalid"));
+            when(userService.login(anyString(), anyString())).thenThrow(new AuthorisationException("Invalid"));
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))

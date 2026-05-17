@@ -1,7 +1,7 @@
 package finance.services;
 
 import finance.entities.User;
-import finance.exceptions.AuthenticationException;
+import finance.exceptions.AuthorisationException;
 import finance.exceptions.RegistrationException;
 import finance.repositories.UserRepository;
 
@@ -107,7 +107,7 @@ public class UserServiceTests {
         void testInvalidUsername() {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.empty());
-            AuthenticationException exception = assertThrows(AuthenticationException.class,
+            AuthorisationException exception = assertThrows(AuthorisationException.class,
                     () -> userService.login("testuser", "password"));
             assertEquals("Invalid username or password", exception.getMessage());
         }
@@ -116,7 +116,7 @@ public class UserServiceTests {
         void testIncorrectPassword() {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.of(existingUser));
-            AuthenticationException exception = assertThrows(AuthenticationException.class,
+            AuthorisationException exception = assertThrows(AuthorisationException.class,
                     () -> userService.login("existinguser", "pasword"));
             assertEquals("Invalid username or password", exception.getMessage());
         }

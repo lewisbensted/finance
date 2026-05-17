@@ -1,5 +1,6 @@
 package finance.services;
 
+import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,17 +45,17 @@ public class StockServiceTests {
 
         @Test
         void testBadReq() {
-            assertEquals(new StockResultDTO(null, "Invalid Symbol"), stockService.fetchPrice("BANANA"));
+            assertEquals(new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")), stockService.fetchPrice("BANANA"));
         }
 
         @Test
         void testServerError() {
-            assertEquals(new StockResultDTO(null, "Unexpected Error"), stockService.fetchPrice("MSFT"));
+            assertEquals(new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")), stockService.fetchPrice("MSFT"));
         }
 
         @Test
         void testOtherError() {
-            assertEquals(new StockResultDTO(null, "Unexpected Error"), stockService.fetchPrice("ORCL"));
+            assertEquals(new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")), stockService.fetchPrice("ORCL"));
         }
     }
 

@@ -2,6 +2,7 @@ package finance.services;
 
 
 import finance.entities.User;
+import finance.exceptions.NotFoundException;
 import finance.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -41,7 +42,7 @@ public class BalanceServiceTests {
         void testUserNotFound() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            NotFoundException exception = assertThrows(NotFoundException.class,
                     () -> balanceService.deposit(1L, BigDecimal.valueOf(50)));
             assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());
@@ -75,7 +76,7 @@ public class BalanceServiceTests {
         void testUserNotFound() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+            NotFoundException exception = assertThrows(NotFoundException.class,
                     () -> balanceService.withdraw(1L, BigDecimal.valueOf(50)));
             assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());

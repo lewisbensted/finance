@@ -1,5 +1,6 @@
 package finance.entities;
 
+import finance.exceptions.InsufficientSharesException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -32,7 +33,7 @@ public class Holding {
     public void remove(Long quantity) {
         if (quantity == null || quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         if (quantity > shares)
-            throw new IllegalArgumentException("Insufficient shares");
+            throw new InsufficientSharesException("Insufficient shares");
         this.shares -= quantity;
     }
 

@@ -3,6 +3,7 @@ package finance.controllers;
 import finance.dtos.*;
 import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
+import finance.exceptions.InsufficientSharesException;
 import finance.services.TransactionService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +33,13 @@ public class TransactionController {
     ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
-        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
+        Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), BUY, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
-                errorFields.put(transactionResult.transaction().symbol(), List.of(transactionResult.error()));
+                errorFields.put(transactionResult.transaction().symbol(), transactionResult.error());
             else successful.add(transactionResult.transaction());
         }
 
@@ -50,22 +51,27 @@ public class TransactionController {
     ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
         User activeUser = authenticateUser(session);
 
-        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
+        Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
         List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), SELL, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
-                errorFields.put(transactionResult.transaction().symbol(), List.of(transactionResult.error()));
+                errorFields.put(transactionResult.transaction().symbol(), transactionResult.error());
             else successful.add(transactionResult.transaction());
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO("PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? "UNPROCESSABLE" : "PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
+        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientSharesException.class)
+    public ResponseEntity<ErrorDTO> handleInsufficientSharesException(InsufficientSharesException ex) {
         return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
     }
 }

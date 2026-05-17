@@ -5,7 +5,6 @@ import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
 import finance.services.StockService;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,10 +56,10 @@ public class StockControllerTests {
                         "MSFT", new StockResultDTO(new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), null),
                         "ORCL", new StockResultDTO(new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), null),
                         "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                        "LINUX", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error")
+                        "GOOG", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error")
                         )));
 
-        mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT,BANANA,LINUX")
+        mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT,BANANA,GOOG")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.stocks[*].symbol")
@@ -68,10 +67,14 @@ public class StockControllerTests {
                 .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
                 .andExpect(jsonPath("$.error.message")
                         .value("Failed to fetch some prices"))
-                .andExpect(jsonPath("$.error.fields.BANANA[0]")
-                        .value("Invalid symbol"))
-                .andExpect(jsonPath("$.error.fields.LINUX[0]")
-                        .value("Unexpected Error"));
+                .andExpect(jsonPath("$.error.fields.BANANA.code")
+                        .value("NOT_FOUND"))
+                .andExpect(jsonPath("$.error.fields.BANANA.message")
+                        .value("Stock symbol not found"))
+                .andExpect(jsonPath("$.error.fields.GOOG.code")
+                        .value("SERVER_ERROR"))
+                .andExpect(jsonPath("$.error.fields.GOOG.message")
+                        .value("Unexpected error"));
     }
 
     @Test
@@ -79,20 +82,24 @@ public class StockControllerTests {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
                         "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                        "LINUX", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error"))
+                        "GOOG", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error"))
                 ));
 
-        mockMvc.perform(get("/api/prices").param("symbolsStr", "BANANA,LINUX")
+        mockMvc.perform(get("/api/prices").param("symbolsStr", "BANANA,GOOG")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(422))
                 .andExpect(jsonPath("$.stocks").isEmpty())
                 .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
                 .andExpect(jsonPath("$.error.message")
                         .value("Failed to fetch all prices"))
-                .andExpect(jsonPath("$.error.fields.BANANA[0]")
-                        .value("Invalid symbol"))
-                .andExpect(jsonPath("$.error.fields.LINUX[0]")
-                        .value("Unexpected Error"));
+                .andExpect(jsonPath("$.error.fields.BANANA.code")
+                        .value("NOT_FOUND"))
+                .andExpect(jsonPath("$.error.fields.BANANA.message")
+                        .value("Stock symbol not found"))
+                .andExpect(jsonPath("$.error.fields.GOOG.code")
+                        .value("SERVER_ERROR"))
+                .andExpect(jsonPath("$.error.fields.GOOG.message")
+                        .value("Unexpected error"));
 
     }
 

@@ -27,7 +27,7 @@ public class StockController {
             return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "No symbols provided"));
         String[] symbols = symbolsStr.split(",");
 
-        Map<String, List<ItemErrorDTO>> errorFields = new HashMap<>();
+        Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<StockDTO> stocks = new ArrayList<>();
 
         Map<String, StockResultDTO> prices = stockService.fetchPrices(symbols);
@@ -35,7 +35,7 @@ public class StockController {
         for (Map.Entry<String, StockResultDTO> entry : prices.entrySet()) {
             String symbol = entry.getKey();
             StockResultDTO fetch = entry.getValue();
-            if (fetch.error() != null) errorFields.put(symbol, List.of(fetch.error()));
+            if (fetch.error() != null) errorFields.put(symbol, fetch.error());
             else stocks.add(fetch.stock());
         }
 
