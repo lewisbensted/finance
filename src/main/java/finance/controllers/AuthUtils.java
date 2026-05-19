@@ -10,6 +10,7 @@ public class AuthUtils {
         if (activeUser == null) {
             throw new AuthorisationException("Not logged in");
         }
+        System.out.println(activeUser);
         return activeUser;
     }
 }

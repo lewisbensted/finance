@@ -37,6 +37,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(400))
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("No symbols provided"));
     }
 
@@ -45,6 +46,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices?symbolsStr=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(400))
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                 .andExpect(jsonPath("$.message").value("No symbols provided"));
     }
 

@@ -14,16 +14,16 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class BalanceServiceTests {
+public class AccountServiceTests {
 
-    private BalanceService balanceService;
+    private AccountService accountService;
     private UserRepository mockUserRepo;
     private User testUser;
 
     @BeforeEach
     void setUp() {
         mockUserRepo = mock(UserRepository.class);
-        balanceService = new BalanceService(mockUserRepo);
+        accountService = new AccountService(mockUserRepo);
         testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
     }
 
@@ -33,7 +33,7 @@ public class BalanceServiceTests {
         void testSuccess() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
-            balanceService.deposit(1L, BigDecimal.valueOf(50));
+            accountService.deposit(1L, BigDecimal.valueOf(50));
             assertEquals(BigDecimal.valueOf(150), testUser.getBalance());
             verify(mockUserRepo).save(testUser);
         }
@@ -43,7 +43,7 @@ public class BalanceServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
             NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> balanceService.deposit(1L, BigDecimal.valueOf(50)));
+                    () -> accountService.deposit(1L, BigDecimal.valueOf(50)));
             assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
@@ -54,7 +54,7 @@ public class BalanceServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> balanceService.deposit(1L, BigDecimal.valueOf(-50)));
+                    () -> accountService.deposit(1L, BigDecimal.valueOf(-50)));
             assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
             assertEquals("Amount must be positive", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
@@ -67,7 +67,7 @@ public class BalanceServiceTests {
         void testSuccess() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
-            balanceService.withdraw(1L, BigDecimal.valueOf(50));
+            accountService.withdraw(1L, BigDecimal.valueOf(50));
             assertEquals(BigDecimal.valueOf(50), testUser.getBalance());
             verify(mockUserRepo).save(testUser);
         }
@@ -77,7 +77,7 @@ public class BalanceServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
             NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> balanceService.withdraw(1L, BigDecimal.valueOf(50)));
+                    () -> accountService.withdraw(1L, BigDecimal.valueOf(50)));
             assertEquals("User not found.", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
@@ -88,7 +88,7 @@ public class BalanceServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(testUser));
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                    () -> balanceService.withdraw(1L, BigDecimal.valueOf(-50)));
+                    () -> accountService.withdraw(1L, BigDecimal.valueOf(-50)));
             assertEquals(testUser.getBalance(), BigDecimal.valueOf(100));
             assertEquals("Amount must be positive", exception.getMessage());
             verify(mockUserRepo, never()).save(any());

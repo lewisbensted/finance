@@ -78,6 +78,7 @@ public class TransactionControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty Request Body"));
         }
 
@@ -87,6 +88,7 @@ public class TransactionControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
                     .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
@@ -171,6 +173,7 @@ public class TransactionControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty Request Body"));
         }
 
@@ -180,6 +183,7 @@ public class TransactionControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
                     .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
