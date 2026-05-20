@@ -18,8 +18,8 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorDTO> handleMissingBody(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "Empty Request Body"));
+    public ResponseEntity<ErrorDTO> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", "Empty or unreadable request body"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
             fieldErrors.putIfAbsent(error.getField(), new ArrayList<>());
             fieldErrors.get(error.getField()).add(error.getDefaultMessage());
         });
-        return ResponseEntity.status(400).body(new ValidationErrorDTO("BAD_REQUEST", "Validation Error(s)", fieldErrors));
+        return ResponseEntity.status(400).body(new ValidationErrorDTO("BAD_REQUEST", "Validation error(s)", fieldErrors));
     }
 
     @ExceptionHandler(ForbiddenException.class)

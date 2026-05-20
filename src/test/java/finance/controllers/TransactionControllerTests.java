@@ -68,18 +68,13 @@ public class TransactionControllerTests {
     @Nested
     class BuyTests {
         @Test
-        void test400MalformedJSON() {
-            assertTrue(false);
-        }
-
-        @Test
         void test400NullBody() throws Exception {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
@@ -174,7 +169,7 @@ public class TransactionControllerTests {
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test

@@ -3,9 +3,9 @@ package finance.dtos;
 import jakarta.validation.constraints.NotBlank;
 
 public record LoginDTO(
-        @NotBlank(message = "Username is required.")
+        @NotBlank(message = "Username is required")
         String username,
 
-        @NotBlank(message = "Password is required.")
+        @NotBlank(message = "Password is required")
         String password) {
 }

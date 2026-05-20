@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.dtos.LoginDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
-import finance.exceptions.RegistrationException;
 import finance.exceptions.AuthorisationException;
+import finance.exceptions.RegistrationException;
 import finance.services.UserService;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,11 +45,6 @@ public class UserControllerTests {
 
     @Nested
     class RegisterControllerTests {
-        @Test
-        void test400MalformedJSON() {
-            assertTrue(false);
-        }
-
         @Test
         void test201Success() throws Exception {
             RegisterDTO request = new RegisterDTO(
@@ -103,7 +98,7 @@ public class UserControllerTests {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Validation Error(s)"))
+                    .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.firstName").value("Invalid first name format"))
                     .andExpect(jsonPath("$.fields.username").value("Username must be between 3 and 20 characters"))
                     .andExpect(jsonPath("$.fields.email").value("Invalid email address"))
@@ -117,7 +112,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
@@ -143,8 +138,20 @@ public class UserControllerTests {
     @Nested
     class LoginControllerTests {
         @Test
-        void test400MalformedJSON() {
-            assertTrue(false);
+        void test400MalformedJSON() throws Exception {
+            String badJson = """
+                    {
+                        "username": "testuser",
+                        "password": "testpassword",
+                    }
+                    """;
+
+            mockMvc.perform(post("/api/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(badJson))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
@@ -183,7 +190,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
@@ -192,17 +199,31 @@ public class UserControllerTests {
                     "testuser",
                     "password123!"
             );
-            when(userService.login(anyString(), anyString())).thenThrow(new AuthorisationException("Invalid user"));
+            when(userService.login(anyString(), anyString())).thenThrow(new AuthorisationException("Invalid username"));
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(401))
                     .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
-                    .andExpect(jsonPath("$.message").value("Invalid user"));
+                    .andExpect(jsonPath("$.message").value("Invalid username"));
         }
 
         @Test
-        void test400Invalid() throws Exception {assertTrue(false);}
+        void test400Invalid() throws Exception {
+            LoginDTO request = new LoginDTO(
+                    "",
+                    null
+            );
+            mockMvc.perform(post("/api/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("Validation error(s)"))
+                    .andExpect(jsonPath("$.fields.username").value("Username is required"))
+                    .andExpect(jsonPath("$.fields.password").value("Password is required"));
+
+        }
     }
 
     @Nested

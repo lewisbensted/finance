@@ -50,18 +50,19 @@ public class AccountControllerTests {
     @Nested
     class DepositTests {
         @Test
-        void test400MalformedJSON() {
-            assertTrue(false);
-        }
-
-        @Test
-        void test400NullBody() throws Exception {
+        void test400BadJSON() throws Exception {
+            String badJson = """
+                    {
+                        "amount": "ten"
+                    }
+                    """;
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUser)
+                            .content(badJson))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
@@ -110,7 +111,7 @@ public class AccountControllerTests {
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Empty Request Body"));
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test

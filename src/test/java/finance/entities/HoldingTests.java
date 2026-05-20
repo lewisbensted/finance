@@ -1,5 +1,6 @@
 package finance.entities;
 
+import finance.exceptions.InsufficientSharesException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,7 @@ public class HoldingTests {
 
         @Test
         void testInsufficientShares() {
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> testHolding.remove(11L));
+            InsufficientSharesException exception = assertThrows(InsufficientSharesException.class, () -> testHolding.remove(11L));
             assertEquals("Insufficient shares", exception.getMessage());
             assertEquals(10L, testHolding.getShares());
         }
