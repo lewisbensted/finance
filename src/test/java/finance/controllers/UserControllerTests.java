@@ -16,7 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -80,7 +79,7 @@ public class UserControllerTests {
                             .sessionAttr("USER_SESSION", testUser))
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
-                    .andExpect(jsonPath("$.message").value("Already registered"));
+                    .andExpect(jsonPath("$.message").value("Cannot register while logged in"));
         }
 
         @Test
@@ -170,9 +169,9 @@ public class UserControllerTests {
         }
 
         @Test
-        void test403AlreadyLoggedIn() throws Exception {
+        void test403AlreadyLoggedInDifferentUser() throws Exception {
             LoginDTO request = new LoginDTO(
-                    "testuser",
+                    "testuser1",
                     "password123!"
             );
             mockMvc.perform(post("/api/login")
@@ -182,6 +181,20 @@ public class UserControllerTests {
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("Already logged in"));
+        }
+
+        @Test
+        void test403AlreadyLoggedInSameUser() throws Exception {
+            LoginDTO request = new LoginDTO(
+                    "testuser",
+                    "password123!"
+            );
+            mockMvc.perform(post("/api/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request))
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(200))
+                    .andExpect(jsonPath("$.username").value("testuser"));
         }
 
         @Test

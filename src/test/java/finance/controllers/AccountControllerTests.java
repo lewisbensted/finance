@@ -1,6 +1,5 @@
 package finance.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.dtos.AmountDTO;
 import finance.entities.User;
@@ -16,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -77,17 +75,15 @@ public class AccountControllerTests {
         }
 
         @Test
-        void test400DepositFails() throws Exception {
-            doThrow(new IllegalArgumentException("Amount must be positive"))
-                    .when(accountService)
-                    .deposit(any(), any());
+        void test400InvalidRequest() throws Exception {
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testUser)
-                            .content(objectMapper.writeValueAsString(testAmount)))
+                            .content(objectMapper.writeValueAsString(new AmountDTO(null))))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Amount must be positive"));
+                    .andExpect(jsonPath("$.message").value("Validation error(s)"))
+                    .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
         }
 
         @Test
@@ -127,7 +123,7 @@ public class AccountControllerTests {
 
         @Test
         void test400WithdrawFails() throws Exception {
-            doThrow(new IllegalArgumentException("Amount must be positive"))
+            doThrow(new IllegalArgumentException("Insufficient funds"))
                     .when(accountService)
                     .withdraw(any(), any());
             mockMvc.perform(post("/api/withdraw")
@@ -136,7 +132,19 @@ public class AccountControllerTests {
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-                    .andExpect(jsonPath("$.message").value("Amount must be positive"));
+                    .andExpect(jsonPath("$.message").value("Insufficient funds"));
+        }
+
+        @Test
+        void test400InvalidRequest() throws Exception {
+            mockMvc.perform(post("/api/withdraw")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testUser)
+                            .content(objectMapper.writeValueAsString(new AmountDTO(BigDecimal.valueOf(-1)))))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("Validation error(s)"))
+                    .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
         }
 
         @Test

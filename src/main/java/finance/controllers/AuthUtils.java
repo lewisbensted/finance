@@ -10,7 +10,10 @@ public class AuthUtils {
         if (activeUser == null) {
             throw new AuthorisationException("Not logged in");
         }
-        System.out.println(activeUser);
         return activeUser;
+    }
+
+    public static User getAuthenticatedUser(HttpSession session) {
+        return (User) session.getAttribute("USER_SESSION");
     }
 }
