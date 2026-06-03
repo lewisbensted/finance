@@ -7,9 +7,10 @@ import finance.entities.TransactionType;
 import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
 import finance.exceptions.InsufficientSharesException;
-import finance.repositories.HoldingRepository;
 import finance.repositories.TransactionRepository;
 import finance.repositories.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -147,10 +148,10 @@ public class TransactionService {
         return results;
     }
 
-    public List<TransactionDTO> fetchTransactions(Long userId) {
+    public Page<TransactionDTO> fetchTransactions(Long userId, Pageable pageable) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found."));
-        List<Transaction> transactions = transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        return transactions.stream().map(Transaction::toDTO).toList();
+        Page<Transaction> transactions = transactionRepository.findByUserId(userId, pageable);
+        return transactions.map(Transaction::toDTO);
     }
 }

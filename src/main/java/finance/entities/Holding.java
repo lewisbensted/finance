@@ -1,5 +1,7 @@
 package finance.entities;
 
+import finance.dtos.HoldingDTO;
+import finance.dtos.TransactionDTO;
 import finance.exceptions.InsufficientSharesException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,6 +20,10 @@ public class Holding {
 
     @NotNull
     @Column(nullable = false)
+    String companyName;
+
+    @NotNull
+    @Column(nullable = false)
     private Long shares;
 
     protected Holding() {
@@ -27,6 +33,7 @@ public class Holding {
         this();
         this.user = user;
         this.id = new HoldingId(user.getId(), symbol);
+        this.companyName = companyName;
         this.shares = shares;
     }
 
@@ -56,5 +63,13 @@ public class Holding {
 
     public User getUser() {
         return this.user;
+    }
+
+    public HoldingDTO toDTO() {
+        return new HoldingDTO(
+                this.id.getSymbol(),
+                this.companyName,
+                this.shares
+        );
     }
 }

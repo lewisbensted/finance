@@ -1,11 +1,12 @@
 package finance.repositories;
 
+import finance.dtos.HoldingDTO;
 import finance.entities.Holding;
 import finance.entities.HoldingId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
-
 public interface HoldingRepository extends JpaRepository<Holding, HoldingId> {
-    Optional<Holding> findByIdUserIdAndIdSymbol(Long userId, String symbol);
+    Page<Holding> findByIdUserId(Long userId, Pageable pageable);
 }

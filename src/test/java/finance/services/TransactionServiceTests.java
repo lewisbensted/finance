@@ -11,6 +11,9 @@ import finance.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,7 +26,6 @@ import static finance.entities.TransactionType.SELL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.never;
 
 public class TransactionServiceTests {
 
@@ -410,7 +412,7 @@ public class TransactionServiceTests {
         @Test
         void testUserNotFound() {
             when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.fetchTransactions(1L));
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> transactionService.fetchTransactions(1L, PageRequest.of(0, 10)));
             assertEquals("User not found.", exception.getMessage());
             verifyNoInteractions(mockTransactionRepo);
         }
@@ -421,8 +423,8 @@ public class TransactionServiceTests {
             Transaction microsoftTransaction = new Transaction(testUser, "MSFT", "Microsoft", 5L, BigDecimal.valueOf(20), BUY, LocalDateTime.of(2024, 1, 1, 12, 1));
 
             when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-            when(mockTransactionRepo.findByUserIdOrderByCreatedAtDesc(any())).thenReturn(List.of(appleTransaction, microsoftTransaction));
-            List<TransactionDTO> result = transactionService.fetchTransactions(1L);
+            when(mockTransactionRepo.findByUserId(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(appleTransaction, microsoftTransaction)));
+            List<TransactionDTO> result = transactionService.fetchTransactions(1L, PageRequest.of(0, 10)).getContent();
 
             assertEquals(2, result.size());
             assertEquals("AAPL", result.get(0).symbol());
