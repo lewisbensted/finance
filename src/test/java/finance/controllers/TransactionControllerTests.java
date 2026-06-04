@@ -2,6 +2,7 @@ package finance.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.dtos.ItemErrorDTO;
+import finance.dtos.TransactionDTO;
 import finance.dtos.TransactionRequestDTO;
 import finance.dtos.TransactionResultDTO;
 import finance.entities.User;
@@ -9,19 +10,30 @@ import finance.services.TransactionService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
+import static finance.entities.TransactionType.BUY;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -246,6 +258,46 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
+        }
+    }
+
+    @Nested
+    class FetchTransactions {
+        @Test
+        void test200Success() throws Exception {
+            TransactionDTO appleTransaction = new TransactionDTO("AAPL", "Apple", 5L, BigDecimal.valueOf(20), BUY, LocalDateTime.of(2024, 1, 1, 12, 0));
+            TransactionDTO microsoftTransaction = new TransactionDTO("MSFT", "Microsoft", 5L, BigDecimal.valueOf(20), BUY, LocalDateTime.of(2024, 1, 1, 12, 1));
+            when(transactionService.fetchTransactions(any(), any())).thenReturn(new PageImpl<>(List.of(appleTransaction, microsoftTransaction)));
+            ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+
+            mockMvc.perform(get("/api/transactions?direction=ASC")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testUser))
+                    .andExpect(status().is(200))
+                    .andExpect(jsonPath("$.content[*].symbol")
+                            .value(containsInAnyOrder("AAPL", "MSFT")));
+
+            verify(transactionService).fetchTransactions(
+                    eq(testUser.getId()),
+                    captor.capture()
+            );
+
+            Sort.Order order = captor.getValue()
+                    .getSort()
+                    .getOrderFor("createdAt");
+
+            assertThat(order).isNotNull();
+            assertThat(order.getDirection())
+                    .isEqualTo(Sort.Direction.ASC);
+        }
+
+        @Test
+        void test401Unauthorised() throws Exception {
+            mockMvc.perform(get("/api/transactions")
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.message").value("Not logged in"));
         }
     }
 }
