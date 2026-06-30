@@ -1,6 +1,7 @@
-package finance.controllers;
+package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import finance.controllers.UserController;
 import finance.dtos.LoginDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
@@ -33,6 +34,8 @@ public class UserControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    Long testUserId = 1L;
 
     User testUser = new User(
             "testuser",
@@ -76,7 +79,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("Cannot register while logged in"));
@@ -165,7 +168,8 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(200))
-                    .andExpect(jsonPath("$.username").value("testuser"));
+                    .andExpect(jsonPath("$.username").value("testuser"))
+                    .andExpect(request().sessionAttribute("USER_SESSION", testUser));
         }
 
         @Test
@@ -177,7 +181,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("Already logged in"));
@@ -192,7 +196,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
         }
@@ -248,9 +252,10 @@ public class UserControllerTests {
 
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(200))
-                    .andExpect(content().string("Logged out"));
+                    .andExpect(content().string("Logged out"))
+                    .andExpect(request().sessionAttributeDoesNotExist("USER_SESSION"));
         }
 
         @Test

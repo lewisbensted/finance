@@ -33,11 +33,11 @@ public class TransactionController {
 
     @PostMapping(value = "/api/buy")
     ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
-        User activeUser = authenticateUser(session);
+        Long activeUserId = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), BUY, transactions);
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUserId, BUY, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
@@ -51,11 +51,11 @@ public class TransactionController {
 
     @PostMapping(value = "/api/sell")
     ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
-        User activeUser = authenticateUser(session);
+        Long activeUserId = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUser.getId(), SELL, transactions);
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUserId, SELL, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
@@ -71,7 +71,7 @@ public class TransactionController {
     ResponseEntity<Page<TransactionDTO>> fetchTransactions(HttpSession session, @RequestParam(defaultValue = "DESC") Sort.Direction direction, @PageableDefault(
             size = 10
     ) Pageable pageable) {
-        User activeUser = authenticateUser(session);
+        Long activeUserId = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -79,7 +79,7 @@ public class TransactionController {
                 Sort.by(direction, "createdAt")
         );
 
-        Page<TransactionDTO> transactions = transactionService.fetchTransactions(activeUser.getId(), safePageable);
+        Page<TransactionDTO> transactions = transactionService.fetchTransactions(activeUserId, safePageable);
         return ResponseEntity.status(200).body(transactions);
     }
 

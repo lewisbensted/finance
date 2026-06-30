@@ -1,5 +1,7 @@
-package finance.entities;
+package finance.unit.entities;
 
+import finance.entities.Holding;
+import finance.entities.User;
 import finance.exceptions.InsufficientSharesException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

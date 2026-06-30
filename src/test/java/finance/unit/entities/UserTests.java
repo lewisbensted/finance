@@ -1,5 +1,6 @@
-package finance.entities;
+package finance.unit.entities;
 
+import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

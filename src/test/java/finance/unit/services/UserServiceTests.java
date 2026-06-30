@@ -1,10 +1,11 @@
-package finance.services;
+package finance.unit.services;
 
 import finance.entities.User;
 import finance.exceptions.AuthorisationException;
 import finance.exceptions.RegistrationException;
 import finance.repositories.UserRepository;
 
+import finance.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

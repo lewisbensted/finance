@@ -1,6 +1,5 @@
 package finance.repositories;
 
-import finance.dtos.HoldingDTO;
 import finance.entities.Holding;
 import finance.entities.HoldingId;
 import org.springframework.data.domain.Page;

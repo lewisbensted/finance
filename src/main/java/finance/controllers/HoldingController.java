@@ -27,7 +27,7 @@ public class HoldingController {
     ResponseEntity<Page<HoldingDTO>> fetchHoldings(HttpSession session, @PageableDefault(
             size = 10
     ) Pageable pageable) {
-        User activeUser = authenticateUser(session);
+        Long activeUserId = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -35,7 +35,7 @@ public class HoldingController {
                 Sort.by(Sort.Direction.ASC, "symbol")
         );
 
-        Page<HoldingDTO> holdings = holdingService.fetchHoldings(activeUser.getId(), safePageable);
+        Page<HoldingDTO> holdings = holdingService.fetchHoldings(activeUserId, safePageable);
         return ResponseEntity.status(200).body(holdings);
     }
 }

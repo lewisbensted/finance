@@ -36,7 +36,7 @@ public class UserController {
             throw new ForbiddenException("Already logged in");
         }
         User newActiveUser = activeUser != null ? activeUser : userService.login(user.username(), user.password());
-        session.setAttribute("USER_SESSION", newActiveUser);
+        session.setAttribute("USER_SESSION", newActiveUser.getId());
         return ResponseEntity.status(200).body(new UserDTO(newActiveUser));
     }
 

@@ -1,6 +1,7 @@
-package finance.controllers;
+package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import finance.controllers.FundingController;
 import finance.dtos.AmountDTO;
 import finance.entities.User;
 import finance.services.AccountService;
@@ -22,9 +23,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-@WebMvcTest(AccountController.class)
+@WebMvcTest(FundingController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class AccountControllerTests {
+public class FundingControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,6 +35,8 @@ public class AccountControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    Long testUserId = 1L;
 
     User testUser = new User(
             "testuser",
@@ -56,7 +59,7 @@ public class AccountControllerTests {
                     """;
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser)
+                            .sessionAttr("USER_SESSION", testUserId)
                             .content(badJson))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -65,7 +68,8 @@ public class AccountControllerTests {
 
         @Test
         void test401Unauthorised() throws Exception {
-            doNothing().when(accountService).deposit(anyLong(), any());
+            when(accountService.deposit(anyLong(), any()))
+                    .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
@@ -78,7 +82,7 @@ public class AccountControllerTests {
         void test400InvalidRequest() throws Exception {
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser)
+                            .sessionAttr("USER_SESSION", testUserId)
                             .content(objectMapper.writeValueAsString(new AmountDTO(null))))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -88,10 +92,11 @@ public class AccountControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            doNothing().when(accountService).deposit(anyLong(), any());
+            when(accountService.deposit(anyLong(), any()))
+                    .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser)
+                            .sessionAttr("USER_SESSION", testUserId)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
@@ -104,7 +109,7 @@ public class AccountControllerTests {
         void test400NullBody() throws Exception {
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
@@ -112,7 +117,8 @@ public class AccountControllerTests {
 
         @Test
         void test401Unauthorised() throws Exception {
-            doNothing().when(accountService).withdraw(anyLong(), any(BigDecimal.class));
+            when(accountService.withdraw(anyLong(), any()))
+                    .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
@@ -128,7 +134,7 @@ public class AccountControllerTests {
                     .withdraw(any(), any());
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser)
+                            .sessionAttr("USER_SESSION", testUserId)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -149,10 +155,11 @@ public class AccountControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            doNothing().when(accountService).withdraw(anyLong(), any());
+            when(accountService.withdraw(anyLong(), any()))
+                    .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser)
+                            .sessionAttr("USER_SESSION", testUserId)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
@@ -172,9 +179,11 @@ public class AccountControllerTests {
 
         @Test
         void test200Success() throws Exception {
+            when(accountService.getBalance(anyLong()))
+                    .thenReturn(testUser);
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUser))
+                            .sessionAttr("USER_SESSION", testUserId))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
         }

@@ -1,5 +1,6 @@
-package finance.controllers;
+package finance.slice.controllers;
 
+import finance.controllers.StockController;
 import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;

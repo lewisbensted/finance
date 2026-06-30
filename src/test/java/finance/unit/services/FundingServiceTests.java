@@ -1,9 +1,9 @@
-package finance.services;
-
+package finance.unit.services;
 
 import finance.entities.User;
 import finance.exceptions.NotFoundException;
 import finance.repositories.UserRepository;
+import finance.services.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class AccountServiceTests {
+public class FundingServiceTests {
 
     private AccountService accountService;
     private UserRepository mockUserRepo;

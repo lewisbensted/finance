@@ -1,10 +1,11 @@
-package finance.services;
+package finance.unit.services;
 
 import finance.dtos.HoldingDTO;
 import finance.entities.Holding;
 import finance.entities.User;
 import finance.repositories.HoldingRepository;
 import finance.repositories.UserRepository;
+import finance.services.HoldingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;

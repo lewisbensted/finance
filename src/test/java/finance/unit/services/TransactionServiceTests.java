@@ -1,4 +1,4 @@
-package finance.services;
+package finance.unit.services;
 
 import finance.dtos.*;
 import finance.entities.Holding;
@@ -8,6 +8,8 @@ import finance.exceptions.InsufficientFundsException;
 import finance.exceptions.InsufficientSharesException;
 import finance.repositories.TransactionRepository;
 import finance.repositories.UserRepository;
+import finance.services.StockService;
+import finance.services.TransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
