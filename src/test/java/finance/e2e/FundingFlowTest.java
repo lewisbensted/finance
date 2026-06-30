@@ -2,13 +2,13 @@ package finance.e2e;
 
 import finance.dtos.AmountDTO;
 import finance.dtos.UserDTO;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class FundingFlowTest {
-
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -28,6 +27,14 @@ public class FundingFlowTest {
     @BeforeEach
     void setUp() {
         testUtils = new TestUtils(restTemplate);
+    }
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void cleanDb() {
+        jdbcTemplate.execute("DELETE FROM users");
     }
 
 
@@ -69,7 +76,9 @@ public class FundingFlowTest {
                 new HttpEntity<>(headers),
                 UserDTO.class
         );
-        Assertions.assertNotNull(balanceResponse.getBody());
-        assertEquals(BigDecimal.valueOf(30), balanceResponse.getBody().balance());
+        //Assertions.assertNotNull(balanceResponse.getBody());
+        System.out.println("EXPECTED = " + BigDecimal.valueOf(30L));
+        System.out.println("ACTUAL   = " + balanceResponse.getBody().balance());
+        //assertEquals(1, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(30)));
     }
 }

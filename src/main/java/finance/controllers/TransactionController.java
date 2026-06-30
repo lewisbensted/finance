@@ -5,6 +5,7 @@ import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
 import finance.exceptions.InsufficientSharesException;
 import finance.services.TransactionService;
+import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,11 +34,11 @@ public class TransactionController {
 
     @PostMapping(value = "/api/buy")
     ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
-        Long activeUserId = authenticateUser(session);
+        SessionUser sessionUser = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUserId, BUY, transactions);
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), BUY, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
@@ -51,11 +52,11 @@ public class TransactionController {
 
     @PostMapping(value = "/api/sell")
     ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
-        Long activeUserId = authenticateUser(session);
+        SessionUser sessionUser = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
         List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(activeUserId, SELL, transactions);
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), SELL, transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
             if (transactionResult.error() != null)
@@ -71,7 +72,7 @@ public class TransactionController {
     ResponseEntity<Page<TransactionDTO>> fetchTransactions(HttpSession session, @RequestParam(defaultValue = "DESC") Sort.Direction direction, @PageableDefault(
             size = 10
     ) Pageable pageable) {
-        Long activeUserId = authenticateUser(session);
+        SessionUser sessionUser = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -79,7 +80,7 @@ public class TransactionController {
                 Sort.by(direction, "createdAt")
         );
 
-        Page<TransactionDTO> transactions = transactionService.fetchTransactions(activeUserId, safePageable);
+        Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(), safePageable);
         return ResponseEntity.status(200).body(transactions);
     }
 

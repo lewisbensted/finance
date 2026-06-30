@@ -4,6 +4,7 @@ import finance.dtos.AmountDTO;
 import finance.dtos.UserDTO;
 import finance.entities.User;
 import finance.services.AccountService;
+import finance.session.SessionUser;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -26,22 +27,22 @@ public class FundingController {
 
     @PostMapping(value = "/api/deposit")
     ResponseEntity<UserDTO> deposit(@Valid @RequestBody AmountDTO request, HttpSession session) {
-        Long activeUserId = authenticateUser(session);
-        User user = accountService.deposit(activeUserId, request.amount());
+        SessionUser sessionUser = authenticateUser(session);
+        User user = accountService.deposit(sessionUser.id(), request.amount());
         return ResponseEntity.status(200).body(new UserDTO(user));
     }
 
     @PostMapping(value = "/api/withdraw")
     ResponseEntity<UserDTO> withdraw(@Valid @RequestBody AmountDTO request, HttpSession session) {
-        Long activeUserId = authenticateUser(session);
-        User user = accountService.withdraw(activeUserId, request.amount());
+        SessionUser sessionUser = authenticateUser(session);
+        User user = accountService.withdraw(sessionUser.id(), request.amount());
         return ResponseEntity.status(200).body(new UserDTO(user));
     }
 
     @GetMapping(value = "/api/balance")
     ResponseEntity<UserDTO> getBalance(HttpSession session) {
-        Long activeUserId = authenticateUser(session);
-        User user = accountService.getBalance(activeUserId);
+        SessionUser sessionUser = authenticateUser(session);
+        User user = accountService.getBalance(sessionUser.id());
         return ResponseEntity.status(200).body(new UserDTO(user));
     }
 }

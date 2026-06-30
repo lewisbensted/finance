@@ -3,6 +3,7 @@ package finance.controllers;
 import finance.dtos.HoldingDTO;
 import finance.entities.User;
 import finance.services.HoldingService;
+import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +28,7 @@ public class HoldingController {
     ResponseEntity<Page<HoldingDTO>> fetchHoldings(HttpSession session, @PageableDefault(
             size = 10
     ) Pageable pageable) {
-        Long activeUserId = authenticateUser(session);
+        SessionUser sessionUser = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
@@ -35,7 +36,7 @@ public class HoldingController {
                 Sort.by(Sort.Direction.ASC, "symbol")
         );
 
-        Page<HoldingDTO> holdings = holdingService.fetchHoldings(activeUserId, safePageable);
+        Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
         return ResponseEntity.status(200).body(holdings);
     }
 }

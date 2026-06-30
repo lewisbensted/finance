@@ -8,6 +8,7 @@ import finance.dtos.TransactionRequestDTO;
 import finance.dtos.TransactionResultDTO;
 import finance.entities.User;
 import finance.services.TransactionService;
+import finance.session.SessionUser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ public class TransactionControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    Long testUserId = 1L;
+    SessionUser testSessionUser = new SessionUser(1L, "testuser");
 
     TransactionRequestDTO appleTransactionRequest = new TransactionRequestDTO("AAPL", 5L);
     TransactionRequestDTO microsoftTransactionRequest = new TransactionRequestDTO("MSFT", 10L);
@@ -77,7 +78,7 @@ public class TransactionControllerTests {
         void test400NullBody() throws Exception {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
@@ -103,7 +104,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(422))
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
@@ -130,7 +131,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
@@ -158,7 +159,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
@@ -172,7 +173,7 @@ public class TransactionControllerTests {
         void test400NullBody() throws Exception {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
@@ -198,7 +199,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(422))
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
@@ -224,7 +225,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
@@ -248,7 +249,7 @@ public class TransactionControllerTests {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
@@ -267,13 +268,13 @@ public class TransactionControllerTests {
 
             mockMvc.perform(get("/api/transactions?direction=ASC")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.content[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")));
 
             verify(transactionService).fetchTransactions(
-                    eq(testUserId),
+                    eq(testSessionUser.id()),
                     captor.capture()
             );
 

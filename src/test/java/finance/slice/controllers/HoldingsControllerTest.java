@@ -4,6 +4,7 @@ import finance.controllers.HoldingController;
 import finance.dtos.HoldingDTO;
 import finance.entities.User;
 import finance.services.HoldingService;
+import finance.session.SessionUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,7 +33,7 @@ public class HoldingsControllerTest {
     @MockBean
     private HoldingService holdingService;
 
-    Long testUserId = 1L;
+    SessionUser testSessionUser = new SessionUser(1L, "testuser");
 
     @Test
     void test200Success() throws Exception {
@@ -42,7 +43,7 @@ public class HoldingsControllerTest {
 
         mockMvc.perform(get("/api/holdings")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .sessionAttr("USER_SESSION", testUserId))
+                        .sessionAttr("USER_SESSION", testSessionUser))
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.content[*].symbol")
                         .value(containsInAnyOrder("AAPL", "MSFT")));

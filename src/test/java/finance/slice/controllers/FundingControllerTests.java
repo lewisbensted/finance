@@ -5,6 +5,7 @@ import finance.controllers.FundingController;
 import finance.dtos.AmountDTO;
 import finance.entities.User;
 import finance.services.AccountService;
+import finance.session.SessionUser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class FundingControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    Long testUserId = 1L;
+    SessionUser testSessionUser = new SessionUser(1L, "testuser");
 
     User testUser = new User(
             "testuser",
@@ -59,7 +60,7 @@ public class FundingControllerTests {
                     """;
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId)
+                            .sessionAttr("USER_SESSION", testSessionUser)
                             .content(badJson))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -82,7 +83,7 @@ public class FundingControllerTests {
         void test400InvalidRequest() throws Exception {
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId)
+                            .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(new AmountDTO(null))))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -96,7 +97,7 @@ public class FundingControllerTests {
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId)
+                            .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
@@ -109,7 +110,7 @@ public class FundingControllerTests {
         void test400NullBody() throws Exception {
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
@@ -134,7 +135,7 @@ public class FundingControllerTests {
                     .withdraw(any(), any());
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId)
+                            .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(400))
                     .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
@@ -159,7 +160,7 @@ public class FundingControllerTests {
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId)
+                            .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
@@ -183,7 +184,7 @@ public class FundingControllerTests {
                     .thenReturn(testUser);
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"));
         }

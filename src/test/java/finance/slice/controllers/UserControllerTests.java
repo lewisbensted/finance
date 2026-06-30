@@ -8,6 +8,8 @@ import finance.entities.User;
 import finance.exceptions.AuthorisationException;
 import finance.exceptions.RegistrationException;
 import finance.services.UserService;
+import finance.session.SessionUser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -35,15 +38,16 @@ public class UserControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    Long testUserId = 1L;
+    User testUser = mock(User.class);
 
-    User testUser = new User(
-            "testuser",
-            "testuser@test.com",
-            "test",
-            "user",
-            "password_hash"
-    );
+    @BeforeEach
+    void setUp() {
+        when(testUser.getId()).thenReturn(1L);
+        when(testUser.getUsername()).thenReturn("testuser");
+    }
+
+
+    SessionUser testSessionUser = new SessionUser(1L, "testuser");
 
     @Nested
     class RegisterControllerTests {
@@ -79,7 +83,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("Cannot register while logged in"));
@@ -169,11 +173,11 @@ public class UserControllerTests {
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.username").value("testuser"))
-                    .andExpect(request().sessionAttribute("USER_SESSION", testUser));
+                    .andExpect(request().sessionAttribute("USER_SESSION", testSessionUser));
         }
 
         @Test
-        void test403AlreadyLoggedInDifferentUser() throws Exception {
+        void test403AlreadyLoggedIn() throws Exception {
             LoginDTO request = new LoginDTO(
                     "testuser1",
                     "password123!"
@@ -181,25 +185,12 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(403))
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
                     .andExpect(jsonPath("$.message").value("Already logged in"));
         }
 
-        @Test
-        void test403AlreadyLoggedInSameUser() throws Exception {
-            LoginDTO request = new LoginDTO(
-                    "testuser",
-                    "password123!"
-            );
-            mockMvc.perform(post("/api/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(request))
-                            .sessionAttr("USER_SESSION", testUserId))
-                    .andExpect(status().is(200))
-                    .andExpect(jsonPath("$.username").value("testuser"));
-        }
 
         @Test
         void test400NullBody() throws Exception {
@@ -252,7 +243,7 @@ public class UserControllerTests {
 
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .sessionAttr("USER_SESSION", testUserId))
+                            .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(200))
                     .andExpect(content().string("Logged out"))
                     .andExpect(request().sessionAttributeDoesNotExist("USER_SESSION"));
