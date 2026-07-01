@@ -1,6 +1,7 @@
 package finance.controllers;
 
 import finance.dtos.HoldingDTO;
+import finance.dtos.PageResponse;
 import finance.entities.User;
 import finance.services.HoldingService;
 import finance.session.SessionUser;
@@ -25,7 +26,7 @@ public class HoldingController {
     }
 
     @GetMapping(value = "/api/holdings")
-    ResponseEntity<Page<HoldingDTO>> fetchHoldings(HttpSession session, @PageableDefault(
+    ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session, @PageableDefault(
             size = 10
     ) Pageable pageable) {
         SessionUser sessionUser = authenticateUser(session);
@@ -37,6 +38,6 @@ public class HoldingController {
         );
 
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
-        return ResponseEntity.status(200).body(holdings);
+        return ResponseEntity.status(200).body(PageResponse.from(holdings));
     }
 }

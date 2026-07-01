@@ -280,7 +280,7 @@ public class TransactionControllerTests {
 
             Sort.Order order = captor.getValue()
                     .getSort()
-                    .getOrderFor("createdAt");
+                    .getOrderFor("id");
 
             assertThat(order).isNotNull();
             assertThat(order.getDirection())

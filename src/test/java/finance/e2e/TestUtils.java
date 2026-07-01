@@ -5,9 +5,8 @@ import finance.dtos.RegisterDTO;
 import finance.dtos.UserDTO;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Objects;
 
 public class TestUtils {
 
@@ -45,5 +44,17 @@ public class TestUtils {
                 entity,
                 UserDTO.class
         );
+    }
+
+    protected HttpHeaders authenticateHeaders() {
+        ResponseEntity<UserDTO> login = login();
+        String sessionCookie = Objects.requireNonNull(login.getHeaders()
+                        .getFirst(HttpHeaders.SET_COOKIE))
+                .split(";", 2)[0];
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.add(HttpHeaders.COOKIE, sessionCookie);
+        return headers;
     }
 }

@@ -48,6 +48,7 @@ public class TransactionServiceTests {
     TransactionRequestDTO appleTransactionSecondRequest = new TransactionRequestDTO("AAPL", 3L);
     TransactionRequestDTO microsoftTransactionSecond = new TransactionRequestDTO("MSFT", 8L);
     TransactionRequestDTO insufficientFundsTransaction = new TransactionRequestDTO("MSFT", 50L);
+    TransactionRequestDTO googleTransactionRequest = new TransactionRequestDTO("GOOG", 10L);
 
     @BeforeEach
     void setUp() {
@@ -210,11 +211,11 @@ public class TransactionServiceTests {
         class testBuy {
             @Test
             void testSuccessPartial() {
-                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, bananaTransactionRequest, invalidTransactionRequest);
+                List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest, bananaTransactionRequest, invalidTransactionRequest, googleTransactionRequest);
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
                 List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
-                assertEquals(3, transactions.size());
+                assertEquals(4, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest);
                 assertNull(transactions.get(0).error());
                 assertEquals(transactions.get(1).transaction(), bananaTransactionRequest);
@@ -223,6 +224,9 @@ public class TransactionServiceTests {
                 assertEquals(transactions.get(2).transaction(), invalidTransactionRequest);
                 assertEquals("BAD_REQUEST", transactions.get(2).error().code());
                 assertEquals("Transaction must be a positive number of shares", transactions.get(2).error().message());
+                assertEquals(transactions.get(3).transaction(), googleTransactionRequest);
+                assertEquals("INTERNAL_ERROR", transactions.get(3).error().code());
+                assertEquals("No price returned", transactions.get(3).error().message());
 
                 assertEquals(BigDecimal.valueOf(84), testUser.getBalance());
                 List<Holding> holdings = testUser.getHoldings();

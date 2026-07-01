@@ -12,7 +12,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,27 +25,19 @@ public class FundingFlowTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private TestUtils testUtils;
+    private HttpHeaders headers;
 
     @BeforeEach
     void setUp() {
-        testUtils = new TestUtils(restTemplate);
         jdbcTemplate.execute("DELETE FROM users");
+
+        TestUtils testUtils = new TestUtils(restTemplate);
+        testUtils.register();
+        headers = testUtils.authenticateHeaders();
     }
 
     @Test
     void depositAndWithdraw() {
-
-        testUtils.register();
-        ResponseEntity<UserDTO> login = testUtils.login();
-
-        String sessionCookie = Objects.requireNonNull(login.getHeaders()
-                        .getFirst(HttpHeaders.SET_COOKIE))
-                .split(";", 2)[0];
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.COOKIE, sessionCookie);
-        headers.setContentType(MediaType.APPLICATION_JSON);
 
         AmountDTO depositBody = new AmountDTO(BigDecimal.valueOf(50));
         ResponseEntity<UserDTO> depositResponse = restTemplate.exchange(

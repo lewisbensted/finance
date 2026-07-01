@@ -69,7 +69,7 @@ public class TransactionController {
     }
 
     @GetMapping(value = "/api/transactions")
-    ResponseEntity<Page<TransactionDTO>> fetchTransactions(HttpSession session, @RequestParam(defaultValue = "DESC") Sort.Direction direction, @PageableDefault(
+    ResponseEntity<PageResponse<TransactionDTO>> fetchTransactions(HttpSession session, @RequestParam(defaultValue = "DESC") Sort.Direction direction, @PageableDefault(
             size = 10
     ) Pageable pageable) {
         SessionUser sessionUser = authenticateUser(session);
@@ -77,11 +77,11 @@ public class TransactionController {
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(direction, "createdAt")
+                Sort.by(direction, "id")
         );
 
         Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(), safePageable);
-        return ResponseEntity.status(200).body(transactions);
+        return ResponseEntity.status(200).body(PageResponse.from(transactions));
     }
 
 

@@ -1,8 +1,5 @@
 package finance.e2e;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.dtos.*;
 import finance.entities.TransactionType;
 import finance.services.StockService;
@@ -13,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,7 +31,7 @@ public class TradingFlowTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private TestUtils testUtils;
+    private HttpHeaders headers;
 
     @MockBean
     private StockService stockService;
@@ -44,11 +39,13 @@ public class TradingFlowTest {
 
     @BeforeEach
     void setUp() {
-        testUtils = new TestUtils(restTemplate);
-
         jdbcTemplate.execute("DELETE FROM users");
         jdbcTemplate.execute("DELETE FROM holdings");
         jdbcTemplate.execute("DELETE FROM transactions");
+
+        TestUtils testUtils = new TestUtils(restTemplate);
+        testUtils.register();
+        headers = testUtils.authenticateHeaders();
 
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
@@ -60,17 +57,6 @@ public class TradingFlowTest {
 
     @Test
     void buyAndSell() {
-        testUtils.register();
-        ResponseEntity<UserDTO> login = testUtils.login();
-
-        String sessionCookie = Objects.requireNonNull(login.getHeaders()
-                        .getFirst(HttpHeaders.SET_COOKIE))
-                .split(";", 2)[0];
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.COOKIE, sessionCookie);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
         restTemplate.exchange(
                 "/api/deposit",
                 HttpMethod.POST,
@@ -129,7 +115,6 @@ public class TradingFlowTest {
         );
         assertNotNull(holdingsResponse.getBody());
         List<HoldingDTO> holdings = holdingsResponse.getBody().content();
-        System.out.println(holdingsResponse);
 
         assertEquals(3, holdings.size());
         assertEquals(new HoldingDTO("AAPL", "Apple", 1L), holdings.get(0));
