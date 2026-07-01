@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -22,21 +23,16 @@ public class FundingFlowTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     private TestUtils testUtils;
 
     @BeforeEach
     void setUp() {
         testUtils = new TestUtils(restTemplate);
-    }
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @BeforeEach
-    void cleanDb() {
         jdbcTemplate.execute("DELETE FROM users");
     }
-
 
     @Test
     void depositAndWithdraw() {
@@ -76,9 +72,8 @@ public class FundingFlowTest {
                 new HttpEntity<>(headers),
                 UserDTO.class
         );
-        //Assertions.assertNotNull(balanceResponse.getBody());
-        System.out.println("EXPECTED = " + BigDecimal.valueOf(30L));
-        System.out.println("ACTUAL   = " + balanceResponse.getBody().balance());
-        //assertEquals(1, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(30)));
+
+        assertNotNull(balanceResponse.getBody());
+        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(30)));
     }
 }

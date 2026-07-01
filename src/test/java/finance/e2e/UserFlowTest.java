@@ -18,21 +18,16 @@ public class UserFlowTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private TestUtils testUtils;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @BeforeEach
-    void cleanDb() {
-        jdbcTemplate.execute("DELETE FROM users");
-    }
+    private TestUtils testUtils;
 
     @BeforeEach
     void setUp() {
         testUtils = new TestUtils(restTemplate);
+        jdbcTemplate.execute("DELETE FROM users");
     }
-
 
     @Test
     void registerAndLogin() {

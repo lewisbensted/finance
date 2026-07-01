@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 public class TestUtils {
+
     private final TestRestTemplate restTemplate;
 
     public TestUtils(TestRestTemplate restTemplate) {

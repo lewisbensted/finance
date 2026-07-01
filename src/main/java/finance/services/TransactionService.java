@@ -109,8 +109,7 @@ public class TransactionService {
 
         for (TransactionRequestDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
-            if (fetch.error() != null) continue;
-
+            if (fetch == null || fetch.error() != null) continue;
             if (type == BUY) {
                 BigDecimal cost = BigDecimal.valueOf(transaction.quantity())
                         .multiply(fetch.stock().latestPrice());
@@ -124,6 +123,13 @@ public class TransactionService {
 
         for (TransactionRequestDTO transaction : transactions) {
             StockResultDTO fetch = prices.get(transaction.symbol());
+            if (fetch == null) {
+                results.add(new TransactionResultDTO(
+                        transaction,
+                        new ItemErrorDTO("INTERNAL_ERROR", "No price returned")
+                ));
+                continue;
+            }
             if (fetch.error() != null) {
                 results.add(new TransactionResultDTO(transaction, fetch.error()));
                 continue;
@@ -132,7 +138,6 @@ public class TransactionService {
             try {
                 if (type == BUY) {
                     buy(user, stock, transaction.quantity());
-
                 } else
                     sell(user, stock, transaction.quantity());
                 results.add(new TransactionResultDTO(transaction, null));

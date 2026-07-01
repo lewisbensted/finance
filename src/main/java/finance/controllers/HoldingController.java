@@ -33,7 +33,7 @@ public class HoldingController {
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.ASC, "symbol")
+                Sort.by(Sort.Direction.ASC, "id.symbol")
         );
 
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
