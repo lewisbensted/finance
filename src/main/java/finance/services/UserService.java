@@ -1,6 +1,7 @@
 package finance.services;
 
 import finance.entities.User;
+import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
 import finance.exceptions.AuthorisationException;
 import finance.repositories.UserRepository;
@@ -37,5 +38,15 @@ public class UserService {
         if (!compare(password, user.getPasswordHash()))
             throw new AuthorisationException("Invalid username or password");
         return user;
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String password, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        if (!compare(password, user.getPasswordHash()))
+            throw new AuthorisationException("Incorrect password");
+        user.changePassword(newPassword);
+        userRepository.save(user);
     }
 }

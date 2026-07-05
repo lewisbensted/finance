@@ -19,7 +19,7 @@ public class AccountService {
     @Transactional
     public User deposit(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found."));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         user.deposit(amount);
         return userRepository.save(user);
     }
@@ -27,7 +27,7 @@ public class AccountService {
     @Transactional
     public User withdraw(Long userId, BigDecimal amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found."));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         user.withdraw(amount);
         return userRepository.save(user);
     }
@@ -35,6 +35,6 @@ public class AccountService {
 
     public User getBalance(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User not found."));
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

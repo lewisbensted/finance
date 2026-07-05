@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static finance.services.PasswordService.hash;
+
 @Entity
 @Table(name = "users")
 public class User {
@@ -133,5 +135,9 @@ public class User {
 
     public Long getId() {
         return this.id;
+    }
+
+    public void changePassword(String newPassword) {
+        this.passwordHash = hash(newPassword);
     }
 }

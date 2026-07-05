@@ -155,7 +155,7 @@ public class TransactionService {
 
     public Page<TransactionDTO> fetchTransactions(Long userId, Pageable pageable) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         Page<Transaction> transactions = transactionRepository.findByUserId(userId, pageable);
         return transactions.map(Transaction::toDTO);
     }

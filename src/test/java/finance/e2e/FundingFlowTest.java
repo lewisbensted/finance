@@ -32,8 +32,8 @@ public class FundingFlowTest {
         jdbcTemplate.execute("DELETE FROM users");
 
         TestUtils testUtils = new TestUtils(restTemplate);
-        testUtils.register();
-        headers = testUtils.authenticateHeaders();
+        testUtils.register(testUtils.newUser);
+        headers = testUtils.authenticateHeaders(testUtils.login(testUtils.loginUser));
     }
 
     @Test

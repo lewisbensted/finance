@@ -40,7 +40,7 @@ public class HoldingServiceTests {
     void testUserNotFound() {
         when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> holdingService.fetchHoldings(1L, PageRequest.of(0, 10)));
-        assertEquals("User not found.", exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
         verifyNoInteractions(mockHoldingRepo);
     }
 

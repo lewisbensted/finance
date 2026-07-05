@@ -22,7 +22,7 @@ public class HoldingService {
 
     public Page<HoldingDTO> fetchHoldings(Long userId, Pageable pageable) {
         userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         Page<Holding> holdings = holdingRepository.findByIdUserId(userId, pageable);
         return holdings.map(Holding::toDTO);
     }

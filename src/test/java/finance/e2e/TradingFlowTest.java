@@ -44,8 +44,8 @@ public class TradingFlowTest {
         jdbcTemplate.execute("DELETE FROM transactions");
 
         TestUtils testUtils = new TestUtils(restTemplate);
-        testUtils.register();
-        headers = testUtils.authenticateHeaders();
+        testUtils.register(testUtils.newUser);
+        headers = testUtils.authenticateHeaders(testUtils.login(testUtils.loginUser));
 
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(

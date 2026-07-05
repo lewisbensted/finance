@@ -24,7 +24,7 @@ public record RegisterDTO(@NotBlank(message = "Username is required")
                           )
                           String lastName,
 
-                          @NotBlank(message = "Password is required.")
+                          @NotBlank(message = "Password is required")
                           @Pattern(
                                   regexp = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[$&+,:;=?@#|'<>.^*()%!\\-/])\\S+$",
                                   message = "Password must contain a number, letter and special character, without spaces"

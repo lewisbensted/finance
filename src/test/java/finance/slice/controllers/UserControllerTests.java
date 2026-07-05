@@ -3,6 +3,7 @@ package finance.slice.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.controllers.UserController;
 import finance.dtos.LoginDTO;
+import finance.dtos.PasswordDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
 import finance.exceptions.AuthorisationException;
@@ -19,10 +20,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -255,6 +258,77 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(200))
                     .andExpect(content().string("Logged out"));
+        }
+    }
+
+    @Nested
+    class PasswordControllerTests {
+        PasswordDTO newTestPassword = new PasswordDTO("password", "newpassword123!");
+
+        @Test
+        void test400BadJson() throws Exception {
+            String badJson = """
+                    {
+                        "password": "password",
+                        "newPassword": "newpassword",
+                    }
+                    """;
+            mockMvc.perform(put("/api/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testSessionUser)
+                            .content(badJson))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
+        }
+
+        @Test
+        void test401Unauthorised() throws Exception {
+            mockMvc.perform(put("/api/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(newTestPassword)))
+                    .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.message").value("Not logged in"));
+        }
+
+        @Test
+        void test400ChangePasswordFails() throws Exception {
+            doThrow(new AuthorisationException("Incorrect password"))
+                    .when(userService)
+                    .changePassword(anyLong(), any(), any());
+            mockMvc.perform(put("/api/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testSessionUser)
+                            .content(objectMapper.writeValueAsString(newTestPassword)))
+                    .andExpect(status().is(401))
+                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.message").value("Incorrect password"));
+        }
+
+        //
+        @Test
+        void test400Invalid() throws Exception {
+            mockMvc.perform(put("/api/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testSessionUser)
+                            .content(objectMapper.writeValueAsString(new PasswordDTO("", "newpassword123"))))
+                    .andExpect(status().is(400))
+                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.message").value("Validation error(s)"))
+                    .andExpect(jsonPath("$.fields.password").value("Password is required"))
+                    .andExpect(jsonPath("$.fields.newPassword").value("New password must contain a number, letter and special character, without spaces"));
+        }
+
+        @Test
+        void test200Success() throws Exception {
+            doNothing().when(userService).changePassword(anyLong(), any(), any());
+            mockMvc.perform(put("/api/password")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testSessionUser)
+                            .content(objectMapper.writeValueAsString(newTestPassword)))
+                    .andExpect(status().is(200))
+                    .andExpect(content().string("Password updated"));
         }
     }
 }

@@ -1,9 +1,6 @@
 package finance.controllers;
 
-import finance.dtos.ErrorDTO;
-import finance.dtos.LoginDTO;
-import finance.dtos.RegisterDTO;
-import finance.dtos.UserDTO;
+import finance.dtos.*;
 import finance.entities.User;
 import finance.exceptions.*;
 import finance.services.UserService;
@@ -12,6 +9,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static finance.controllers.AuthUtils.authenticateUser;
 
 
 @RestController
@@ -46,6 +45,13 @@ public class UserController {
     public ResponseEntity<String> logout(HttpSession session) {
         session.removeAttribute("USER_SESSION");
         return ResponseEntity.status(200).body("Logged out");
+    }
+
+    @PutMapping(value = "/api/password")
+    public ResponseEntity<String> changePassword(HttpSession session, @RequestBody @Valid PasswordDTO body) {
+        SessionUser sessionUser = authenticateUser(session);
+        userService.changePassword(sessionUser.id(), body.password(), body.newPassword());
+        return ResponseEntity.status(200).body("Password updated");
     }
 
     @ExceptionHandler(RegistrationException.class)

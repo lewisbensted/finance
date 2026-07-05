@@ -44,7 +44,7 @@ public class FundingServiceTests {
                     .thenReturn(Optional.empty());
             NotFoundException exception = assertThrows(NotFoundException.class,
                     () -> accountService.deposit(1L, BigDecimal.valueOf(50)));
-            assertEquals("User not found.", exception.getMessage());
+            assertEquals("User not found", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
         }
@@ -78,7 +78,7 @@ public class FundingServiceTests {
                     .thenReturn(Optional.empty());
             NotFoundException exception = assertThrows(NotFoundException.class,
                     () -> accountService.withdraw(1L, BigDecimal.valueOf(50)));
-            assertEquals("User not found.", exception.getMessage());
+            assertEquals("User not found", exception.getMessage());
             verify(mockUserRepo).findById(any());
             verify(mockUserRepo, never()).save(any());
         }

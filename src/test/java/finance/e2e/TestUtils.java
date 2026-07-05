@@ -9,6 +9,8 @@ import org.springframework.http.*;
 import java.util.Objects;
 
 public class TestUtils {
+    protected RegisterDTO newUser = new RegisterDTO("testuser", "testuser@test.com", "test", "user", "password123!", "password123!");
+    protected LoginDTO loginUser = new LoginDTO("testuser", "password123!");
 
     private final TestRestTemplate restTemplate;
 
@@ -16,8 +18,7 @@ public class TestUtils {
         this.restTemplate = restTemplate;
     }
 
-    protected ResponseEntity<UserDTO> register() {
-        RegisterDTO registerBody = new RegisterDTO("testuser", "testuser@test.com", "test", "user", "password123!", "password123!");
+    protected ResponseEntity<UserDTO> register(RegisterDTO registerBody) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -31,8 +32,7 @@ public class TestUtils {
         );
     }
 
-    protected ResponseEntity<UserDTO> login() {
-        LoginDTO loginBody = new LoginDTO("testuser", "password123!");
+    protected ResponseEntity<UserDTO> login(LoginDTO loginBody) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -46,9 +46,8 @@ public class TestUtils {
         );
     }
 
-    protected HttpHeaders authenticateHeaders() {
-        ResponseEntity<UserDTO> login = login();
-        String sessionCookie = Objects.requireNonNull(login.getHeaders()
+    protected HttpHeaders authenticateHeaders(ResponseEntity<UserDTO> loginResponse) {
+        String sessionCookie = Objects.requireNonNull(loginResponse.getHeaders()
                         .getFirst(HttpHeaders.SET_COOKIE))
                 .split(";", 2)[0];
 

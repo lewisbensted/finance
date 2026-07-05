@@ -2,6 +2,7 @@ package finance.unit.services;
 
 import finance.entities.User;
 import finance.exceptions.AuthorisationException;
+import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
 import finance.repositories.UserRepository;
 
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static finance.services.PasswordService.compare;
 import static finance.services.PasswordService.hash;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,6 +122,38 @@ public class UserServiceTests {
             AuthorisationException exception = assertThrows(AuthorisationException.class,
                     () -> userService.login("existinguser", "pasword"));
             assertEquals("Invalid username or password", exception.getMessage());
+        }
+    }
+
+    @Nested
+    class changePasswordTests {
+        @Test
+        void testSuccess() {
+            when(mockUserRepo.findById(any()))
+                    .thenReturn(Optional.of(existingUser));
+            userService.changePassword(1L, "password", "newpassword");
+            verify(mockUserRepo).save(any());
+            assertTrue(compare("newpassword", existingUser.getPasswordHash()));
+        }
+
+        @Test
+        void testUserNotFound() {
+            when(mockUserRepo.findById(any()))
+                    .thenReturn(Optional.empty());
+            NotFoundException exception = assertThrows(NotFoundException.class,
+                    () -> userService.changePassword(1L, "password", "newpassword"));
+            assertEquals("User not found", exception.getMessage());
+            verify(mockUserRepo, never()).save(any());
+        }
+
+        @Test
+        void testCompareFails() {
+            when(mockUserRepo.findById(any()))
+                    .thenReturn(Optional.of(existingUser));
+            AuthorisationException exception = assertThrows(AuthorisationException.class,
+                    () -> userService.changePassword(1L, "pass word", "newpassword"));
+            assertEquals("Incorrect password", exception.getMessage());
+            verify(mockUserRepo, never()).save(any());
         }
     }
 }
