@@ -64,7 +64,7 @@ public class UserControllerTests {
                     "password123!",
                     "password123!"
             );
-            when(userService.register(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(testUser);
+            when(userService.register(any())).thenReturn(testUser);
 
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -112,7 +112,7 @@ public class UserControllerTests {
                     .andExpect(jsonPath("$.fields.username").value("Username must be between 3 and 20 characters"))
                     .andExpect(jsonPath("$.fields.email").value("Invalid email address"))
                     .andExpect(jsonPath("$.fields.password").value("Password must contain a number, letter and special character, without spaces"))
-                    .andExpect(jsonPath("$.fields.confirmPassword").value("Password confirmation is required"));
+                    .andExpect(jsonPath("$.fields.passwordRepeat").value("Password confirmation is required"));
         }
 
         @Test
@@ -134,7 +134,7 @@ public class UserControllerTests {
                     "password123!",
                     "password123!"
             );
-            when(userService.register(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenThrow(new RegistrationException("User taken"));
+            when(userService.register(any())).thenThrow(new RegistrationException("User taken"));
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -169,7 +169,7 @@ public class UserControllerTests {
                     "testuser",
                     "password123!"
             );
-            when(userService.login(anyString(), anyString())).thenReturn(testUser);
+            when(userService.login(any())).thenReturn(testUser);
 
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -210,7 +210,7 @@ public class UserControllerTests {
                     "testuser",
                     "password123!"
             );
-            when(userService.login(anyString(), anyString())).thenThrow(new AuthorisationException("Invalid username"));
+            when(userService.login(any())).thenThrow(new AuthorisationException("Invalid username"));
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
@@ -242,7 +242,7 @@ public class UserControllerTests {
         @Test
         void test200Success() throws Exception {
 
-            when(userService.login(anyString(), anyString())).thenReturn(testUser);
+            when(userService.login(any())).thenReturn(testUser);
 
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -296,7 +296,7 @@ public class UserControllerTests {
         void test400ChangePasswordFails() throws Exception {
             doThrow(new AuthorisationException("Incorrect password"))
                     .when(userService)
-                    .changePassword(anyLong(), any(), any());
+                    .changePassword(anyLong(), any());
             mockMvc.perform(put("/api/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
@@ -306,7 +306,6 @@ public class UserControllerTests {
                     .andExpect(jsonPath("$.message").value("Incorrect password"));
         }
 
-        //
         @Test
         void test400Invalid() throws Exception {
             mockMvc.perform(put("/api/password")
@@ -322,7 +321,7 @@ public class UserControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            doNothing().when(userService).changePassword(anyLong(), any(), any());
+            doNothing().when(userService).changePassword(anyLong(), any());
             mockMvc.perform(put("/api/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)

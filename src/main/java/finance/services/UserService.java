@@ -1,5 +1,8 @@
 package finance.services;
 
+import finance.dtos.LoginDTO;
+import finance.dtos.PasswordDTO;
+import finance.dtos.RegisterDTO;
 import finance.entities.User;
 import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
@@ -20,33 +23,33 @@ public class UserService {
     }
 
     @Transactional
-    public User register(String username, String email, String firstName, String lastName, String password, String passwordRepeat) {
-        userRepository.findByEmail(email).ifPresent(e -> {
+    public User register(RegisterDTO dto) {
+        userRepository.findByEmail(dto.email()).ifPresent(e -> {
             throw new RegistrationException("Email address already taken");
         });
-        userRepository.findByUsername(username).ifPresent(e -> {
+        userRepository.findByUsername(dto.username()).ifPresent(e -> {
             throw new RegistrationException("Username already taken");
         });
-        if (!password.equals(passwordRepeat)) throw new RegistrationException("Passwords do not match");
-        User newUser = new User(username, email, firstName, lastName, hash(password));
+        if (!dto.password().equals(dto.passwordRepeat())) throw new RegistrationException("Passwords do not match");
+        User newUser = new User(dto.username(), dto.email(), dto.firstName(), dto.lastName(), hash(dto.password()));
         return userRepository.save(newUser);
     }
 
     @Transactional
-    public User login(String username, String password) {
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new AuthorisationException("Invalid username or password"));
-        if (!compare(password, user.getPasswordHash()))
+    public User login(LoginDTO dto) {
+        User user = userRepository.findByUsername(dto.username()).orElseThrow(() -> new AuthorisationException("Invalid username or password"));
+        if (!compare(dto.password(), user.getPasswordHash()))
             throw new AuthorisationException("Invalid username or password");
         return user;
     }
 
     @Transactional
-    public void changePassword(Long userId, String password, String newPassword) {
+    public void changePassword(Long userId, PasswordDTO dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        if (!compare(password, user.getPasswordHash()))
+        if (!compare(dto.password(), user.getPasswordHash()))
             throw new AuthorisationException("Incorrect password");
-        user.changePassword(newPassword);
+        user.changePassword(dto.newPassword());
         userRepository.save(user);
     }
 }

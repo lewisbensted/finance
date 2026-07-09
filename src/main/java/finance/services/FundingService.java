@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
-public class AccountService {
+public class FundingService {
     private final UserRepository userRepository;
 
-    public AccountService(UserRepository userRepository) {
+    public FundingService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -31,7 +31,6 @@ public class AccountService {
         user.withdraw(amount);
         return userRepository.save(user);
     }
-
 
     public User getBalance(Long userId) {
         return userRepository.findById(userId)

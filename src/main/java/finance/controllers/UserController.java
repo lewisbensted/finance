@@ -22,18 +22,18 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid RegisterDTO user, HttpSession session) {
+    public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid RegisterDTO body, HttpSession session) {
         if (session.getAttribute("USER_SESSION") != null)
             throw new ForbiddenException("Cannot register while logged in");
-        User newUser = userService.register(user.username(), user.email(), user.firstName(), user.lastName(), user.password(), user.confirmPassword());
+        User newUser = userService.register(body);
         return ResponseEntity.status(201).body(new UserDTO(newUser));
     }
 
     @PostMapping(value = "/api/login")
-    public ResponseEntity<UserDTO> login(@RequestBody @Valid LoginDTO loginBody, HttpSession session) {
+    public ResponseEntity<UserDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
         if (session.getAttribute("USER_SESSION") != null) throw new ForbiddenException("Already logged in");
 
-        User user = userService.login(loginBody.username(), loginBody.password());
+        User user = userService.login(body);
         session.setAttribute("USER_SESSION", new SessionUser(
                 user.getId(),
                 user.getUsername()
@@ -50,7 +50,7 @@ public class UserController {
     @PutMapping(value = "/api/password")
     public ResponseEntity<String> changePassword(HttpSession session, @RequestBody @Valid PasswordDTO body) {
         SessionUser sessionUser = authenticateUser(session);
-        userService.changePassword(sessionUser.id(), body.password(), body.newPassword());
+        userService.changePassword(sessionUser.id(), body);
         return ResponseEntity.status(200).body("Password updated");
     }
 

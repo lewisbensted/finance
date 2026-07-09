@@ -51,4 +51,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorDTO> handleIllegalArgument(IllegalArgumentException ex) {
         return ResponseEntity.status(400).body(new ErrorDTO("BAD_REQUEST", ex.getMessage()));
     }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
+        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
+    }
+
+    @ExceptionHandler(InsufficientSharesException.class)
+    public ResponseEntity<ErrorDTO> handleInsufficientSharesException(InsufficientSharesException ex) {
+        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
+    }
 }

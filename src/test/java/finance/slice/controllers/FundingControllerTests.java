@@ -4,7 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.controllers.FundingController;
 import finance.dtos.AmountDTO;
 import finance.entities.User;
-import finance.services.AccountService;
+import finance.exceptions.InsufficientFundsException;
+import finance.services.FundingService;
 import finance.session.SessionUser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,7 +33,7 @@ public class FundingControllerTests {
     private MockMvc mockMvc;
 
     @MockBean
-    private AccountService accountService;
+    private FundingService accountService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -130,15 +131,15 @@ public class FundingControllerTests {
 
         @Test
         void test400WithdrawFails() throws Exception {
-            doThrow(new IllegalArgumentException("Insufficient funds"))
+            doThrow(new InsufficientFundsException("Insufficient funds"))
                     .when(accountService)
                     .withdraw(any(), any());
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(status().is(422))
+                    .andExpect(jsonPath("$.code").value("UNPROCESSABLE"))
                     .andExpect(jsonPath("$.message").value("Insufficient funds"));
         }
 

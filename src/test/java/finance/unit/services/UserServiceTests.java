@@ -1,5 +1,8 @@
 package finance.unit.services;
 
+import finance.dtos.LoginDTO;
+import finance.dtos.PasswordDTO;
+import finance.dtos.RegisterDTO;
 import finance.entities.User;
 import finance.exceptions.AuthorisationException;
 import finance.exceptions.NotFoundException;
@@ -48,7 +51,7 @@ public class UserServiceTests {
                     .thenReturn(Optional.empty());
             when(mockUserRepo.save(any(User.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            User newUser = userService.register("testuser", "testuser@test.com", "test", "user", "testpassword", "testpassword");
+            User newUser = userService.register(new RegisterDTO("testuser", "testuser@test.com", "test", "user", "testpassword", "testpassword"));
             assertNotNull(newUser);
             assertEquals("testuser", newUser.getUsername());
             assertEquals("testuser@test.com", newUser.getEmail());
@@ -65,7 +68,7 @@ public class UserServiceTests {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.empty());
             RegistrationException exception = assertThrows(RegistrationException.class,
-                    () -> userService.register("testuser", "existinguser@test.com", "test", "user", "testpassword", "testpassword"));
+                    () -> userService.register(new RegisterDTO("testuser", "existinguser@test.com", "test", "user", "testpassword", "testpassword")));
             assertEquals("Email address already taken", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
         }
@@ -78,7 +81,7 @@ public class UserServiceTests {
                     .thenReturn(Optional.of(existingUser));
 
             RegistrationException exception = assertThrows(RegistrationException.class,
-                    () -> userService.register("existinguser", "testuser@test.com", "test", "user", "testpassword", "testpassword"));
+                    () -> userService.register(new RegisterDTO("existinguser", "testuser@test.com", "test", "user", "testpassword", "testpassword")));
             assertEquals("Username already taken", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
         }
@@ -90,7 +93,7 @@ public class UserServiceTests {
             when(mockUserRepo.findByEmail(anyString()))
                     .thenReturn(Optional.empty());
             RegistrationException exception = assertThrows(RegistrationException.class,
-                    () -> userService.register("existinguser", "testuser@test.com", "test", "user", "testpassword", "testpasword"));
+                    () -> userService.register(new RegisterDTO("existinguser", "testuser@test.com", "test", "user", "testpassword", "testpasword")));
             assertEquals("Passwords do not match", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
         }
@@ -102,7 +105,7 @@ public class UserServiceTests {
         void testSuccess() {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.of(existingUser));
-            User loggedInUser = userService.login("existinguser", "password");
+            User loggedInUser = userService.login(new LoginDTO("existinguser", "password"));
             assertEquals(loggedInUser, existingUser);
         }
 
@@ -111,7 +114,7 @@ public class UserServiceTests {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.empty());
             AuthorisationException exception = assertThrows(AuthorisationException.class,
-                    () -> userService.login("testuser", "password"));
+                    () -> userService.login(new LoginDTO("testuser", "password")));
             assertEquals("Invalid username or password", exception.getMessage());
         }
 
@@ -120,7 +123,7 @@ public class UserServiceTests {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.of(existingUser));
             AuthorisationException exception = assertThrows(AuthorisationException.class,
-                    () -> userService.login("existinguser", "pasword"));
+                    () -> userService.login(new LoginDTO("existinguser", "pasword")));
             assertEquals("Invalid username or password", exception.getMessage());
         }
     }
@@ -131,7 +134,7 @@ public class UserServiceTests {
         void testSuccess() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(existingUser));
-            userService.changePassword(1L, "password", "newpassword");
+            userService.changePassword(1L, new PasswordDTO("password", "newpassword"));
             verify(mockUserRepo).save(any());
             assertTrue(compare("newpassword", existingUser.getPasswordHash()));
         }
@@ -141,7 +144,7 @@ public class UserServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.empty());
             NotFoundException exception = assertThrows(NotFoundException.class,
-                    () -> userService.changePassword(1L, "password", "newpassword"));
+                    () -> userService.changePassword(1L, new PasswordDTO("password", "newpassword")));
             assertEquals("User not found", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
         }
@@ -151,7 +154,7 @@ public class UserServiceTests {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(existingUser));
             AuthorisationException exception = assertThrows(AuthorisationException.class,
-                    () -> userService.changePassword(1L, "pass word", "newpassword"));
+                    () -> userService.changePassword(1L, new PasswordDTO("pass word", "newpassword")));
             assertEquals("Incorrect password", exception.getMessage());
             verify(mockUserRepo, never()).save(any());
         }

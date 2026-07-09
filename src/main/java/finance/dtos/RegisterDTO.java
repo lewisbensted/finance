@@ -33,5 +33,5 @@ public record RegisterDTO(@NotBlank(message = "Username is required")
                           String password,
 
                           @NotBlank(message = "Password confirmation is required")
-                          String confirmPassword) {
+                          String passwordRepeat) {
 }

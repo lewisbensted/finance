@@ -3,7 +3,7 @@ package finance.unit.services;
 import finance.entities.User;
 import finance.exceptions.NotFoundException;
 import finance.repositories.UserRepository;
-import finance.services.AccountService;
+import finance.services.FundingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,14 +16,14 @@ import static org.mockito.Mockito.*;
 
 public class FundingServiceTests {
 
-    private AccountService accountService;
+    private FundingService accountService;
     private UserRepository mockUserRepo;
     private User testUser;
 
     @BeforeEach
     void setUp() {
         mockUserRepo = mock(UserRepository.class);
-        accountService = new AccountService(mockUserRepo);
+        accountService = new FundingService(mockUserRepo);
         testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
     }
 

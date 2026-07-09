@@ -83,15 +83,4 @@ public class TransactionController {
         Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(), safePageable);
         return ResponseEntity.status(200).body(PageResponse.from(transactions));
     }
-
-
-    @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
-        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
-    }
-
-    @ExceptionHandler(InsufficientSharesException.class)
-    public ResponseEntity<ErrorDTO> handleInsufficientSharesException(InsufficientSharesException ex) {
-        return ResponseEntity.status(422).body(new ErrorDTO("UNPROCESSABLE", ex.getMessage()));
-    }
 }
