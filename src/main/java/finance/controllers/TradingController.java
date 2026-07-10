@@ -1,10 +1,7 @@
 package finance.controllers;
 
 import finance.dtos.*;
-import finance.entities.User;
-import finance.exceptions.InsufficientFundsException;
-import finance.exceptions.InsufficientSharesException;
-import finance.services.TransactionService;
+import finance.services.TradingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.data.domain.Page;
@@ -25,10 +22,10 @@ import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 
 @RestController
-public class TransactionController {
-    TransactionService transactionService;
+public class TradingController {
+    TradingService transactionService;
 
-    TransactionController(TransactionService transactionService) {
+    TradingController(TradingService transactionService) {
         this.transactionService = transactionService;
     }
 

@@ -1,13 +1,9 @@
 package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import finance.controllers.TransactionController;
-import finance.dtos.ItemErrorDTO;
-import finance.dtos.TransactionDTO;
-import finance.dtos.TransactionRequestDTO;
-import finance.dtos.TransactionResultDTO;
-import finance.entities.User;
-import finance.services.TransactionService;
+import finance.controllers.TradingController;
+import finance.dtos.*;
+import finance.services.TradingService;
 import finance.session.SessionUser;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Nested;
@@ -27,7 +23,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static finance.dtos.ItemErrorCode.*;
 import static finance.entities.TransactionType.BUY;
+import static finance.fixtures.TradingFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,38 +37,37 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TransactionController.class)
+@WebMvcTest(TradingController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class TransactionControllerTests {
+public class TradingControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private TransactionService transactionService;
+    private TradingService transactionService;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     SessionUser testSessionUser = new SessionUser(1L, "testuser");
 
-    TransactionRequestDTO appleTransactionRequest = new TransactionRequestDTO("AAPL", 5L);
-    TransactionRequestDTO microsoftTransactionRequest = new TransactionRequestDTO("MSFT", 10L);
-    TransactionRequestDTO bananaTransactionRequest = new TransactionRequestDTO("BANANA", 10L);
-    TransactionRequestDTO invalidTransactionRequest = new TransactionRequestDTO("ORCL", -5L);
-
     List<TransactionRequestDTO> requestSuccess = List.of(
-            appleTransactionRequest, microsoftTransactionRequest
+            appleTransactionRequest(5L), microsoftTransactionRequest(10L)
     );
 
     List<TransactionRequestDTO> requestPartial = List.of(
-            appleTransactionRequest, microsoftTransactionRequest, bananaTransactionRequest, invalidTransactionRequest
+            appleTransactionRequest(5L), microsoftTransactionRequest(10L), bananaTransactionRequest(10L), oracleTransactionRequest(-5L)
     );
 
     List<TransactionRequestDTO> requestFailure = List.of(
-            bananaTransactionRequest, invalidTransactionRequest
+            bananaTransactionRequest(10L), oracleTransactionRequest(-5L)
     );
 
+    TransactionResultDTO appleTransactionResult = new TransactionResultDTO(appleTransactionRequest(5L), null);
+    TransactionResultDTO microsoftTransactionResult = new TransactionResultDTO(microsoftTransactionRequest(10L), null);
+    TransactionResultDTO bananaTransactionResult = new TransactionResultDTO(bananaTransactionRequest(10L), new ItemErrorDTO(NOT_FOUND, "Stock symbol not found"));
+    TransactionResultDTO oracleTransactionResult = new TransactionResultDTO(oracleTransactionRequest(-5L), new ItemErrorDTO(INVALID_INPUT, "Invalid quantity"));
 
     @Nested
     class BuyTests {
@@ -97,10 +94,7 @@ public class TransactionControllerTests {
         @Test
         void test422AllFailed() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
-                            new TransactionResultDTO(bananaTransactionRequest, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
-                    ));
+                    .thenReturn(List.of(bananaTransactionResult, oracleTransactionResult));
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
@@ -113,7 +107,7 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.error.fields.BANANA.message")
                             .value("Stock symbol not found"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("BAD_REQUEST"))
+                            .value("INVALID_INPUT"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -121,13 +115,7 @@ public class TransactionControllerTests {
         @Test
         void test200PartialFailure() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
-                            new TransactionResultDTO(appleTransactionRequest, null),
-                            new TransactionResultDTO(microsoftTransactionRequest, null),
-                            new TransactionResultDTO(bananaTransactionRequest, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
-                    ));
-
+                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult, bananaTransactionResult, oracleTransactionResult));
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
@@ -143,7 +131,7 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.error.fields.BANANA.message")
                             .value("Stock symbol not found"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("BAD_REQUEST"))
+                            .value("INVALID_INPUT"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -151,10 +139,7 @@ public class TransactionControllerTests {
         @Test
         void test200Success() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
-                            new TransactionResultDTO(appleTransactionRequest, null),
-                            new TransactionResultDTO(microsoftTransactionRequest, null)
-                    ));
+                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult));
 
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -193,8 +178,8 @@ public class TransactionControllerTests {
         void test422AllFailed() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
                     .thenReturn(List.of(
-                            new TransactionResultDTO(appleTransactionRequest, new ItemErrorDTO("UNPROCESSABLE", "Insufficient shares")),
-                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
+                            new TransactionResultDTO(appleTransactionRequest(5L), new ItemErrorDTO(INSUFFICIENT_SHARES, "Insufficient shares")),
+                            oracleTransactionResult
                     ));
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -204,11 +189,11 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
                     .andExpect(jsonPath("$.error.fields.AAPL.code")
-                            .value("UNPROCESSABLE"))
+                            .value("INSUFFICIENT_SHARES"))
                     .andExpect(jsonPath("$.error.fields.AAPL.message")
                             .value("Insufficient shares"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("BAD_REQUEST"))
+                            .value("INVALID_INPUT"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -216,11 +201,7 @@ public class TransactionControllerTests {
         @Test
         void test200PartialFailure() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
-                            new TransactionResultDTO(appleTransactionRequest, null),
-                            new TransactionResultDTO(microsoftTransactionRequest, null),
-                            new TransactionResultDTO(invalidTransactionRequest, new ItemErrorDTO("BAD_REQUEST", "Invalid quantity"))
-                    ));
+                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult, oracleTransactionResult));
 
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -233,7 +214,7 @@ public class TransactionControllerTests {
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("BAD_REQUEST"))
+                            .value("INVALID_INPUT"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -241,10 +222,7 @@ public class TransactionControllerTests {
         @Test
         void test200Success() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
-                            new TransactionResultDTO(appleTransactionRequest, null),
-                            new TransactionResultDTO(microsoftTransactionRequest, null)
-                    ));
+                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult));
 
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)

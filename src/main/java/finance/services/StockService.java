@@ -1,5 +1,6 @@
 package finance.services;
 
+import finance.dtos.ItemErrorCode;
 import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
@@ -11,6 +12,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+
+import static finance.dtos.ItemErrorCode.INTERNAL_ERROR;
+import static finance.dtos.ItemErrorCode.NOT_FOUND;
 
 @Service
 public class StockService {
@@ -45,12 +49,12 @@ public class StockService {
             return new StockResultDTO(response.getBody(), null);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-                return new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found"));
+                return new StockResultDTO(null, new ItemErrorDTO(NOT_FOUND, "Stock symbol not found"));
             } else {
-                return new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error"));
+                return new StockResultDTO(null, new ItemErrorDTO(INTERNAL_ERROR, "Unexpected error"));
             }
         } catch (Exception e) {
-            return new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error"));
+            return new StockResultDTO(null, new ItemErrorDTO(INTERNAL_ERROR, "Unexpected error"));
         }
     }
 }

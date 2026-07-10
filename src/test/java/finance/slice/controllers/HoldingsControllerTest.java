@@ -1,8 +1,6 @@
 package finance.slice.controllers;
 
 import finance.controllers.HoldingController;
-import finance.dtos.HoldingDTO;
-import finance.entities.User;
 import finance.services.HoldingService;
 import finance.session.SessionUser;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static finance.fixtures.HoldingFixtures.appleHolding;
+import static finance.fixtures.HoldingFixtures.microsoftHolding;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -37,9 +37,7 @@ public class HoldingsControllerTest {
 
     @Test
     void test200Success() throws Exception {
-        HoldingDTO appleHolding = new HoldingDTO("AAPL", "Apple", 40L);
-        HoldingDTO microsoftHolding = new HoldingDTO("MSFT", "Microsoft", 50L);
-        when(holdingService.fetchHoldings(any(), any())).thenReturn(new PageImpl<>(List.of(appleHolding, microsoftHolding)));
+        when(holdingService.fetchHoldings(any(), any())).thenReturn(new PageImpl<>(List.of(appleHolding(40L), microsoftHolding(50L))));
 
         mockMvc.perform(get("/api/holdings")
                         .contentType(MediaType.APPLICATION_JSON)

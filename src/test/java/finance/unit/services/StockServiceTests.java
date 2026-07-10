@@ -1,6 +1,5 @@
 package finance.unit.services;
 
-import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
 import finance.services.StockService;
@@ -14,10 +13,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
-import static finance.StockFixtures.APPLE_STOCK;
+import static finance.fixtures.StockFixtures.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -40,22 +38,22 @@ public class StockServiceTests {
     class FetchPriceTests {
         @Test
         void testSuccess() {
-            assertEquals(new StockResultDTO(APPLE_STOCK, null), stockService.fetchPrice("AAPL"));
+            assertEquals(APPLE_STOCK_RESULT, stockService.fetchPrice("AAPL"));
         }
 
         @Test
         void testBadReq() {
-            assertEquals(new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")), stockService.fetchPrice("BANANA"));
+            assertEquals(BANANA_STOCK_RESULT, stockService.fetchPrice("BANANA"));
         }
 
         @Test
         void testServerError() {
-            assertEquals(new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")), stockService.fetchPrice("MSFT"));
+            assertEquals(ERROR_STOCK_RESULT, stockService.fetchPrice("MSFT"));
         }
 
         @Test
         void testOtherError() {
-            assertEquals(new StockResultDTO(null, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")), stockService.fetchPrice("ORCL"));
+            assertEquals(ERROR_STOCK_RESULT, stockService.fetchPrice("ORCL"));
         }
     }
 

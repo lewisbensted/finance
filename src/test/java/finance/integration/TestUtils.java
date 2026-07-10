@@ -11,7 +11,6 @@ import org.springframework.test.web.client.MockRestServiceServer;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -32,13 +31,13 @@ public class TestUtils {
         this.restTemplate = restTemplate;
     }
 
-    protected ResponseEntity<UserDTO> register(RegisterDTO registerBody) {
+    protected void register(RegisterDTO registerBody) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<RegisterDTO> entity = new HttpEntity<>(registerBody, headers);
 
-        return restTemplate.exchange(
+        restTemplate.exchange(
                 "/api/register",
                 HttpMethod.POST,
                 entity,

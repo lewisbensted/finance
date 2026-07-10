@@ -1,9 +1,6 @@
 package finance.slice.controllers;
 
 import finance.controllers.StockController;
-import finance.dtos.ItemErrorDTO;
-import finance.dtos.StockDTO;
-import finance.dtos.StockResultDTO;
 import finance.services.StockService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -14,10 +11,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
-import static finance.StockFixtures.*;
+
+import static finance.fixtures.StockFixtures.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -56,12 +53,12 @@ public class StockControllerTests {
     void test200PartialFailure() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "AAPL", new StockResultDTO(APPLE_STOCK, null),
-                        "MSFT", new StockResultDTO(MICROSOFT_STOCK, null),
-                        "ORCL", new StockResultDTO(ORACLE_STOCK, null),
-                        "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                        "GOOG", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error")
-                        )));
+                        "AAPL", APPLE_STOCK_RESULT,
+                        "MSFT", MICROSOFT_STOCK_RESULT,
+                        "ORCL", ORACLE_STOCK_RESULT,
+                        "BANANA", BANANA_STOCK_RESULT,
+                        "GOOG", ERROR_STOCK_RESULT
+                        ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT,BANANA,GOOG")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -76,7 +73,7 @@ public class StockControllerTests {
                 .andExpect(jsonPath("$.error.fields.BANANA.message")
                         .value("Stock symbol not found"))
                 .andExpect(jsonPath("$.error.fields.GOOG.code")
-                        .value("SERVER_ERROR"))
+                        .value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.error.fields.GOOG.message")
                         .value("Unexpected error"));
     }
@@ -85,8 +82,8 @@ public class StockControllerTests {
     void test422AllFailed() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
-                        "GOOG", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error"))
+                        "BANANA", BANANA_STOCK_RESULT,
+                        "GOOG", ERROR_STOCK_RESULT
                 ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "BANANA,GOOG")
@@ -101,7 +98,7 @@ public class StockControllerTests {
                 .andExpect(jsonPath("$.error.fields.BANANA.message")
                         .value("Stock symbol not found"))
                 .andExpect(jsonPath("$.error.fields.GOOG.code")
-                        .value("SERVER_ERROR"))
+                        .value("INTERNAL_ERROR"))
                 .andExpect(jsonPath("$.error.fields.GOOG.message")
                         .value("Unexpected error"));
 
@@ -111,9 +108,9 @@ public class StockControllerTests {
     void test200Success() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "AAPL", new StockResultDTO(APPLE_STOCK, null),
-                        "MSFT", new StockResultDTO(MICROSOFT_STOCK, null),
-                        "ORCL", new StockResultDTO(ORACLE_STOCK, null)
+                        "AAPL", APPLE_STOCK_RESULT,
+                        "MSFT", MICROSOFT_STOCK_RESULT,
+                        "ORCL", ORACLE_STOCK_RESULT
                 ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT")

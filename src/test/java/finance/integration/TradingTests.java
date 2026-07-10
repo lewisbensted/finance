@@ -17,7 +17,10 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static finance.StockFixtures.*;
+
+import static finance.fixtures.HoldingFixtures.*;
+import static finance.fixtures.StockFixtures.*;
+import static finance.fixtures.TradingFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,6 +41,12 @@ public class TradingTests {
     private TestUtils testUtils;
 
     private MockRestServiceServer mockServer;
+
+    private static final List<TransactionRequestDTO> initialBuy = List.of(
+            appleTransactionRequest(2L),
+            microsoftTransactionRequest(2L),
+            oracleTransactionRequest(2L)
+    );
 
 
     @BeforeEach
@@ -60,12 +69,7 @@ public class TradingTests {
         testUtils.mockStockPrice(mockServer, ORACLE_STOCK);
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
-        ResponseEntity<TransactionResponseDTO> buyResponse = testUtils.buyShares(
-                List.of(
-                        new TransactionRequestDTO("AAPL", 2L),
-                        new TransactionRequestDTO("MSFT", 2L),
-                        new TransactionRequestDTO("ORCL", 2L)
-                ), headers);
+        ResponseEntity<TransactionResponseDTO> buyResponse = testUtils.buyShares(initialBuy, headers);
         assertEquals(HttpStatus.OK, buyResponse.getStatusCode());
 
         ResponseEntity<PageResponse<TransactionDTO>> transactionsResponse = testUtils.getTransactions(headers);
@@ -87,9 +91,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        new HoldingDTO("AAPL", "Apple", 2L),
-                        new HoldingDTO("MSFT", "Microsoft", 2L),
-                        new HoldingDTO("ORCL", "Oracle", 2L)
+                        appleHolding(2L), microsoftHolding(2L), oracleHolding(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -107,8 +109,8 @@ public class TradingTests {
         ResponseEntity<TransactionResponseDTO> buyResponse = testUtils.buyShares(
                 List.of(
                         new TransactionRequestDTO("AAAPL", 2L),
-                        new TransactionRequestDTO("MSFT", 2L),
-                        new TransactionRequestDTO("ORCL", 2L)
+                        microsoftTransactionRequest(2L),
+                        oracleTransactionRequest(2L)
                 ), headers);
         assertEquals(HttpStatus.OK, buyResponse.getStatusCode());
 
@@ -129,8 +131,7 @@ public class TradingTests {
         assertEquals(2, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        new HoldingDTO("MSFT", "Microsoft", 2L),
-                        new HoldingDTO("ORCL", "Oracle", 2L)
+                        microsoftHolding(2L), oracleHolding(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -146,17 +147,10 @@ public class TradingTests {
         testUtils.mockStockPrice(mockServer, ORACLE_STOCK, ExpectedCount.times(2));
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
-        testUtils.buyShares(
-                List.of(
-                        new TransactionRequestDTO("AAPL", 2L),
-                        new TransactionRequestDTO("MSFT", 2L),
-                        new TransactionRequestDTO("ORCL", 2L)
-                ), headers);
+        testUtils.buyShares(initialBuy, headers);
 
         ResponseEntity<TransactionResponseDTO> sellResponse = testUtils.sellShares(List.of(
-                new TransactionRequestDTO("AAPL", 1L),
-                new TransactionRequestDTO("MSFT", 1L),
-                new TransactionRequestDTO("ORCL", 1L)
+                appleTransactionRequest(1L), microsoftTransactionRequest(1L), oracleTransactionRequest(1L)
         ), headers);
         assertEquals(HttpStatus.OK, sellResponse.getStatusCode());
 
@@ -179,9 +173,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        new HoldingDTO("AAPL", "Apple", 1L),
-                        new HoldingDTO("MSFT", "Microsoft", 1L),
-                        new HoldingDTO("ORCL", "Oracle", 1L)
+                        appleHolding(1L), microsoftHolding(1L), oracleHolding(1L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -197,17 +189,12 @@ public class TradingTests {
         testUtils.mockStockError(mockServer, "AAAPL", HttpStatus.BAD_REQUEST);
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
-        testUtils.buyShares(
-                List.of(
-                        new TransactionRequestDTO("AAPL", 2L),
-                        new TransactionRequestDTO("MSFT", 2L),
-                        new TransactionRequestDTO("ORCL", 2L)
-                ), headers);
+        testUtils.buyShares(initialBuy, headers);
 
         ResponseEntity<TransactionResponseDTO> sellResponse = testUtils.sellShares(List.of(
                 new TransactionRequestDTO("AAAPL", 1L),
-                new TransactionRequestDTO("MSFT", 1L),
-                new TransactionRequestDTO("ORCL", 3L)
+                microsoftTransactionRequest(1L),
+                oracleTransactionRequest(3L)
         ), headers);
         assertEquals(HttpStatus.OK, sellResponse.getStatusCode());
 
@@ -226,9 +213,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        new HoldingDTO("AAPL", "Apple", 2L),
-                        new HoldingDTO("MSFT", "Microsoft", 1L),
-                        new HoldingDTO("ORCL", "Oracle", 2L)
+                        appleHolding(2L), microsoftHolding(1L), oracleHolding(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);

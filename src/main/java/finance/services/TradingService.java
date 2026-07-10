@@ -7,7 +7,7 @@ import finance.entities.TransactionType;
 import finance.entities.User;
 import finance.exceptions.InsufficientFundsException;
 import finance.exceptions.InsufficientSharesException;
-import finance.repositories.TransactionRepository;
+import finance.repositories.TradingRepository;
 import finance.repositories.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,16 +19,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static finance.dtos.ItemErrorCode.*;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 
 @Service
-public class TransactionService {
+public class TradingService {
     private final UserRepository userRepository;
-    private final TransactionRepository transactionRepository;
+    private final TradingRepository transactionRepository;
     private final StockService stockService;
 
-    public TransactionService(UserRepository userRepository, TransactionRepository transactionRepository, StockService stockService) {
+    public TradingService(UserRepository userRepository, TradingRepository transactionRepository, StockService stockService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.stockService = stockService;
@@ -126,7 +127,7 @@ public class TransactionService {
             if (fetch == null) {
                 results.add(new TransactionResultDTO(
                         transaction,
-                        new ItemErrorDTO("INTERNAL_ERROR", "No price returned")
+                        new ItemErrorDTO(INTERNAL_ERROR, "No price returned")
                 ));
                 continue;
             }
@@ -143,11 +144,11 @@ public class TransactionService {
                 results.add(new TransactionResultDTO(transaction, null));
 
             } catch (InsufficientSharesException e) {
-                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("UNPROCESSABLE", e.getMessage())));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INSUFFICIENT_SHARES, e.getMessage())));
             } catch (IllegalArgumentException e) {
-                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("BAD_REQUEST", e.getMessage())));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INVALID_INPUT, e.getMessage())));
             } catch (Exception e) {
-                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO("INTERNAL_ERROR", "Unexpected error")));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INTERNAL_ERROR, "Unexpected error")));
             }
         }
         return results;
