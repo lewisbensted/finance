@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import static finance.controllers.AuthUtils.authenticateUser;
+import static finance.dtos.ErrorCode.OPERATION_FAILED;
+import static finance.dtos.ErrorCode.OPERATION_PARTIALLY_FAILED;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 
@@ -44,7 +46,7 @@ public class TradingController {
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? "UNPROCESSABLE" : "PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @PostMapping(value = "/api/sell")
@@ -62,7 +64,7 @@ public class TradingController {
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? "UNPROCESSABLE" : "PARTIAL_FAILURE", String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @GetMapping(value = "/api/transactions")

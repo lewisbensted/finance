@@ -2,11 +2,12 @@ package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import finance.controllers.UserController;
+import finance.dtos.ErrorCode;
 import finance.dtos.LoginDTO;
 import finance.dtos.PasswordDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
-import finance.exceptions.AuthorisationException;
+import finance.exceptions.AuthenticationException;
 import finance.exceptions.RegistrationException;
 import finance.services.UserService;
 import finance.session.SessionUser;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static finance.dtos.ErrorCode.INVALID_CREDENTIALS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -105,7 +107,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.firstName").value("Invalid first name format"))
                     .andExpect(jsonPath("$.fields.username").value("Username must be between 3 and 20 characters"))
@@ -119,7 +121,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
@@ -138,7 +140,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(409))
-                    .andExpect(jsonPath("$.code").value("CONFLICT"))
+                    .andExpect(jsonPath("$.code").value("REGISTRATION_FAILED"))
                     .andExpect(jsonPath("$.message").value("User taken"));
         }
     }
@@ -158,7 +160,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(badJson))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
@@ -199,7 +201,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
@@ -209,12 +211,12 @@ public class UserControllerTests {
                     "testuser",
                     "password123!"
             );
-            when(userService.login(any())).thenThrow(new AuthorisationException("Invalid username"));
+            when(userService.login(any())).thenThrow(new AuthenticationException(INVALID_CREDENTIALS, "Invalid username"));
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                     .andExpect(jsonPath("$.message").value("Invalid username"));
         }
 
@@ -228,7 +230,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.username").value("Username is required"))
                     .andExpect(jsonPath("$.fields.password").value("Password is required"));
@@ -277,23 +279,23 @@ public class UserControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(badJson))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             mockMvc.perform(put("/api/password")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(newTestPassword)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
         @Test
         void test400ChangePasswordFails() throws Exception {
-            doThrow(new AuthorisationException("Incorrect password"))
+            doThrow(new AuthenticationException(INVALID_CREDENTIALS, "Incorrect password"))
                     .when(userService)
                     .changePassword(anyLong(), any());
             mockMvc.perform(put("/api/password")
@@ -301,7 +303,7 @@ public class UserControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(newTestPassword)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"))
                     .andExpect(jsonPath("$.message").value("Incorrect password"));
         }
 
@@ -312,7 +314,7 @@ public class UserControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(new PasswordDTO("", "newpassword123"))))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.password").value("Password is required"))
                     .andExpect(jsonPath("$.fields.newPassword").value("New password must contain a number, letter and special character, without spaces"));

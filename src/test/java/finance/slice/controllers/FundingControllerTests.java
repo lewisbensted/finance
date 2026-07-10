@@ -64,19 +64,19 @@ public class FundingControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(badJson))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             when(accountService.deposit(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
@@ -87,7 +87,7 @@ public class FundingControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(new AmountDTO(null))))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
         }
@@ -113,19 +113,19 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             when(accountService.withdraw(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
@@ -139,7 +139,7 @@ public class FundingControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
                     .andExpect(status().is(422))
-                    .andExpect(jsonPath("$.code").value("UNPROCESSABLE"))
+                    .andExpect(jsonPath("$.code").value("INSUFFICIENT_FUNDS"))
                     .andExpect(jsonPath("$.message").value("Insufficient funds"));
         }
 
@@ -150,7 +150,7 @@ public class FundingControllerTests {
                             .sessionAttr("USER_SESSION", testUser)
                             .content(objectMapper.writeValueAsString(new AmountDTO(BigDecimal.valueOf(-1)))))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
         }
@@ -171,11 +171,11 @@ public class FundingControllerTests {
     @Nested
     class BalanceTests {
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 

@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 
 
-import static finance.dtos.ItemErrorCode.*;
+import static finance.dtos.ErrorCode.*;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 import static finance.fixtures.StockFixtures.*;
@@ -211,7 +211,7 @@ public class TradingServiceTests {
                 assertEquals(NOT_FOUND, transactions.get(1).error().code());
                 assertEquals("Stock symbol not found", transactions.get(1).error().message());
                 assertEquals(transactions.get(2).transaction(), microsoftTransactionRequest(-5L));
-                assertEquals(INVALID_INPUT, transactions.get(2).error().code());
+                assertEquals(INVALID_REQUEST, transactions.get(2).error().code());
                 assertEquals("Transaction must be a positive number of shares", transactions.get(2).error().message());
                 assertEquals(new TransactionRequestDTO("GOOG", 10L), transactions.get(3).transaction());
                 assertEquals(INTERNAL_ERROR, transactions.get(3).error().code());
@@ -338,7 +338,7 @@ public class TradingServiceTests {
                 assertEquals(NOT_FOUND, transactions.get(1).error().code());
                 assertEquals("Stock symbol not found", transactions.get(1).error().message());
                 assertEquals(transactions.get(2).transaction(), microsoftTransactionRequest(-5L));
-                assertEquals(INVALID_INPUT, transactions.get(2).error().code());
+                assertEquals(INVALID_REQUEST, transactions.get(2).error().code());
                 assertEquals("Transaction must be a positive number of shares", transactions.get(2).error().message());
 
                 assertEquals(BigDecimal.valueOf(120), testUser.getBalance());

@@ -6,11 +6,12 @@ import finance.dtos.RegisterDTO;
 import finance.entities.User;
 import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
-import finance.exceptions.AuthorisationException;
+import finance.exceptions.AuthenticationException;
 import finance.repositories.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import static finance.dtos.ErrorCode.INVALID_CREDENTIALS;
 import static finance.services.PasswordService.*;
 
 @Service
@@ -37,9 +38,9 @@ public class UserService {
 
     @Transactional
     public User login(LoginDTO dto) {
-        User user = userRepository.findByUsername(dto.username()).orElseThrow(() -> new AuthorisationException("Invalid username or password"));
+        User user = userRepository.findByUsername(dto.username()).orElseThrow(() -> new AuthenticationException(INVALID_CREDENTIALS, "Invalid username or password"));
         if (!compare(dto.password(), user.getPasswordHash()))
-            throw new AuthorisationException("Invalid username or password");
+            throw new AuthenticationException(INVALID_CREDENTIALS, "Invalid username or password");
         return user;
     }
 
@@ -48,7 +49,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         if (!compare(dto.password(), user.getPasswordHash()))
-            throw new AuthorisationException("Incorrect password");
+            throw new AuthenticationException(INVALID_CREDENTIALS, "Incorrect password");
         user.changePassword(dto.newPassword());
         userRepository.save(user);
     }

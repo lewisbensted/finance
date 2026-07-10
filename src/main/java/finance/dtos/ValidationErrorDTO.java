@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public record ValidationErrorDTO(
-        String code,
+        ErrorCode code,
         String message,
         Map<String, List<String>> fields
 ) {}

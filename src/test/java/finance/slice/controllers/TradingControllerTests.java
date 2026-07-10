@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static finance.dtos.ItemErrorCode.*;
+import static finance.dtos.ErrorCode.*;
 import static finance.entities.TransactionType.BUY;
 import static finance.fixtures.TradingFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +67,7 @@ public class TradingControllerTests {
     TransactionResultDTO appleTransactionResult = new TransactionResultDTO(appleTransactionRequest(5L), null);
     TransactionResultDTO microsoftTransactionResult = new TransactionResultDTO(microsoftTransactionRequest(10L), null);
     TransactionResultDTO bananaTransactionResult = new TransactionResultDTO(bananaTransactionRequest(10L), new ItemErrorDTO(NOT_FOUND, "Stock symbol not found"));
-    TransactionResultDTO oracleTransactionResult = new TransactionResultDTO(oracleTransactionRequest(-5L), new ItemErrorDTO(INVALID_INPUT, "Invalid quantity"));
+    TransactionResultDTO oracleTransactionResult = new TransactionResultDTO(oracleTransactionRequest(-5L), new ItemErrorDTO(INVALID_REQUEST, "Invalid quantity"));
 
     @Nested
     class BuyTests {
@@ -77,17 +77,17 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
@@ -101,13 +101,13 @@ public class TradingControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(422))
                     .andExpect(jsonPath("$.transactions").isEmpty())
-                    .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
+                    .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.BANANA.code")
                             .value("NOT_FOUND"))
                     .andExpect(jsonPath("$.error.fields.BANANA.message")
                             .value("Stock symbol not found"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("INVALID_INPUT"))
+                            .value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -123,7 +123,7 @@ public class TradingControllerTests {
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
-                    .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
+                    .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
                     .andExpect(jsonPath("$.error.fields.BANANA.code")
@@ -131,7 +131,7 @@ public class TradingControllerTests {
                     .andExpect(jsonPath("$.error.fields.BANANA.message")
                             .value("Stock symbol not found"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("INVALID_INPUT"))
+                            .value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -160,17 +160,17 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(400))
-                    .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                    .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
 
@@ -187,13 +187,13 @@ public class TradingControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().is(422))
                     .andExpect(jsonPath("$.transactions").isEmpty())
-                    .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
+                    .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.AAPL.code")
                             .value("INSUFFICIENT_SHARES"))
                     .andExpect(jsonPath("$.error.fields.AAPL.message")
                             .value("Insufficient shares"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("INVALID_INPUT"))
+                            .value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -210,11 +210,11 @@ public class TradingControllerTests {
                     .andExpect(status().is(200))
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
-                    .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
+                    .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
                     .andExpect(jsonPath("$.error.fields.ORCL.code")
-                            .value("INVALID_INPUT"))
+                            .value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.error.fields.ORCL.message")
                             .value("Invalid quantity"));
         }
@@ -266,11 +266,11 @@ public class TradingControllerTests {
         }
 
         @Test
-        void test401Unauthorised() throws Exception {
+        void test401Unauthenticated() throws Exception {
             mockMvc.perform(get("/api/transactions")
                             .contentType(MediaType.APPLICATION_JSON))
                     .andExpect(status().is(401))
-                    .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                    .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
     }

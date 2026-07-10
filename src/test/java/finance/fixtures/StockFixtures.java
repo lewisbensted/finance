@@ -6,8 +6,8 @@ import finance.dtos.StockResultDTO;
 
 import java.math.BigDecimal;
 
-import static finance.dtos.ItemErrorCode.INTERNAL_ERROR;
-import static finance.dtos.ItemErrorCode.NOT_FOUND;
+import static finance.dtos.ErrorCode.INTERNAL_ERROR;
+import static finance.dtos.ErrorCode.NOT_FOUND;
 
 public class StockFixtures {
     public static final StockDTO APPLE_STOCK = new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5));

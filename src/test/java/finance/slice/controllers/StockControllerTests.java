@@ -36,7 +36,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                 .andExpect(jsonPath("$.message").value("No symbols provided"));
     }
 
@@ -45,7 +45,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices?symbolsStr=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(400))
-                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                 .andExpect(jsonPath("$.message").value("No symbols provided"));
     }
 
@@ -65,7 +65,7 @@ public class StockControllerTests {
                 .andExpect(status().is(200))
                 .andExpect(jsonPath("$.stocks[*].symbol")
                         .value(containsInAnyOrder("AAPL", "ORCL", "MSFT")))
-                .andExpect(jsonPath("$.error.code").value("PARTIAL_FAILURE"))
+                .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                 .andExpect(jsonPath("$.error.message")
                         .value("Failed to fetch some prices"))
                 .andExpect(jsonPath("$.error.fields.BANANA.code")
@@ -90,7 +90,7 @@ public class StockControllerTests {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(422))
                 .andExpect(jsonPath("$.stocks").isEmpty())
-                .andExpect(jsonPath("$.error.code").value("UNPROCESSABLE"))
+                .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                 .andExpect(jsonPath("$.error.message")
                         .value("Failed to fetch all prices"))
                 .andExpect(jsonPath("$.error.fields.BANANA.code")

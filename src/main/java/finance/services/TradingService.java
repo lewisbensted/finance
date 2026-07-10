@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static finance.dtos.ItemErrorCode.*;
+import static finance.dtos.ErrorCode.*;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 
@@ -146,7 +146,7 @@ public class TradingService {
             } catch (InsufficientSharesException e) {
                 results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INSUFFICIENT_SHARES, e.getMessage())));
             } catch (IllegalArgumentException e) {
-                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INVALID_INPUT, e.getMessage())));
+                results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INVALID_REQUEST, e.getMessage())));
             } catch (Exception e) {
                 results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INTERNAL_ERROR, "Unexpected error")));
             }

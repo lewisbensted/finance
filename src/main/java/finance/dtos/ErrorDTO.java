@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 public record ErrorDTO(
-        String code,
+        ErrorCode code,
         String message,
         Map<String, ItemErrorDTO> fields
 ) {
-    public ErrorDTO(String code, String message) {
+    public ErrorDTO(ErrorCode code, String message) {
         this(code, message, null);
     }
 }

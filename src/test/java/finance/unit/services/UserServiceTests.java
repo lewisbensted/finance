@@ -4,7 +4,7 @@ import finance.dtos.LoginDTO;
 import finance.dtos.PasswordDTO;
 import finance.dtos.RegisterDTO;
 import finance.entities.User;
-import finance.exceptions.AuthorisationException;
+import finance.exceptions.AuthenticationException;
 import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;
 import finance.repositories.UserRepository;
@@ -113,7 +113,7 @@ public class UserServiceTests {
         void testInvalidUsername() {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.empty());
-            AuthorisationException exception = assertThrows(AuthorisationException.class,
+            AuthenticationException exception = assertThrows(AuthenticationException.class,
                     () -> userService.login(new LoginDTO("testuser", "password")));
             assertEquals("Invalid username or password", exception.getMessage());
         }
@@ -122,7 +122,7 @@ public class UserServiceTests {
         void testIncorrectPassword() {
             when(mockUserRepo.findByUsername(anyString()))
                     .thenReturn(Optional.of(existingUser));
-            AuthorisationException exception = assertThrows(AuthorisationException.class,
+            AuthenticationException exception = assertThrows(AuthenticationException.class,
                     () -> userService.login(new LoginDTO("existinguser", "pasword")));
             assertEquals("Invalid username or password", exception.getMessage());
         }
@@ -153,7 +153,7 @@ public class UserServiceTests {
         void testCompareFails() {
             when(mockUserRepo.findById(any()))
                     .thenReturn(Optional.of(existingUser));
-            AuthorisationException exception = assertThrows(AuthorisationException.class,
+            AuthenticationException exception = assertThrows(AuthenticationException.class,
                     () -> userService.changePassword(1L, new PasswordDTO("pass word", "newpassword")));
             assertEquals("Incorrect password", exception.getMessage());
             verify(mockUserRepo, never()).save(any());

@@ -48,11 +48,11 @@ public class HoldingsControllerTest {
     }
 
     @Test
-    void test401Unauthorised() throws Exception {
+    void test401Unauthenticated() throws Exception {
         mockMvc.perform(get("/api/holdings")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().is(401))
-                .andExpect(jsonPath("$.code").value("UNAUTHORISED"))
+                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                 .andExpect(jsonPath("$.message").value("Not logged in"));
     }
 }

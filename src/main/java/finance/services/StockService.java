@@ -1,6 +1,5 @@
 package finance.services;
 
-import finance.dtos.ItemErrorCode;
 import finance.dtos.ItemErrorDTO;
 import finance.dtos.StockDTO;
 import finance.dtos.StockResultDTO;
@@ -13,8 +12,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
-import static finance.dtos.ItemErrorCode.INTERNAL_ERROR;
-import static finance.dtos.ItemErrorCode.NOT_FOUND;
+import static finance.dtos.ErrorCode.INTERNAL_ERROR;
+import static finance.dtos.ErrorCode.NOT_FOUND;
 
 @Service
 public class StockService {

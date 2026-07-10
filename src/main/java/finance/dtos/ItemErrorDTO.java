@@ -1,7 +1,7 @@
 package finance.dtos;
 
 public record ItemErrorDTO(
-        ItemErrorCode code,
+        ErrorCode code,
         String message
 ) {
 }

@@ -54,8 +54,4 @@ public class UserController {
         return ResponseEntity.status(200).body("Password updated");
     }
 
-    @ExceptionHandler(RegistrationException.class)
-    public ResponseEntity<ErrorDTO> handleRegistrationException(RegistrationException ex) {
-        return ResponseEntity.status(409).body(new ErrorDTO("CONFLICT", ex.getMessage()));
-    }
 }
