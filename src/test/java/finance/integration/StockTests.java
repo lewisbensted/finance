@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 
+import static finance.StockFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,9 +41,9 @@ public class StockTests {
 
     @Test
     void callsExternalAPI() {
-        testUtils.mockStockPrice(mockServer, new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)));
+        testUtils.mockStockPrice(mockServer, APPLE_STOCK);
+        testUtils.mockStockPrice(mockServer, MICROSOFT_STOCK);
+        testUtils.mockStockPrice(mockServer, ORACLE_STOCK);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -56,10 +57,7 @@ public class StockTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertThat(response.getBody().stocks())
-                .containsExactlyInAnyOrder(
-                        new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)),
-                        new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)),
-                        new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15))
+                .containsExactlyInAnyOrder(APPLE_STOCK, MICROSOFT_STOCK, ORACLE_STOCK
                 );
     }
 }

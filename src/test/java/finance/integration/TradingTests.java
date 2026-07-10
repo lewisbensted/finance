@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static finance.StockFixtures.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,9 +55,9 @@ public class TradingTests {
 
     @Test
     void buyShares() {
-        testUtils.mockStockPrice(mockServer, new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)));
+        testUtils.mockStockPrice(mockServer, APPLE_STOCK);
+        testUtils.mockStockPrice(mockServer, MICROSOFT_STOCK);
+        testUtils.mockStockPrice(mockServer, ORACLE_STOCK);
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
         ResponseEntity<TransactionResponseDTO> buyResponse = testUtils.buyShares(
@@ -99,8 +100,8 @@ public class TradingTests {
     @Test
     void buySharesPartial() {
         testUtils.mockStockError(mockServer, "AAAPL", HttpStatus.BAD_REQUEST);
-        testUtils.mockStockPrice(mockServer, new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)));
+        testUtils.mockStockPrice(mockServer, MICROSOFT_STOCK);
+        testUtils.mockStockPrice(mockServer, ORACLE_STOCK);
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
         ResponseEntity<TransactionResponseDTO> buyResponse = testUtils.buyShares(
@@ -140,9 +141,9 @@ public class TradingTests {
 
     @Test
     void sellShares() {
-        testUtils.mockStockPrice(mockServer, new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)), ExpectedCount.times(2));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), ExpectedCount.times(2));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), ExpectedCount.times(2));
+        testUtils.mockStockPrice(mockServer, APPLE_STOCK, ExpectedCount.times(2));
+        testUtils.mockStockPrice(mockServer, MICROSOFT_STOCK, ExpectedCount.times(2));
+        testUtils.mockStockPrice(mockServer, ORACLE_STOCK, ExpectedCount.times(2));
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);
         testUtils.buyShares(
@@ -190,9 +191,9 @@ public class TradingTests {
 
     @Test
     void sellSharesPartial() {
-        testUtils.mockStockPrice(mockServer, new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), ExpectedCount.times(2));
-        testUtils.mockStockPrice(mockServer, new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), ExpectedCount.times(2));
+        testUtils.mockStockPrice(mockServer, APPLE_STOCK);
+        testUtils.mockStockPrice(mockServer, MICROSOFT_STOCK, ExpectedCount.times(2));
+        testUtils.mockStockPrice(mockServer, ORACLE_STOCK, ExpectedCount.times(2));
         testUtils.mockStockError(mockServer, "AAAPL", HttpStatus.BAD_REQUEST);
 
         testUtils.deposit(BigDecimal.valueOf(100), headers);

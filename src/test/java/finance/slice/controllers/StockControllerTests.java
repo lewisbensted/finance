@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import static finance.StockFixtures.*;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -55,9 +56,9 @@ public class StockControllerTests {
     void test200PartialFailure() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "AAPL", new StockResultDTO(new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)), null),
-                        "MSFT", new StockResultDTO(new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), null),
-                        "ORCL", new StockResultDTO(new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), null),
+                        "AAPL", new StockResultDTO(APPLE_STOCK, null),
+                        "MSFT", new StockResultDTO(MICROSOFT_STOCK, null),
+                        "ORCL", new StockResultDTO(ORACLE_STOCK, null),
                         "BANANA", new StockResultDTO(null, new ItemErrorDTO("NOT_FOUND", "Stock symbol not found")),
                         "GOOG", new StockResultDTO(null, new ItemErrorDTO("SERVER_ERROR", "Unexpected error")
                         )));
@@ -110,9 +111,9 @@ public class StockControllerTests {
     void test200Success() throws Exception {
         when(stockService.fetchPrices(any()))
                 .thenReturn(Map.of(
-                        "AAPL", new StockResultDTO(new StockDTO("Apple", "AAPL", BigDecimal.valueOf(5)), null),
-                        "MSFT", new StockResultDTO(new StockDTO("Microsoft", "MSFT", BigDecimal.valueOf(10)), null),
-                        "ORCL", new StockResultDTO(new StockDTO("Oracle", "ORCL", BigDecimal.valueOf(15)), null)
+                        "AAPL", new StockResultDTO(APPLE_STOCK, null),
+                        "MSFT", new StockResultDTO(MICROSOFT_STOCK, null),
+                        "ORCL", new StockResultDTO(ORACLE_STOCK, null)
                 ));
 
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT")

@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import static finance.StockFixtures.APPLE_STOCK;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -24,14 +25,12 @@ public class StockServiceTests {
 
     private StockService stockService;
 
-    StockDTO apple = new StockDTO("Apple", "AAPL", BigDecimal.valueOf(150));
-
     @BeforeEach
     void setUp() {
         RestTemplate mockRestTemplate = mock(RestTemplate.class);
         stockService = new StockService(mockRestTemplate);
 
-        when(mockRestTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StockDTO.class), eq("AAPL"))).thenReturn(ResponseEntity.ok(apple));
+        when(mockRestTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StockDTO.class), eq("AAPL"))).thenReturn(ResponseEntity.ok(APPLE_STOCK));
         when(mockRestTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StockDTO.class), eq("BANANA"))).thenThrow(new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request"));
         when(mockRestTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StockDTO.class), eq("MSFT"))).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Server Error"));
         when(mockRestTemplate.exchange(anyString(), eq(HttpMethod.GET), isNull(), eq(StockDTO.class), eq("ORCL"))).thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Other Error"));
@@ -41,7 +40,7 @@ public class StockServiceTests {
     class FetchPriceTests {
         @Test
         void testSuccess() {
-            assertEquals(new StockResultDTO(apple, null), stockService.fetchPrice("AAPL"));
+            assertEquals(new StockResultDTO(APPLE_STOCK, null), stockService.fetchPrice("AAPL"));
         }
 
         @Test
