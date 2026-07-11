@@ -63,7 +63,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(badJson))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
@@ -75,7 +75,7 @@ public class FundingControllerTests {
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
@@ -86,7 +86,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(new AmountDTO(null))))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
@@ -100,7 +100,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.username").value("testuser"));
         }
     }
@@ -112,7 +112,7 @@ public class FundingControllerTests {
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
@@ -124,7 +124,7 @@ public class FundingControllerTests {
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
@@ -138,7 +138,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(422))
+                    .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.code").value("INSUFFICIENT_FUNDS"))
                     .andExpect(jsonPath("$.message").value("Insufficient funds"));
         }
@@ -149,7 +149,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testUser)
                             .content(objectMapper.writeValueAsString(new AmountDTO(BigDecimal.valueOf(-1)))))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Validation error(s)"))
                     .andExpect(jsonPath("$.fields.amount").value("Amount must be positive"));
@@ -163,7 +163,7 @@ public class FundingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(testAmount)))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.username").value("testuser"));
         }
     }
@@ -174,7 +174,7 @@ public class FundingControllerTests {
         void test401Unauthenticated() throws Exception {
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
@@ -186,7 +186,7 @@ public class FundingControllerTests {
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.username").value("testuser"));
         }
     }

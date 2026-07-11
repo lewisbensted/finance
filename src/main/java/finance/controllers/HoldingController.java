@@ -2,7 +2,6 @@ package finance.controllers;
 
 import finance.dtos.HoldingDTO;
 import finance.dtos.PageResponse;
-import finance.entities.User;
 import finance.services.HoldingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
@@ -38,6 +37,6 @@ public class HoldingController {
         );
 
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
-        return ResponseEntity.status(200).body(PageResponse.from(holdings));
+        return ResponseEntity.ok().body(PageResponse.from(holdings));
     }
 }

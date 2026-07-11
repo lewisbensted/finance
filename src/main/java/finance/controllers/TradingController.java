@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +47,7 @@ public class TradingController {
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @PostMapping(value = "/api/sell")
@@ -64,7 +65,7 @@ public class TradingController {
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
     }
 
     @GetMapping(value = "/api/transactions")
@@ -80,6 +81,6 @@ public class TradingController {
         );
 
         Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(), safePageable);
-        return ResponseEntity.status(200).body(PageResponse.from(transactions));
+        return ResponseEntity.ok().body(PageResponse.from(transactions));
     }
 }

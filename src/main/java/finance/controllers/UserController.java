@@ -7,6 +7,7 @@ import finance.services.UserService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class UserController {
         if (session.getAttribute("USER_SESSION") != null)
             throw new ForbiddenException("Cannot register while logged in");
         User newUser = userService.register(body);
-        return ResponseEntity.status(201).body(new UserDTO(newUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new UserDTO(newUser));
     }
 
     @PostMapping(value = "/api/login")
@@ -38,20 +39,20 @@ public class UserController {
                 user.getId(),
                 user.getUsername()
         ));
-        return ResponseEntity.status(200).body(new UserDTO(user));
+        return ResponseEntity.ok().body(new UserDTO(user));
     }
 
     @PostMapping(value = "/api/logout")
     public ResponseEntity<String> logout(HttpSession session) {
         session.removeAttribute("USER_SESSION");
-        return ResponseEntity.status(200).body("Logged out");
+        return ResponseEntity.ok().body("Logged out");
     }
 
     @PutMapping(value = "/api/password")
     public ResponseEntity<String> changePassword(HttpSession session, @RequestBody @Valid PasswordDTO body) {
         SessionUser sessionUser = authenticateUser(session);
         userService.changePassword(sessionUser.id(), body);
-        return ResponseEntity.status(200).body("Password updated");
+        return ResponseEntity.ok().body("Password updated");
     }
 
 }

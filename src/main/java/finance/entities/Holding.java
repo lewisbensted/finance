@@ -1,7 +1,6 @@
 package finance.entities;
 
 import finance.dtos.HoldingDTO;
-import finance.dtos.TransactionDTO;
 import finance.exceptions.InsufficientSharesException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

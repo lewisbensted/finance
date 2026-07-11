@@ -42,7 +42,7 @@ public class HoldingsControllerTest {
         mockMvc.perform(get("/api/holdings")
                         .contentType(MediaType.APPLICATION_JSON)
                         .sessionAttr("USER_SESSION", testSessionUser))
-                .andExpect(status().is(200))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[*].symbol")
                         .value(containsInAnyOrder("AAPL", "MSFT")));
     }
@@ -51,7 +51,7 @@ public class HoldingsControllerTest {
     void test401Unauthenticated() throws Exception {
         mockMvc.perform(get("/api/holdings")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().is(401))
+                .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                 .andExpect(jsonPath("$.message").value("Not logged in"));
     }

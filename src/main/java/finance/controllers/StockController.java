@@ -2,6 +2,7 @@ package finance.controllers;
 
 import finance.dtos.*;
 import finance.services.StockService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,7 @@ public class StockController {
     @GetMapping(value = "/api/prices")
     ResponseEntity<?> getPrice(@RequestParam(required = false) String symbolsStr) {
         if (symbolsStr == null || symbolsStr.isEmpty())
-            return ResponseEntity.status(400).body(new ErrorDTO(INVALID_REQUEST, "No symbols provided"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(INVALID_REQUEST, "No symbols provided"));
         String[] symbols = symbolsStr.split(",");
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
@@ -42,6 +43,6 @@ public class StockController {
         }
 
         boolean allFailed = stocks.isEmpty();
-        return ResponseEntity.status(allFailed ? 422 : 200).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to fetch %s prices", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK).body(new StockResponseDTO(stocks, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to fetch %s prices", allFailed ? "all" : "some"), errorFields)));
     }
 }

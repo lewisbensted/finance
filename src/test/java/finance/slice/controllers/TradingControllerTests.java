@@ -76,7 +76,7 @@ public class TradingControllerTests {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
@@ -86,7 +86,7 @@ public class TradingControllerTests {
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
@@ -99,7 +99,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(422))
+                    .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.BANANA.code")
@@ -120,7 +120,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
@@ -145,7 +145,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
@@ -159,7 +159,7 @@ public class TradingControllerTests {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(400))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
                     .andExpect(jsonPath("$.message").value("Empty or unreadable request body"));
         }
@@ -169,7 +169,7 @@ public class TradingControllerTests {
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess)))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }
@@ -185,7 +185,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(422))
+                    .andExpect(status().isUnprocessableEntity())
                     .andExpect(jsonPath("$.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.AAPL.code")
@@ -207,7 +207,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
@@ -228,7 +228,7 @@ public class TradingControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
@@ -247,7 +247,7 @@ public class TradingControllerTests {
             mockMvc.perform(get("/api/transactions?direction=ASC")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().is(200))
+                    .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")));
 
@@ -269,7 +269,7 @@ public class TradingControllerTests {
         void test401Unauthenticated() throws Exception {
             mockMvc.perform(get("/api/transactions")
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().is(401))
+                    .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"))
                     .andExpect(jsonPath("$.message").value("Not logged in"));
         }

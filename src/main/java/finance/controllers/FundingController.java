@@ -27,20 +27,20 @@ public class FundingController {
     ResponseEntity<UserDTO> deposit(@Valid @RequestBody AmountDTO request, HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
         User user = accountService.deposit(sessionUser.id(), request.amount());
-        return ResponseEntity.status(200).body(new UserDTO(user));
+        return ResponseEntity.ok().body(new UserDTO(user));
     }
 
     @PostMapping(value = "/api/withdraw")
     ResponseEntity<UserDTO> withdraw(@Valid @RequestBody AmountDTO request, HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
         User user = accountService.withdraw(sessionUser.id(), request.amount());
-        return ResponseEntity.status(200).body(new UserDTO(user));
+        return ResponseEntity.ok().body(new UserDTO(user));
     }
 
     @GetMapping(value = "/api/balance")
     ResponseEntity<UserDTO> getBalance(HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
         User user = accountService.getBalance(sessionUser.id());
-        return ResponseEntity.status(200).body(new UserDTO(user));
+        return ResponseEntity.ok().body(new UserDTO(user));
     }
 }
