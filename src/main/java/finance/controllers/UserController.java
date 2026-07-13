@@ -9,17 +9,23 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import static finance.controllers.AuthUtils.authenticateUser;
 
 
-@RestController
+@Controller
 public class UserController {
     UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "register";
     }
 
     @PostMapping(value = "/api/register")
@@ -30,7 +36,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserDTO(newUser));
     }
 
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
+
     @PostMapping(value = "/api/login")
+    @ResponseBody
     public ResponseEntity<UserDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
         if (session.getAttribute("USER_SESSION") != null) throw new ForbiddenException("Already logged in");
 

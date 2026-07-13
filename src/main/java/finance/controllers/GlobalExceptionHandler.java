@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorDTO> handleMessageNotReadable(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(INVALID_REQUEST, "Empty or unreadable request body"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(MALFORMED_REQUEST, "Empty or unreadable request body"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
