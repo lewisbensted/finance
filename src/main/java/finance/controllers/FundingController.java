@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+
 import static finance.controllers.AuthUtils.authenticateUser;
 
 @RestController
@@ -38,9 +40,9 @@ public class FundingController {
     }
 
     @GetMapping(value = "/api/balance")
-    ResponseEntity<UserDTO> getBalance(HttpSession session) {
+    ResponseEntity<BigDecimal> getBalance(HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
         User user = accountService.getBalance(sessionUser.id());
-        return ResponseEntity.ok().body(new UserDTO(user));
+        return ResponseEntity.ok().body(user.getBalance());
     }
 }
