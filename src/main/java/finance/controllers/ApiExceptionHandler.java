@@ -3,10 +3,12 @@ package finance.controllers;
 import finance.dtos.ErrorDTO;
 import finance.dtos.ValidationErrorDTO;
 import finance.exceptions.*;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -18,7 +20,7 @@ import java.util.Map;
 import static finance.dtos.ErrorCode.*;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class ApiExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorDTO> handleMessageNotReadable(HttpMessageNotReadableException ex) {
@@ -33,6 +35,16 @@ public class GlobalExceptionHandler {
             fieldErrors.get(error.getField()).add(error.getDefaultMessage());
         });
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ValidationErrorDTO(INVALID_REQUEST, "Validation error(s)", fieldErrors));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorDTO> handleConstraintViolation(ConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(INVALID_REQUEST, ex.getMessage()));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorDTO> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(INVALID_REQUEST, ex.getMessage()));
     }
 
     @ExceptionHandler(ForbiddenException.class)

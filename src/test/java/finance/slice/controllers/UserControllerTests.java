@@ -89,7 +89,7 @@ public class UserControllerTests {
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isForbidden())
                     .andExpect(jsonPath("$.code").value("FORBIDDEN"))
-                    .andExpect(jsonPath("$.message").value("Cannot register while logged in"));
+                    .andExpect(jsonPath("$.message").value("Cannot register a new user while logged in"));
         }
 
         @Test

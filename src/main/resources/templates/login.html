@@ -13,6 +13,7 @@
     <form th:action="@{/login}" method="post" class="login-form">
         <div class="mb-3">
             <input
+                    aria-label="Username"
                     autocomplete="off"
                     autofocus
                     class="form-control mx-auto w-auto"
@@ -22,7 +23,12 @@
             />
         </div>
         <div class="mb-3">
-            <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="password"/>
+            <input
+                    aria-label="Password"
+                    class="form-control mx-auto w-auto"
+                    name="password"
+                    placeholder="Password"
+                    type="password"/>
         </div>
         <button class="btn btn-primary login-button" type="submit">Log In</button>
         <div class="d-flex justify-content-center" style="display: none">

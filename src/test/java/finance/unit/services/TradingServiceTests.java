@@ -27,6 +27,8 @@ import java.util.Optional;
 import static finance.dtos.ErrorCode.*;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
+import static finance.fixtures.HoldingFixtures.appleHolding;
+import static finance.fixtures.HoldingFixtures.microsoftHolding;
 import static finance.fixtures.StockFixtures.*;
 import static finance.fixtures.TradingFixtures.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,8 +51,7 @@ public class TradingServiceTests {
         transactionService = new TradingService(mockUserRepo, mockTransactionRepo, mockStockService);
 
         testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
-        Holding appleHolding = new Holding(testUser, "AAPL", "Apple", 5L);
-        testUser.addHolding(appleHolding);
+        testUser.addHolding(appleHolding(testUser, 5L));
 
         when(mockStockService.fetchPrices(any())).thenReturn(
                 Map.of("AAPL", APPLE_STOCK_RESULT,
@@ -297,8 +298,7 @@ public class TradingServiceTests {
 
             @BeforeEach
             void setUpSell() {
-                Holding microsoftHolding = new Holding(testUser, "MSFT", "Microsoft", 10L);
-                testUser.addHolding(microsoftHolding);
+                testUser.addHolding(microsoftHolding(testUser, 10L));
             }
 
             @Test

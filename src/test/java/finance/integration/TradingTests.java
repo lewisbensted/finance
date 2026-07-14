@@ -84,6 +84,14 @@ public class TradingTests {
         assertEquals("AAPL", transactions.get(2).symbol());
         assertEquals(TransactionType.BUY, transactions.get(2).transactionType());
 
+        ResponseEntity<HoldingDTO> holdingResponse = restTemplate.exchange(
+                "/api/holding?symbol=AAPL",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                HoldingDTO.class
+        );
+        assertEquals(appleHoldingDTO(2L), holdingResponse.getBody());
+
         ResponseEntity<PageResponse<HoldingDTO>> holdingsResponse = testUtils.getHoldings(headers);
         assertNotNull(holdingsResponse.getBody());
         List<HoldingDTO> holdings = holdingsResponse.getBody().content();
@@ -91,7 +99,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        appleHolding(2L), microsoftHolding(2L), oracleHolding(2L)
+                        appleHoldingDTO(2L), microsoftHoldingDTO(2L), oracleHoldingDTO(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -131,7 +139,7 @@ public class TradingTests {
         assertEquals(2, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        microsoftHolding(2L), oracleHolding(2L)
+                        microsoftHoldingDTO(2L), oracleHoldingDTO(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -173,7 +181,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        appleHolding(1L), microsoftHolding(1L), oracleHolding(1L)
+                        appleHoldingDTO(1L), microsoftHoldingDTO(1L), oracleHoldingDTO(1L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
@@ -213,7 +221,7 @@ public class TradingTests {
         assertEquals(3, holdings.size());
         assertThat(holdings)
                 .containsExactlyInAnyOrder(
-                        appleHolding(2L), microsoftHolding(1L), oracleHolding(2L)
+                        appleHoldingDTO(2L), microsoftHoldingDTO(1L), oracleHoldingDTO(2L)
                 );
 
         ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);

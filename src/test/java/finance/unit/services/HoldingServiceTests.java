@@ -3,11 +3,14 @@ package finance.unit.services;
 import finance.dtos.HoldingDTO;
 import finance.entities.Holding;
 import finance.entities.User;
+import finance.exceptions.NotFoundException;
 import finance.repositories.HoldingRepository;
 import finance.repositories.UserRepository;
 import finance.services.HoldingService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static finance.fixtures.HoldingFixtures.appleHolding;
+import static finance.fixtures.HoldingFixtures.microsoftHolding;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,26 +41,58 @@ public class HoldingServiceTests {
         testUser = new User("testuser", "testuser@test.com", "test", "user", "test_hash", BigDecimal.valueOf(100));
     }
 
-    @Test
-    void testUserNotFound() {
-        when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> holdingService.fetchHoldings(1L, PageRequest.of(0, 10)));
-        assertEquals("User not found", exception.getMessage());
-        verifyNoInteractions(mockHoldingRepo);
+    @Nested
+    class TestFetchHoldings {
+        @Test
+        void testUserNotFound() {
+            when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
+            NotFoundException exception = assertThrows(NotFoundException.class, () -> holdingService.fetchHoldings(1L, PageRequest.of(0, 10)));
+            assertEquals("User not found", exception.getMessage());
+            verifyNoInteractions(mockHoldingRepo);
+        }
+
+        @Test
+        void testSuccess() {
+            when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
+            when(mockHoldingRepo.findByIdUserId(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(appleHolding(testUser, 40L), microsoftHolding(testUser, 50L))));
+            List<HoldingDTO> result = holdingService.fetchHoldings(1L, PageRequest.of(0, 10)).getContent();
+
+            assertEquals(2, result.size());
+            assertEquals("AAPL", result.get(0).symbol());
+            assertEquals("MSFT", result.get(1).symbol());
+        }
     }
 
-    @Test
-    void testSuccess() {
-        Holding appleHolding = new Holding(testUser, "AAPL", "Apple", 40L);
-        Holding microsoftHolding = new Holding(testUser, "MSFT", "Microsoft", 50L);
+    @Nested
+    class TestFetchHolding {
+        @Test
+        void testUserNotFound() {
+            when(mockUserRepo.findById(any())).thenReturn(Optional.empty());
+            NotFoundException exception = assertThrows(NotFoundException.class, () -> holdingService.fetchHolding(1L, "AAPL"));
+            assertEquals("User not found", exception.getMessage());
+            verifyNoInteractions(mockHoldingRepo);
+        }
 
+        @Test
+        void testSuccess() {
+            Holding testHolding = appleHolding(testUser, 40L);
 
-        when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-        when(mockHoldingRepo.findByIdUserId(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(appleHolding, microsoftHolding)));
-        List<HoldingDTO> result = holdingService.fetchHoldings(1L, PageRequest.of(0, 10)).getContent();
+            when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
+            when(mockHoldingRepo.findByIdUserIdAndIdSymbol(any(), any())).thenReturn(Optional.of(testHolding));
+            HoldingDTO result = holdingService.fetchHolding(1L, "AAPL");
 
-        assertEquals(2, result.size());
-        assertEquals("AAPL", result.get(0).symbol());
-        assertEquals("MSFT", result.get(1).symbol());
+            assertEquals(testHolding.toDTO(), result);
+        }
+
+        @Test
+        void testHoldingNotFound() {
+            when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
+            when(mockHoldingRepo.findByIdUserIdAndIdSymbol(any(), any())).thenReturn(Optional.empty());
+            NotFoundException exception = assertThrows(
+                    NotFoundException.class,
+                    () -> holdingService.fetchHolding(1L, "AAPL")
+            );
+            assertEquals("Holding not found", exception.getMessage());
+        }
     }
 }

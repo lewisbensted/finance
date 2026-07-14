@@ -49,22 +49,25 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbar">
-            <th:block th:if="${session.USER_SESSION != null}">
-                <ul class="navbar-nav me-auto mt-2">
+
+            <ul class="navbar-nav me-auto mt-2">
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Search</a></li>
+                <th:block th:if="${session.USER_SESSION != null}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/}">Holdings</a></li>
-                    <li class="nav-item"><a class="nav-link" th:href="@{/search}">Search</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/transactions}">Transactions</a></li>
-                </ul>
-                <ul class="navbar-nav ms-auto mt-2">
-                    <li class="nav-item"><a class="nav-link logout-button" href="#">Log Out</a></li>
-                </ul>
-            </th:block>
-            <th:block th:unless="${session.USER_SESSION != null}">
-                <ul class="navbar-nav ms-auto mt-2">
+                </th:block>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mt-2">
+                <th:block th:unless="${session.USER_SESSION != null}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/register}">Register</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/login}">Log In</a></li>
-                </ul>
-            </th:block>
+                </th:block>
+                <th:block th:if="${session.USER_SESSION != null}">
+                    <li class="nav-item"><a class="nav-link logout-button" href="#">Log Out</a></li>
+                </th:block>
+            </ul>
+
         </div>
     </div>
 </nav>
@@ -86,6 +89,12 @@
     </form>
 
 </footer>
+
+<dialog class="error-modal">
+    <ul class="error-list"></ul>
+    <button class="close-modal">Close</button>
+</dialog>
+
 <div layout:fragment="scripts">
     <script th:src="@{/js/auth.js}"></script>
     <script th:src="@{/js/layout.js}"></script>

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static finance.fixtures.HoldingFixtures.appleHolding;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -18,7 +19,7 @@ public class HoldingTests {
 
     @BeforeEach
     void setUp() {
-        testHolding = new Holding(testUser, "AAPL", "Apple", 10L);
+        testHolding = appleHolding(testUser, 10L);
     }
 
     @Nested

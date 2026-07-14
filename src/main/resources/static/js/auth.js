@@ -1,10 +1,21 @@
-const messages = document.querySelector(".messages");
+const errorModal = document.querySelector(".error-modal");
+const errorList = document.querySelector(".error-list");
+const closeModal = document.querySelector(".close-modal");
 
-const displayMessage = (text) => {
-    const div = document.createElement("div");
-    div.className = "message";
-    div.textContent = text;
-    messages.appendChild(div);
+
+closeModal.onclick = () => {
+        errorList.innerHTML = "";
+        errorModal.close();
+    };
+
+const displayMessages = (messages) => {
+    messages.forEach(message => {
+            const li = document.createElement("li");
+            li.textContent = message;
+            errorList.appendChild(li);
+        });
+
+        errorModal.showModal();
 };
 
 const loginButton = document.querySelector(".login-button");
@@ -20,8 +31,6 @@ loginForm.addEventListener("submit", async (event) => {
     document
         .querySelectorAll("input, button")
         .forEach((el) => (el.disabled = true));
-
-    messages.textContent = "";
 
     try {
         const res = await fetch("/api/login", {
@@ -43,13 +52,12 @@ loginForm.addEventListener("submit", async (event) => {
                 data.code !== "MALFORMED_REQUEST"
             ) {
                 console.error(data);
-
                 if (data.code === "INVALID_REQUEST") {
-                    Object.values(data.fields)
+                    const messages = Object.values(data.fields)
                         .flat()
-                        .forEach(displayMessage);
+                    displayMessages(messages)
                 } else {
-                    displayMessage(data.message);
+                    displayMessages([data.message]);
                 }
             } else {
                 throw new Error(
@@ -64,7 +72,7 @@ loginForm.addEventListener("submit", async (event) => {
         window.location.href = "/";
     } catch (error) {
         console.error(error);
-        displayMessage("Unexpected error");
+        displayMessages(["Unexpected error"]);
     } finally {
         loginButton.style.display = "";
         loginSpinner.style.setProperty("display", "none", "important");
@@ -101,7 +109,6 @@ loginForm.addEventListener("submit", async (event) => {
 		registerButton.style.display = "none";
 		registerSpinner.style.setProperty("display", "flex", "important");
 		document.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
-		messages.textContent = "";
 		try {
 			const res = await fetch("/api/register", {
 				method: "POST",
@@ -118,11 +125,11 @@ loginForm.addEventListener("submit", async (event) => {
 				const data = await res.json();
 				if ([400, 409, 429].includes(res.status) && data.error !== "MALFORMED_REQUEST") {
 					if (data.code === "INVALID_REQUEST") {
-                                        Object.values(data.fields)
-                                            .flat()
-                                            .forEach(displayMessage);
+                                        const messages = Object.values(data.fields)
+                                                                .flat()
+                                                            displayMessages(messages)
                                     } else {
-                                        displayMessage(data.message);
+                                        displayMessages([data.message]);
                                     }
 				} else {
 					throw new Error(data?.error || `Error ${res.status}: ${res.statusText}`);
@@ -133,7 +140,7 @@ loginForm.addEventListener("submit", async (event) => {
 			setTimeout(() => (window.location.href = "/login"), 1200);
 		} catch (error) {
 			console.error(error);
-			displayMessage("Unexpected error");
+			displayMessages(["Unexpected error"]);
 		} finally {
 			registerButton.style.display = "";
 			registerSpinner.style.setProperty("display", "none", "important");

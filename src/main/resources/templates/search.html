@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout}">
+
+<head>
+    <title layout:fragment="title">Search</title>
+</head>
+
+<body>
+
+<main layout:fragment="content">
+
+    <h1>Search</h1>
+    <br />
+
+    <form id="quote-form">
+        <div class="mb-3">
+            <input
+                    autocomplete="off"
+                    autofocus
+                    class="form-control mx-auto w-auto quote-input"
+                    name="symbol"
+                    placeholder="Symbol"
+                    type="text"
+            />
+        </div>
+
+        <button class="btn btn-primary quote-button" type="submit">
+            Get Quote
+        </button>
+
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary quote-spinner" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </form>
+
+
+    <div class="table-container">
+        <table style="display: none">
+            <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Symbol</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Value</th>
+                <th>Sell</th>
+                <th>Buy</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr class="holding">
+                <td class="name"></td>
+                <td class="symbol"></td>
+                <td class="current-shares"></td>
+                <td class="price"></td>
+                <td class="value"></td>
+
+                <td>
+                    <input type="number"
+                           name="shares"
+                           class="sell-input"
+                           disabled
+                           step="1"
+                           form="sell-form" />
+                </td>
+
+                <td>
+                    <input type="number"
+                           name="shares"
+                           class="buy-input"
+                           disabled
+                           step="1"
+                           form="buy-form" />
+                </td>
+            </tr>
+            </tbody>
+
+            <tfoot>
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="footer">Total</td>
+                <td></td>
+                <td class="sell-total"></td>
+                <td class="buy-total"></td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="footer">Balance</td>
+
+                <td class="balance">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+
+                <td>
+                    <form id="sell-form">
+                        <input type="hidden" name="symbol" />
+                        <input type="hidden" name="price" />
+                        <input type="hidden" name="current_shares" />
+
+                        <button type="submit"
+                                class="btn btn-primary sell-button"
+                                disabled>
+                            Sell
+                        </button>
+
+                        <div class="spinner-border text-primary sell-spinner" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </form>
+                </td>
+
+                <td>
+                    <form id="buy-form">
+                        <input type="hidden" name="symbol" />
+                        <input type="hidden" name="price" />
+                        <input type="hidden" name="current_shares" />
+
+                        <button type="submit"
+                                class="btn btn-primary buy-button"
+                                disabled>
+                            Buy
+                        </button>
+
+                        <div class="spinner-border text-primary buy-spinner" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <span class="message"></span>
+
+</main>
+
+
+<th:block layout:fragment="scripts">
+    <script th:src="@{/js/search.js}"></script>
+</th:block>
+
+</body>
+</html>

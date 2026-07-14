@@ -1,5 +1,6 @@
 package finance.entities;
 
+import finance.dtos.UserDTO;
 import finance.exceptions.InsufficientFundsException;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;

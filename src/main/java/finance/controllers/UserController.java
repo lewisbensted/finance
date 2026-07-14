@@ -31,7 +31,7 @@ public class UserController {
     @PostMapping(value = "/api/register")
     public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid RegisterDTO body, HttpSession session) {
         if (session.getAttribute("USER_SESSION") != null)
-            throw new ForbiddenException("Cannot register while logged in");
+            throw new ForbiddenException("Cannot register a new user while logged in");
         User newUser = userService.register(body);
         return ResponseEntity.status(HttpStatus.CREATED).body(new UserDTO(newUser));
     }

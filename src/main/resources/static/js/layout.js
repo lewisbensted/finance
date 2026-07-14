@@ -31,7 +31,6 @@
         };
 
         document.addEventListener("DOMContentLoaded", async function () {
-            // Adapted from https://stackoverflow.com/a/10162353
             const html =
                 "<!DOCTYPE " +
                 document.doctype.name +
