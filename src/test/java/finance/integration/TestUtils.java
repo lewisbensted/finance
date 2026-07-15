@@ -90,12 +90,12 @@ public class TestUtils {
         );
     }
 
-    public ResponseEntity<UserDTO> getBalance(HttpHeaders headers) {
+    public ResponseEntity<BigDecimal> getBalance(HttpHeaders headers) {
         return restTemplate.exchange(
                 "/api/balance",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                UserDTO.class
+                BigDecimal.class
         );
     }
 

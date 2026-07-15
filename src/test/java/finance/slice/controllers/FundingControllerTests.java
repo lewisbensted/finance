@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -182,12 +183,12 @@ public class FundingControllerTests {
         @Test
         void test200Success() throws Exception {
             when(accountService.getBalance(anyLong()))
-                    .thenReturn(testUser);
+                    .thenReturn(BigDecimal.valueOf(10));
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.username").value("testuser"));
+                    .andExpect(content().string("10"));
         }
     }
 }

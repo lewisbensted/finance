@@ -42,7 +42,7 @@ public class FundingController {
     @GetMapping(value = "/api/balance")
     ResponseEntity<BigDecimal> getBalance(HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
-        User user = accountService.getBalance(sessionUser.id());
-        return ResponseEntity.ok().body(user.getBalance());
+        BigDecimal balance = accountService.getBalance(sessionUser.id());
+        return ResponseEntity.ok().body(balance);
     }
 }

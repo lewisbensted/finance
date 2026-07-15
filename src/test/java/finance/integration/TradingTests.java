@@ -102,9 +102,9 @@ public class TradingTests {
                         appleHoldingDTO(2L), microsoftHoldingDTO(2L), oracleHoldingDTO(2L)
                 );
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(40)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(40)));
     }
 
     @Test
@@ -142,9 +142,9 @@ public class TradingTests {
                         microsoftHoldingDTO(2L), oracleHoldingDTO(2L)
                 );
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(50)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(50)));
 
     }
 
@@ -184,9 +184,9 @@ public class TradingTests {
                         appleHoldingDTO(1L), microsoftHoldingDTO(1L), oracleHoldingDTO(1L)
                 );
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(70)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(70)));
     }
 
     @Test
@@ -224,9 +224,9 @@ public class TradingTests {
                         appleHoldingDTO(2L), microsoftHoldingDTO(1L), oracleHoldingDTO(2L)
                 );
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(50)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(50)));
     }
 }
 

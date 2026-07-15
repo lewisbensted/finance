@@ -32,8 +32,9 @@ public class FundingService {
         return userRepository.save(user);
     }
 
-    public User getBalance(Long userId) {
-        return userRepository.findById(userId)
+    public BigDecimal getBalance(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+        return user.getBalance();
     }
 }

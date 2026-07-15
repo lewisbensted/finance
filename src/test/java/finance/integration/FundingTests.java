@@ -50,9 +50,9 @@ public class FundingTests {
         ResponseEntity<UserDTO> depositResponse = testUtils.deposit(BigDecimal.valueOf(30), headers);
         assertEquals(HttpStatus.OK, depositResponse.getStatusCode());
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(80)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(80)));
     }
 
     @Test
@@ -61,9 +61,9 @@ public class FundingTests {
         ResponseEntity<String> withdrawResponse = testUtils.withdraw(BigDecimal.valueOf(30), headers);
         assertEquals(HttpStatus.OK, withdrawResponse.getStatusCode());
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(20)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(20)));
     }
 
     @Test
@@ -75,8 +75,8 @@ public class FundingTests {
         ErrorDTO error = objectMapper.readValue(withdrawResponse.getBody(), ErrorDTO.class);
         assertEquals("Insufficient funds", error.message());
 
-        ResponseEntity<UserDTO> balanceResponse = testUtils.getBalance(headers);
+        ResponseEntity<BigDecimal> balanceResponse = testUtils.getBalance(headers);
         assertNotNull(balanceResponse.getBody());
-        assertEquals(0, balanceResponse.getBody().balance().compareTo(BigDecimal.valueOf(50)));
+        assertEquals(0, balanceResponse.getBody().compareTo(BigDecimal.valueOf(50)));
     }
 }
