@@ -13,7 +13,6 @@ const quoteSpinner = document.querySelector(".quote-spinner");
 const quoteButton = document.querySelector(".quote-button");
 const quoteTable = document.querySelector("table");
 
-
 const buyForm = document.querySelector("#buy-form");
 const sellForm = document.querySelector("#sell-form");
 
@@ -53,10 +52,10 @@ quoteForm.addEventListener("submit", async (e) => {
 
 	holding = createHolding({
 		symbol: shareSymbol,
-		nameCell: document.querySelector(".name"), 
-		symbolCell: document.querySelector(".symbol"), 
+		nameCell: document.querySelector(".name"),
+		symbolCell: document.querySelector(".symbol"),
 		sharesCell: document.querySelector(".current-shares"),
-		priceCell: document.querySelector(".price"), 
+		priceCell: document.querySelector(".price"),
 		valueCell: document.querySelector(".value"),
 		buyInput: document.querySelector(".buy-input"),
 		sellInput: document.querySelector(".sell-input"),
@@ -69,10 +68,13 @@ quoteForm.addEventListener("submit", async (e) => {
 	holding.sellInput.value = holding.buyInput.value = "";
 
 	try {
-		const [shares, sharePrice] = await Promise.all([
+		await Promise.all([
 			updateShares(holding),
 			updatePrice(holding, balance, transactionInProgress, true),
 		]);
+
+		const shares = holding.shares;
+		const sharePrice = holding.latestPrice;
 
 		buyForm.symbol.value = sellForm.symbol.value = shareSymbol;
 		holding.symbolCell.textContent = shareSymbol;

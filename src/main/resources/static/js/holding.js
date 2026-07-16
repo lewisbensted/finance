@@ -3,5 +3,6 @@ export const createHolding = ({symbol, companyName = null, shares = null, ...ele
     companyName: companyName,
     shares: shares,
     price: null,
+    value = null,
     ...elements
 })

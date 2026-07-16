@@ -24,19 +24,21 @@ export const updateShares = async (holding) => {
 		const symbol = holding.symbol;
 		const shares = await fetchShares(symbol);
 		if (shares === null) {
-			holding.sharesCell.dataset.value = holding.sharesCell.textContent = "";
+			holding.shares = 0;
+			holding.sharesCell.textContent = "";
 			buyForm.current_shares.value = sellForm.current_shares.value = "";
 			holding.sellInput.max = 0;
 			holding.sellInput.disabled = sellButton.disabled = true;
 			holding.sellInput.min = 1;
 			holding.valueCell.dataset.value = holding.valueCell.textContent = ""
+			holding.value = 0;
 
 			return null
-
 		}
 		holding.sharesCell.dataset.value = holding.sharesCell.textContent = shares;
 		buyForm.current_shares.value = sellForm.current_shares.value = shares;
 		holding.sellInput.max = shares;
+		holding.shares = shares
 		if (shares > 0) {
 			holding.sellInput.disabled = false;
 			sellButton.disabled = false;
