@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "strict": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true
+  },
+  "include": [
+    "src/main/resources/static/js/**/*"
+  ]
+}
