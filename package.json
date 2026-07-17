@@ -1,0 +1,20 @@
+{
+  "name": "cs50-finance",
+  "version": "1.0.0",
+  "description": "Frontend of CS50 Finanace project",
+  "homepage": "https://github.com/lewisbensted/finance#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lewisbensted/finance.git"
+  },
+  "license": "ISC",
+  "author": "Lewis Bensted",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.64.0"
+  }
+}
