@@ -1,20 +1,20 @@
+import { CustomError } from "./types/CustomError.js";
 let balance = null;
 export const fetchBalance = async () => {
     const res = await fetch("/api/balance");
-    const data = await res.json();
+    const response = (await res.json());
     if (!res.ok) {
-        if (data?.code === "UNAUTHENTICATED") {
+        if (response.error?.code === "UNAUTHENTICATED") {
             sessionStorage.removeItem("USER_SESSION");
             balance = null;
             return null;
         }
-        ;
-        throw new Error(data?.message || `Error ${res.status}: ${res.statusText}`);
+        throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
     }
-    if (typeof data !== "number" || Number.isNaN(data)) {
+    if (typeof response.data !== "number" || Number.isNaN(response.data)) {
         throw new Error("Invalid or missing balance");
     }
-    balance = data;
+    balance = response.data;
     return balance;
 };
 export const setBalance = (value) => {

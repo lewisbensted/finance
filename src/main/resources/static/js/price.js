@@ -1,4 +1,4 @@
-import { CustomError } from "./types/CustomError";
+import { CustomError } from "./types/CustomError.js";
 const sellTotal = document.querySelector(".sell-total");
 const buyTotal = document.querySelector(".buy-total");
 const totalCell = document.querySelector(".total");
@@ -6,11 +6,11 @@ const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
 const fetchPrices = async (symbols) => {
     const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
-    const response = await res.json();
+    const response = (await res.json());
     if (!res.ok)
         throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
     if (!response.data?.stocks || typeof response.data.stocks !== "object") {
-        throw new Error("Invalid response from server.");
+        throw new Error("Invalid response from server");
     }
     return {
         stocks: new Map(Object.entries(response.data.stocks)),
@@ -74,8 +74,7 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
         }
         let buySum = 0;
         for (const holding of holdings) {
-            buySum +=
-                Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
+            buySum += Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
         }
         for (const holding of holdings) {
             const symbol = holding.symbol;
@@ -164,10 +163,7 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
                 buyInput.disabled = true;
                 sellInput.disabled = true;
                 if (isFirstLoad) {
-                    priceCell.textContent =
-                        valueCell.textContent =
-                            totalCell.textContent =
-                                "$--";
+                    priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
                 }
             }
         });

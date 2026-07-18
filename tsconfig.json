@@ -3,14 +3,14 @@
     "target": "ES2022",
     "module": "ES2022",
     "strict": true,
-    "allowJs": true,
-    "checkJs": true,
+    "allowJs": false,
+    "checkJs": false,
     "noEmit": false,
     "outDir": "./src/main/resources/static/js",
 		"rootDir": "./src/main/resources/static/ts",
     
   },
   "include": [
-    "src/main/resources/static/ts/**/*.ts"
+    "src/main/resources/static/ts/**/*.ts",
   ]
 }

@@ -1,7 +1,7 @@
-import { ApiResponse } from "./types/ApiResponse";
-import { CustomError } from "./types/CustomError";
-import { Holding } from "./types/Holding";
-import { Stock, StockResponse } from "./types/Stock";
+import { ApiResponse } from "./types/ApiResponse.js";
+import { CustomError } from "./types/CustomError.js";
+import { Holding } from "./types/Holding.js";
+import { Stock, StockResponse } from "./types/Stock.js";
 
 const sellTotal = document.querySelector(".sell-total");
 const buyTotal = document.querySelector(".buy-total");
@@ -9,15 +9,15 @@ const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
 
-const fetchPrices = async (
-	symbols: string[],
-) => {
-	const res = await fetch(
-		`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`,
-	);
-	const response = await res.json() as ApiResponse<StockResponse>;
-	if (!res.ok) 
-		throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
+const fetchPrices = async (symbols: string[]) => {
+	const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
+	const response = (await res.json()) as ApiResponse<StockResponse>;
+	if (!res.ok)
+		throw new CustomError(
+			response.error?.message ?? `Request failed ${res.status}`,
+			res.status,
+			response.error?.code,
+		);
 	if (!response.data?.stocks || typeof response.data.stocks !== "object") {
 		throw new Error("Invalid response from server");
 	}
@@ -27,16 +27,13 @@ const fetchPrices = async (
 	};
 };
 
-const isValidStock = (
-	expectedSymbol: string,
-	stock: unknown,
-): stock is Stock => {
+const isValidStock = (expectedSymbol: string, stock: unknown): stock is Stock => {
 	if (
 		typeof stock !== "object" ||
-    stock === null ||
-    !("symbol" in stock) ||
-    !("companyName" in stock) ||
-    !("latestPrice" in stock)
+		stock === null ||
+		!("symbol" in stock) ||
+		!("companyName" in stock) ||
+		!("latestPrice" in stock)
 	) {
 		console.warn(`Missing or invalid data for stock: ${expectedSymbol}`);
 		return false;
@@ -100,8 +97,7 @@ export const updatePrices = async (
 
 		let buySum = 0;
 		for (const holding of holdings) {
-			buySum +=
-				Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
+			buySum += Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
 		}
 
 		for (const holding of holdings) {
@@ -147,8 +143,7 @@ export const updatePrices = async (
 			const stock = stockMap.get(symbol);
 			const { buyInput, sellInput } = holding;
 			if (isValidStock(symbol, stock)) {
-				const remaining =
-					balance - buySum + latestPrice * (Number(buyInput.value) || 0);
+				const remaining = balance - buySum + latestPrice * (Number(buyInput.value) || 0);
 				const availableShares = Math.floor(remaining / latestPrice);
 				const availableSharesMax = Math.floor(balance / latestPrice);
 				if (availableSharesMax > 0) available++;
@@ -166,10 +161,8 @@ export const updatePrices = async (
 
 		const total = calculateTotal(holdings);
 		DOMupdates.push(() => {
-			if (totalCell)
-				totalCell.style.color = updated === holdings.length ? "" : "red";
-			if (totalCell)
-				totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
+			if (totalCell) totalCell.style.color = updated === holdings.length ? "" : "red";
+			if (totalCell) totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
 			if (isFirstLoad) {
 				sellButton.disabled = false;
 				if (balance && available > 0) buyButton.disabled = false;
@@ -189,10 +182,7 @@ export const updatePrices = async (
 				buyInput.disabled = true;
 				sellInput.disabled = true;
 				if (isFirstLoad) {
-					priceCell.textContent =
-						valueCell.textContent =
-							totalCell.textContent =
-								"$--";
+					priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
 				}
 			}
 		});

@@ -1,6 +1,6 @@
-import { ApiResponse } from "./types/ApiResponse";
-import { CustomError } from "./types/CustomError";
-import { Holding } from "./types/Holding";
+import { ApiResponse } from "./types/ApiResponse.js";
+import { CustomError } from "./types/CustomError.js";
+import { Holding, HoldingDTO } from "./types/Holding.js";
 
 const sellButton = document.querySelector(".sell-button");
 
@@ -9,7 +9,7 @@ const sellForm = document.querySelector("#sell-form");
 
 const fetchShares = async (symbol: string) => {
 	const res = await fetch(`/api/holding?symbol=${encodeURIComponent(symbol)}`);
-	const response = (await res.json()) as ApiResponse<{ shares: number }>;
+	const response = (await res.json()) as ApiResponse<HoldingDTO>;
 	if (!res.ok) {
 		if (response.error?.code === "UNAUTHENTICATED") return null;
 		if (response.error?.code === "NOT_FOUND") return 0;

@@ -1,5 +1,6 @@
 package finance.controllers;
 
+import finance.dtos.ApiResponse;
 import finance.dtos.ErrorDTO;
 import finance.dtos.ValidationErrorDTO;
 import finance.exceptions.*;
@@ -24,7 +25,8 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorDTO> handleMessageNotReadable(HttpMessageNotReadableException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(MALFORMED_REQUEST, "Empty or unreadable request body"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorDTO(MALFORMED_REQUEST, "Empty or unreadable request body"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -34,7 +36,8 @@ public class ApiExceptionHandler {
             fieldErrors.putIfAbsent(error.getField(), new ArrayList<>());
             fieldErrors.get(error.getField()).add(error.getDefaultMessage());
         });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ValidationErrorDTO(INVALID_REQUEST, "Validation error(s)", fieldErrors));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ValidationErrorDTO(INVALID_REQUEST, "Validation error(s)", fieldErrors));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -43,7 +46,8 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ErrorDTO> handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+    public ResponseEntity<ErrorDTO> handleMissingServletRequestParameterException(
+            MissingServletRequestParameterException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorDTO(INVALID_REQUEST, ex.getMessage()));
     }
 
@@ -53,8 +57,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorDTO> handleUnauthenticated(AuthenticationException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorDTO(ex.getCode(), ex.getMessage()));
+    public ResponseEntity<ApiResponse<Void>> handleUnauthenticated(AuthenticationException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse<>(null, new ErrorDTO(ex.getCode(), ex.getMessage())));
     }
 
     @ExceptionHandler(NotFoundException.class)
@@ -69,12 +74,14 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage()));
     }
 
     @ExceptionHandler(InsufficientSharesException.class)
     public ResponseEntity<ErrorDTO> handleInsufficientSharesException(InsufficientSharesException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new ErrorDTO(INSUFFICIENT_SHARES, ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorDTO(INSUFFICIENT_SHARES, ex.getMessage()));
     }
 
     @ExceptionHandler(RegistrationException.class)

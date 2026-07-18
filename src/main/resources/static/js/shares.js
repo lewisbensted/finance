@@ -1,19 +1,21 @@
+import { CustomError } from "./types/CustomError.js";
 const sellButton = document.querySelector(".sell-button");
 const buyForm = document.querySelector("#buy-form");
 const sellForm = document.querySelector("#sell-form");
 const fetchShares = async (symbol) => {
     const res = await fetch(`/api/holding?symbol=${encodeURIComponent(symbol)}`);
-    const data = await res.json();
+    const response = (await res.json());
     if (!res.ok) {
-        if (data.code === "UNAUTHENTICATED")
+        if (response.error?.code === "UNAUTHENTICATED")
             return null;
-        if (data.code === "NOT_FOUND")
+        if (response.error?.code === "NOT_FOUND")
             return 0;
-        throw new Error(data?.message || `Error ${res.status}: ${res.statusText}`);
+        throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
     }
-    if (data.shares === undefined)
-        throw new Error("Missing data");
-    return data.shares;
+    if (response.data?.shares === undefined ||
+        typeof response.data.shares !== "number")
+        throw new Error("Invalid response from server");
+    return response.data.shares;
 };
 export const updateShares = async (holding) => {
     try {

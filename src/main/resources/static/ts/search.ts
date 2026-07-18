@@ -48,10 +48,7 @@ quoteForm.addEventListener("submit", async (e) => {
 		clearInterval(priceIntervalId);
 		priceIntervalId = undefined;
 	}
-	const shareSymbol = document
-		.querySelector(".quote-input")
-		.value.trim()
-		.toUpperCase();
+	const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
 
 	if (!shareSymbol) {
 		message.textContent = "Invalid input - please enter a symbol.";
@@ -107,21 +104,17 @@ quoteForm.addEventListener("submit", async (e) => {
 		quoteTable.style.display = "";
 
 		priceIntervalId = setInterval(() => {
-			updatePrices(holdingMap, balance, transactionInProgress, true).then(
-				() => {
-					if (!transactionInProgress) {
-						if (buyTotal?.textContent)
-							holding.buyInput.dispatchEvent(new Event("input"));
-						if (sellTotal?.textContent)
-							holding.sellInput.dispatchEvent(new Event("input"));
-					}
-				},
-			);
+			updatePrices(holdingMap, balance, transactionInProgress, true).then(() => {
+				if (!transactionInProgress) {
+					if (buyTotal?.textContent) holding.buyInput.dispatchEvent(new Event("input"));
+					if (sellTotal?.textContent) holding.sellInput.dispatchEvent(new Event("input"));
+				}
+			});
 		}, INTERVAL);
 	} catch (error) {
 		console.error(error);
 		message.textContent =
-			error instanceof CustomError && error.code === "UNPROCESSABLE"
+			error instanceof CustomError && error.code === "OPERATION_FAILED"
 				? "Symbol not found"
 				: "Unexpected error";
 	} finally {

@@ -22,6 +22,10 @@ export default tseslint.config(
 			tseslint.configs.stylisticTypeChecked,
 		],
 
+		ignores: [
+			"src/main/resources/static/js/**"
+		],
+
 		languageOptions: {
 			parser: tseslint.parser,
 

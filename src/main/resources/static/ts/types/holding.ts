@@ -13,3 +13,9 @@ export interface Holding {
 	buyInput: HTMLInputElement | null;
 	sellInput: HTMLInputElement | null;
 }
+
+export interface HoldingDTO {
+	symbol: string;
+	companyName: string | null;
+	shares: number | null;
+}

@@ -1,6 +1,7 @@
 package finance.controllers;
 
 import finance.dtos.AmountDTO;
+import finance.dtos.ApiResponse;
 import finance.dtos.UserDTO;
 import finance.entities.User;
 import finance.services.FundingService;
@@ -40,9 +41,9 @@ public class FundingController {
     }
 
     @GetMapping(value = "/api/balance")
-    ResponseEntity<BigDecimal> getBalance(HttpSession session) {
+    ResponseEntity<ApiResponse<BigDecimal>> getBalance(HttpSession session) {
         SessionUser sessionUser = authenticateUser(session);
         BigDecimal balance = accountService.getBalance(sessionUser.id());
-        return ResponseEntity.ok().body(balance);
+        return ResponseEntity.ok().body(new ApiResponse<>(balance, null));
     }
 }
