@@ -1,9 +1,9 @@
 package finance.dtos;
 
-import java.util.List;
+import java.util.Map;
 
 public record TransactionResponseDTO (
-        List<TransactionRequestDTO> transactions,
+        Map<String, TransactionRequestDTO> transactions,
         ErrorDTO error
 ) {
 }

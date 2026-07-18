@@ -1,3 +1,4 @@
+import { CustomError } from "./types/CustomError";
 const sellTotal = document.querySelector(".sell-total");
 const buyTotal = document.querySelector(".buy-total");
 const totalCell = document.querySelector(".total");
@@ -5,16 +6,16 @@ const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
 const fetchPrices = async (symbols) => {
     const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
-    const data = await res.json().catch(() => null);
-    if (!res.ok) {
-        const error = new Error(data?.message || `Error ${res.status}: ${res.statusText}`);
-        error.status = res.status;
-        throw error;
-    }
-    if (!Array.isArray(data?.stocks)) {
+    const response = await res.json();
+    if (!res.ok)
+        throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
+    if (!response.data?.stocks || typeof response.data.stocks !== "object") {
         throw new Error("Invalid response from server.");
     }
-    return data;
+    return {
+        stocks: new Map(Object.entries(response.data.stocks)),
+        error: response.error ?? null,
+    };
 };
 const isValidStock = (expectedSymbol, stock) => {
     if (typeof stock !== "object" ||
@@ -26,7 +27,7 @@ const isValidStock = (expectedSymbol, stock) => {
         return false;
     }
     if (stock.symbol !== expectedSymbol || !stock.companyName) {
-        console.warn((`Missing or invalid data for stock: ${expectedSymbol}`));
+        console.warn(`Missing or invalid data for stock: ${expectedSymbol}`);
         return false;
     }
     const price = stock.latestPrice;
@@ -51,18 +52,20 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
         let updated = 0;
         let available = 0;
         const res = await fetchPrices(symbols);
-        const stocks = res.stocks;
-        if (isSearch && (stocks.length !== 1 || !isValidStock(symbols[0], stocks[0])))
-            throw new Error(`Invalid stock response for ${symbols[0]}`);
-        const stockMap = new Map();
-        for (const stock of stocks)
-            stockMap.set(stock.symbol, stock);
+        const stockMap = res.stocks;
+        if (isSearch) {
+            const stock = stockMap.get(symbols[0]);
+            if (stockMap.size !== 1 || !isValidStock(symbols[0], stock)) {
+                throw new Error(`Invalid stock response for ${symbols[0]}`);
+            }
+        }
         for (const holding of holdings) {
             const symbol = holding.symbol;
             const stock = stockMap.get(symbol);
             if (isValidStock(symbol, stock)) {
                 holding.latestPrice = stock.latestPrice;
-                holding.value = holding.shares === null ? null : holding.shares * holding.latestPrice;
+                holding.value =
+                    holding.shares === null ? null : holding.shares * holding.latestPrice;
                 if (isSearch) {
                     holding.companyName = stock.companyName;
                     holding.nameCell.textContent = stock.companyName;
@@ -71,7 +74,8 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
         }
         let buySum = 0;
         for (const holding of holdings) {
-            buySum += Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
+            buySum +=
+                Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
         }
         for (const holding of holdings) {
             const symbol = holding.symbol;
@@ -160,7 +164,10 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
                 buyInput.disabled = true;
                 sellInput.disabled = true;
                 if (isFirstLoad) {
-                    priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
+                    priceCell.textContent =
+                        valueCell.textContent =
+                            totalCell.textContent =
+                                "$--";
                 }
             }
         });

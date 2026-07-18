@@ -1,7 +1,8 @@
 import { fetchBalance } from "./balance.js";
 import { updatePrices } from "./price.js";
 import { updateShares } from "./shares.js";
-import { Holding } from "./types/holding.js";
+import { CustomError } from "./types/CustomError.js";
+import { Holding } from "./types/Holding.js";
 
 const message = document.querySelector(".message");
 const INTERVAL = JSON.parse(localStorage.getItem("INTERVAL"));
@@ -19,7 +20,7 @@ const sellForm = document.getElementById("sell-form");
 const buyTotal = document.querySelector(".buy-total");
 const sellTotal = document.querySelector(".sell-total");
 
-let priceIntervalId: number | undefined  = undefined;
+let priceIntervalId: number | undefined = undefined;
 const transactionInProgress = false;
 let balance: number | null = null;
 let holding: Holding | null = null;
@@ -46,14 +47,16 @@ quoteForm.addEventListener("submit", async (e) => {
 	if (priceIntervalId) {
 		clearInterval(priceIntervalId);
 		priceIntervalId = undefined;
-	};
-	const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
+	}
+	const shareSymbol = document
+		.querySelector(".quote-input")
+		.value.trim()
+		.toUpperCase();
 
 	if (!shareSymbol) {
 		message.textContent = "Invalid input - please enter a symbol.";
 		return;
 	}
-
 
 	holding = {
 		symbol: shareSymbol,
@@ -69,7 +72,6 @@ quoteForm.addEventListener("submit", async (e) => {
 		buyInput: document.querySelector(".buy-input"),
 		sellInput: document.querySelector(".sell-input"),
 	};
-
 
 	quoteButton.style.display = "none";
 	quoteSpinner.style.setProperty("display", "flex", "important");
@@ -105,16 +107,23 @@ quoteForm.addEventListener("submit", async (e) => {
 		quoteTable.style.display = "";
 
 		priceIntervalId = setInterval(() => {
-			updatePrices(holdingMap, balance,transactionInProgress,true).then(() => {
-				if (!transactionInProgress) {
-					if (buyTotal?.textContent) holding.buyInput.dispatchEvent(new Event("input"));
-					if (sellTotal?.textContent) holding.sellInput.dispatchEvent(new Event("input"));
-				}
-			});
+			updatePrices(holdingMap, balance, transactionInProgress, true).then(
+				() => {
+					if (!transactionInProgress) {
+						if (buyTotal?.textContent)
+							holding.buyInput.dispatchEvent(new Event("input"));
+						if (sellTotal?.textContent)
+							holding.sellInput.dispatchEvent(new Event("input"));
+					}
+				},
+			);
 		}, INTERVAL);
 	} catch (error) {
 		console.error(error);
-		message.textContent = error?.status === 422 ? "Symbol not found" : "Unexpected error";
+		message.textContent =
+			error instanceof CustomError && error.code === "UNPROCESSABLE"
+				? "Symbol not found"
+				: "Unexpected error";
 	} finally {
 		quoteButton.style.display = "";
 		quoteSpinner.style.setProperty("display", "none", "important");

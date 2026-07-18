@@ -3,7 +3,6 @@ package finance.services;
 import finance.dtos.LoginDTO;
 import finance.dtos.PasswordDTO;
 import finance.dtos.RegisterDTO;
-import finance.dtos.UserDTO;
 import finance.entities.User;
 import finance.exceptions.NotFoundException;
 import finance.exceptions.RegistrationException;

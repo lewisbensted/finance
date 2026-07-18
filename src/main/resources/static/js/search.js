@@ -1,6 +1,7 @@
 import { fetchBalance } from "./balance.js";
 import { updatePrices } from "./price.js";
 import { updateShares } from "./shares.js";
+import { CustomError } from "./types/CustomError.js";
 const message = document.querySelector(".message");
 const INTERVAL = JSON.parse(localStorage.getItem("INTERVAL"));
 const balanceCell = document.querySelector(".balance");
@@ -40,8 +41,10 @@ quoteForm.addEventListener("submit", async (e) => {
         clearInterval(priceIntervalId);
         priceIntervalId = undefined;
     }
-    ;
-    const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
+    const shareSymbol = document
+        .querySelector(".quote-input")
+        .value.trim()
+        .toUpperCase();
     if (!shareSymbol) {
         message.textContent = "Invalid input - please enter a symbol.";
         return;
@@ -101,7 +104,10 @@ quoteForm.addEventListener("submit", async (e) => {
     }
     catch (error) {
         console.error(error);
-        message.textContent = error?.status === 422 ? "Symbol not found" : "Unexpected error";
+        message.textContent =
+            error instanceof CustomError && error.code === "UNPROCESSABLE"
+                ? "Symbol not found"
+                : "Unexpected error";
     }
     finally {
         quoteButton.style.display = "";

@@ -1,5 +1,6 @@
 package finance.controllers;
 
+import finance.dtos.ApiResponse;
 import finance.dtos.HoldingDTO;
 import finance.dtos.PageResponse;
 import finance.services.HoldingService;
@@ -45,10 +46,10 @@ public class HoldingController {
     }
 
     @GetMapping(value = "/api/holding")
-    ResponseEntity<HoldingDTO> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
+    ResponseEntity<ApiResponse<HoldingDTO>> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
         SessionUser sessionUser = authenticateUser(session);
 
         HoldingDTO holding = holdingService.fetchHolding(sessionUser.id(), symbol);
-        return ResponseEntity.ok().body(holding);
+        return ResponseEntity.ok().body(new ApiResponse<>(holding, null));
     }
 }

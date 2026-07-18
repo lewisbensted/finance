@@ -11,7 +11,7 @@ const fetchShares = async (symbol) => {
             return 0;
         throw new Error(data?.message || `Error ${res.status}: ${res.statusText}`);
     }
-    if (data.shares == undefined)
+    if (data.shares === undefined)
         throw new Error("Missing data");
     return data.shares;
 };

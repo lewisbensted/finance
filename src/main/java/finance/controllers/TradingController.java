@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,52 +32,69 @@ public class TradingController {
     }
 
     @PostMapping(value = "/api/buy")
-    ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
+    ResponseEntity<TransactionResponseDTO> buyStocks(HttpSession session,
+            @RequestBody List<TransactionRequestDTO> transactions) {
         SessionUser sessionUser = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
-        List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), BUY, transactions);
+        Map<String, TransactionRequestDTO> successful = new HashMap<>();
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), BUY,
+                transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
+            String symbol = transactionResult.transaction().symbol();
             if (transactionResult.error() != null)
-                errorFields.put(transactionResult.transaction().symbol(), transactionResult.error());
-            else successful.add(transactionResult.transaction());
+                errorFields.put(symbol, transactionResult.error());
+            else
+                successful.put(symbol, transactionResult.transaction());
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK)
+                .body(new TransactionResponseDTO(successful,
+                        errorFields.isEmpty() ? null
+                                : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED,
+                                        String.format("Failed to execute %s transactions", allFailed ? "all" : "some"),
+                                        errorFields)));
     }
 
     @PostMapping(value = "/api/sell")
-    ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session, @RequestBody List<TransactionRequestDTO> transactions) {
+    ResponseEntity<TransactionResponseDTO> sellStocks(HttpSession session,
+            @RequestBody List<TransactionRequestDTO> transactions) {
         SessionUser sessionUser = authenticateUser(session);
 
         Map<String, ItemErrorDTO> errorFields = new HashMap<>();
-        List<TransactionRequestDTO> successful = new ArrayList<>();
-        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), SELL, transactions);
+        Map<String, TransactionRequestDTO> successful = new HashMap<>();
+        List<TransactionResultDTO> transactionResults = transactionService.executeTransactions(sessionUser.id(), SELL,
+                transactions);
 
         for (TransactionResultDTO transactionResult : transactionResults) {
+            String symbol = transactionResult.transaction().symbol();
             if (transactionResult.error() != null)
                 errorFields.put(transactionResult.transaction().symbol(), transactionResult.error());
-            else successful.add(transactionResult.transaction());
+            else
+                successful.put(symbol, transactionResult.transaction());
         }
 
         boolean allFailed = successful.isEmpty();
-        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK).body(new TransactionResponseDTO(successful, errorFields.isEmpty() ? null : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED, String.format("Failed to execute %s transactions", allFailed ? "all" : "some"), errorFields)));
+        return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK)
+                .body(new TransactionResponseDTO(successful,
+                        errorFields.isEmpty() ? null
+                                : new ErrorDTO(allFailed ? OPERATION_FAILED : OPERATION_PARTIALLY_FAILED,
+                                        String.format("Failed to execute %s transactions", allFailed ? "all" : "some"),
+                                        errorFields)));
     }
 
     @GetMapping(value = "/api/transactions")
-    ResponseEntity<PageResponse<TransactionDTO>> fetchTransactions(HttpSession session, @RequestParam(defaultValue = "DESC") Sort.Direction direction, @PageableDefault(
-            size = 10
-    ) Pageable pageable) {
+    ResponseEntity<PageResponse<TransactionDTO>> fetchTransactions(HttpSession session,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @PageableDefault(size = 10) Pageable pageable) {
         SessionUser sessionUser = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(direction, "id")
-        );
+                Sort.by(direction, "id"));
 
         Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(), safePageable);
         return ResponseEntity.ok().body(PageResponse.from(transactions));
