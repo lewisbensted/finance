@@ -1,95 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html
-        xmlns:th="http://www.thymeleaf.org"
-        xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-        layout:decorate="~{layout}">
-
-<head>
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout}"
+>
+  <head>
     <title>Register</title>
-</head>
+  </head>
 
-<body>
-
-<main layout:fragment="content">
-    <form th:action="@{/register}" method="post" class="register-form">
-
- <div class="mb-3">
-            <input
-                    autocomplete="off"
-                    autofocus
-                    class="form-control mx-auto w-auto"
-                    name="firstName"
-                    placeholder="First name"
-                    type="text"
-            />
+  <body>
+    <main layout:fragment="content">
+      <form th:action="@{/register}" method="post" class="register-form">
+        <div class="mb-3">
+          <input
+            autocomplete="off"
+            autofocus
+            class="form-control mx-auto w-auto"
+            name="firstName"
+            placeholder="First name"
+            type="text"
+          />
         </div>
 
         <div class="mb-3">
-            <input
-                    autocomplete="off"
-                    autofocus
-                    class="form-control mx-auto w-auto"
-                    name="lastName"
-                    placeholder="Last name"
-                    type="text"
-            />
+          <input
+            autocomplete="off"
+            autofocus
+            class="form-control mx-auto w-auto"
+            name="lastName"
+            placeholder="Last name"
+            type="text"
+          />
         </div>
 
         <div class="mb-3">
-            <input
-                    autocomplete="off"
-                    autofocus
-                    class="form-control mx-auto w-auto"
-                    name="email"
-                    placeholder="E-mail"
-                    type="text"
-            />
+          <input
+            autocomplete="off"
+            autofocus
+            class="form-control mx-auto w-auto"
+            name="email"
+            placeholder="E-mail"
+            type="text"
+          />
         </div>
 
         <div class="mb-3">
-            <input
-                    autocomplete="off"
-                    autofocus
-                    class="form-control mx-auto w-auto"
-                    name="username"
-                    placeholder="Username"
-                    type="text"
-            />
+          <input
+            autocomplete="off"
+            autofocus
+            class="form-control mx-auto w-auto"
+            name="username"
+            placeholder="Username"
+            type="text"
+          />
         </div>
 
         <div class="mb-3">
-            <input
-                    class="form-control mx-auto w-auto"
-                    name="password"
-                    placeholder="Password"
-                    type="password"
-            />
+          <input
+            class="form-control mx-auto w-auto"
+            name="password"
+            placeholder="Password"
+            type="password"
+          />
         </div>
 
         <div class="mb-3">
-            <input
-                    class="form-control mx-auto w-auto"
-                    name="passwordRepeat"
-                    placeholder="Confirm password"
-                    type="password"
-            />
+          <input
+            class="form-control mx-auto w-auto"
+            name="passwordRepeat"
+            placeholder="Confirm password"
+            type="password"
+          />
         </div>
 
-        <button
-                class="btn btn-primary register-button"
-                type="submit">
-            Register
+        <button class="btn btn-primary register-button" type="submit">
+          Register
         </button>
 
         <div class="d-flex justify-content-center" style="display: none">
-            <div class="spinner-border text-primary register-spinner" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
+          <div
+            class="spinner-border text-primary register-spinner"
+            role="status"
+          >
+            <span class="visually-hidden">Loading...</span>
+          </div>
         </div>
-
-    </form>
-    <div class="messages"></div>
-</main>
-
-</body>
+      </form>
+      <div class="messages"></div>
+    </main>
+  </body>
 </html>

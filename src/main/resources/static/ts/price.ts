@@ -7,9 +7,9 @@ const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
 
-const fetchPrices = async (symbols: String[]) => {
+const fetchPrices = async (symbols: string[]) => {
 	const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
-	const data = await res.json().catch(() => null)
+	const data = await res.json().catch(() => null);
 	if (!res.ok) {
 		const error = new Error(data?.message || `Error ${res.status}: ${res.statusText}`);
 		error.status = res.status;
@@ -18,33 +18,33 @@ const fetchPrices = async (symbols: String[]) => {
 	if (!Array.isArray(data?.stocks)) {
 		throw new Error("Invalid response from server.");
 	}
-	return data
+	return data;
 };
 
 
-const isValidStock = (expectedSymbol: String, stock: unknown) : stock is Stock=> {
-if (
-        typeof stock !== "object" ||
+const isValidStock = (expectedSymbol: string, stock: unknown) : stock is Stock=> {
+	if (
+		typeof stock !== "object" ||
         stock === null ||
         !("symbol" in stock) ||
         !("companyName" in stock) ||
         !("latestPrice" in stock)
-    ) {
-        console.warn(`Missing or invalid data for stock: ${expectedSymbol}`);
-        return false;
-    }
+	) {
+		console.warn(`Missing or invalid data for stock: ${expectedSymbol}`);
+		return false;
+	}
 
 	if (stock.symbol !== expectedSymbol || !stock.companyName) {
-		console.warn((`Missing or invalid data for stock: ${expectedSymbol}`))
-		return false
+		console.warn((`Missing or invalid data for stock: ${expectedSymbol}`));
+		return false;
 	}
 	const price = stock.latestPrice;
 	if (typeof price !== "number" || Number.isNaN(price) || price <= 0) {
 		console.warn(`Invalid price received for stock: ${expectedSymbol}`);
-		return false
+		return false;
 	}
-	return true
-}
+	return true;
+};
 
 const calculateTotal = (holdings: Holding[]) => {
 	let total = 0;
@@ -54,10 +54,10 @@ const calculateTotal = (holdings: Holding[]) => {
 	return Number(total.toFixed(2));
 };
 
-export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:number|null , transactionInProgress: boolean, isSearch: boolean, isFirstLoad = false) => {
+export const updatePrices = async (holdingsMap: Map<string, Holding>, balance:number|null , transactionInProgress: boolean, isSearch: boolean, isFirstLoad = false) => {
 	const DOMupdates = [];
-	const symbols = [...holdingsMap.keys()]
-    const holdings = [...holdingsMap.values()];
+	const symbols = [...holdingsMap.keys()];
+	const holdings = [...holdingsMap.values()];
 	try {
 		let updated = 0;
 		let available = 0;
@@ -66,19 +66,19 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 		if (isSearch && (stocks.length !== 1 || !isValidStock(symbols[0], stocks[0])))
 			throw new Error(`Invalid stock response for ${symbols[0]}`);
 
-		const stockMap: Map<String, Stock> = new Map()
+		const stockMap = new Map<string, Stock>();
 		for (const stock of stocks) stockMap.set(stock.symbol, stock);
 
 
 		for (const holding of holdings) {
-			const symbol = holding.symbol
+			const symbol = holding.symbol;
 			const stock = stockMap.get(symbol);
 			if (isValidStock(symbol, stock)) {
 				holding.latestPrice = stock.latestPrice;
 				holding.value =  holding.shares === null ? null : holding.shares * holding.latestPrice;
 				if (isSearch) {
-					holding.companyName = stock.companyName
-					holding.nameCell.textContent = stock.companyName 
+					holding.companyName = stock.companyName;
+					holding.nameCell.textContent = stock.companyName; 
 				}
 			}
 		}
@@ -90,15 +90,15 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 
 
 		for (const holding of holdings) {
-			const symbol = holding.symbol
+			const symbol = holding.symbol;
 			const stock = stockMap.get(symbol);
 			const { priceCell, valueCell, buyInput, sellInput } = holding;
 			
 			if (!isValidStock(symbol, stock)) {
 				DOMupdates.push(() => {
 					if (isFirstLoad) {
-						priceCell.textContent = `$--`;
-						valueCell.textContent = `$--`;
+						priceCell.textContent = "$--";
+						valueCell.textContent = "$--";
 					}
 					priceCell.style.color = "red";
 					valueCell.style.color = "red";
@@ -106,7 +106,7 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 					buyInput.disabled = true;
 				});
 			} else {
-				const { latestPrice, value } = holding
+				const { latestPrice, value } = holding;
 
 				DOMupdates.push(() => {
 					if (isFirstLoad) {
@@ -119,14 +119,14 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 
 					if (value) {
 						valueCell.dataset.value = value;
-					valueCell.style.color = "";
-					valueCell.textContent = `$${value.toFixed(2)}`;
+						valueCell.style.color = "";
+						valueCell.textContent = `$${value.toFixed(2)}`;
 					}
 
-				})
+				});
 			}
 		}
-		if (balance === null) return
+		if (balance === null) return;
 
 		for (const holding of holdings) {
 			const { symbol, latestPrice } = holding;
@@ -154,7 +154,7 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 		const total = calculateTotal(holdings);
 		DOMupdates.push(() => {
 			if (totalCell) totalCell.style.color = updated === holdings.length ? "" : "red";
-			if (totalCell) totalCell.textContent = isNaN(total) ? `$--` : `$${total.toFixed(2)}`;
+			if (totalCell) totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
 			if (isFirstLoad) {
 				sellButton.disabled = false;
 				if (balance && available > 0) buyButton.disabled = false;
@@ -174,11 +174,11 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 				buyInput.disabled = true;
 				sellInput.disabled = true;
 				if (isFirstLoad) {
-					priceCell.textContent = valueCell.textContent = totalCell.textContent = `$--`;
+					priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
 				}
 			}
 		});
-		return null
+		return null;
 	} finally {
 		requestAnimationFrame(() => {
 			for (const update of DOMupdates) {
@@ -186,4 +186,4 @@ export const updatePrices = async (holdingsMap: Map<String, Holding>, balance:nu
 			}
 		});
 	}
-}
+};

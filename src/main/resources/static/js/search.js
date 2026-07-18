@@ -13,7 +13,7 @@ const sellForm = document.getElementById("sell-form");
 const buyTotal = document.querySelector(".buy-total");
 const sellTotal = document.querySelector(".sell-total");
 let priceIntervalId = undefined;
-let transactionInProgress = false;
+const transactionInProgress = false;
 let balance = null;
 let holding = null;
 try {
@@ -29,7 +29,7 @@ try {
 }
 catch (error) {
     console.error(error);
-    balanceCell.textContent = `$--`;
+    balanceCell.textContent = "$--";
     balanceCell.style.color = "red";
     tradingFooter.style.display = "";
 }
@@ -92,16 +92,16 @@ quoteForm.addEventListener("submit", async (e) => {
             updatePrices(holdingMap, balance, transactionInProgress, true).then(() => {
                 if (!transactionInProgress) {
                     if (buyTotal?.textContent)
-                        buyInput.dispatchEvent(new Event("input"));
+                        holding.buyInput.dispatchEvent(new Event("input"));
                     if (sellTotal?.textContent)
-                        sellInput.dispatchEvent(new Event("input"));
+                        holding.sellInput.dispatchEvent(new Event("input"));
                 }
             });
         }, INTERVAL);
     }
     catch (error) {
         console.error(error);
-        message.textContent = error?.status == 422 ? "Symbol not found" : "Unexpected error";
+        message.textContent = error?.status === 422 ? "Symbol not found" : "Unexpected error";
     }
     finally {
         quoteButton.style.display = "";

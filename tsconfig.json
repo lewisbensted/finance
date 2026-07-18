@@ -5,9 +5,12 @@
     "strict": true,
     "allowJs": true,
     "checkJs": true,
-    "noEmit": true
+    "noEmit": false,
+    "outDir": "./src/main/resources/static/js",
+		"rootDir": "./src/main/resources/static/ts",
+    
   },
   "include": [
-    "src/main/resources/static/js/**/*"
+    "src/main/resources/static/ts/**/*.ts"
   ]
 }

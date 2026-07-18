@@ -77,12 +77,11 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
             const symbol = holding.symbol;
             const stock = stockMap.get(symbol);
             const { priceCell, valueCell, buyInput, sellInput } = holding;
-           
             if (!isValidStock(symbol, stock)) {
                 DOMupdates.push(() => {
                     if (isFirstLoad) {
-                        priceCell.textContent = `$--`;
-                        valueCell.textContent = `$--`;
+                        priceCell.textContent = "$--";
+                        valueCell.textContent = "$--";
                     }
                     priceCell.style.color = "red";
                     valueCell.style.color = "red";
@@ -135,7 +134,7 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
             if (totalCell)
                 totalCell.style.color = updated === holdings.length ? "" : "red";
             if (totalCell)
-                totalCell.textContent = isNaN(total) ? `$--` : `$${total.toFixed(2)}`;
+                totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
             if (isFirstLoad) {
                 sellButton.disabled = false;
                 if (balance && available > 0)
@@ -161,7 +160,7 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
                 buyInput.disabled = true;
                 sellInput.disabled = true;
                 if (isFirstLoad) {
-                    priceCell.textContent = valueCell.textContent = totalCell.textContent = `$--`;
+                    priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
                 }
             }
         });

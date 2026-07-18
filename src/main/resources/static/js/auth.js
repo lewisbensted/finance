@@ -80,7 +80,6 @@ if (logoutButton) {
             if (!res.ok)
                 throw new Error(`Logout failed: ${res.status}`);
             sessionStorage.removeItem("balance");
-            console.log(sessionStorage.getItem("balance"));
             window.location.href = "/";
         }
         catch (error) {

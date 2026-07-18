@@ -20,7 +20,7 @@ const buyTotal = document.querySelector(".buy-total");
 const sellTotal = document.querySelector(".sell-total");
 
 let priceIntervalId: number | undefined  = undefined;
-let transactionInProgress = false;
+const transactionInProgress = false;
 let balance: number | null = null;
 let holding: Holding | null = null;
 
@@ -34,8 +34,8 @@ try {
 		balanceCell.textContent = `$${balance.toFixed(2)}`;
 	}
 } catch (error) {
-	console.error(error)
-	balanceCell.textContent = `$--`;
+	console.error(error);
+	balanceCell.textContent = "$--";
 	balanceCell.style.color = "red";
 	tradingFooter.style.display = "";
 }
@@ -44,8 +44,8 @@ const quoteForm = document.getElementById("quote-form");
 quoteForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	if (priceIntervalId) {
-		clearInterval(priceIntervalId)
-		priceIntervalId = undefined
+		clearInterval(priceIntervalId);
+		priceIntervalId = undefined;
 	};
 	const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
 
@@ -68,7 +68,7 @@ quoteForm.addEventListener("submit", async (e) => {
 		valueCell: document.querySelector(".value"),
 		buyInput: document.querySelector(".buy-input"),
 		sellInput: document.querySelector(".sell-input"),
-	}
+	};
 
 
 	quoteButton.style.display = "none";
@@ -78,8 +78,8 @@ quoteForm.addEventListener("submit", async (e) => {
 	holding.sellInput.value = holding.buyInput.value = "";
 
 	try {
-		const holdingMap: Map<String, Holding> = new Map();
-		holdingMap.set(shareSymbol, holding)
+		const holdingMap = new Map<string, Holding>();
+		holdingMap.set(shareSymbol, holding);
 
 		await Promise.all([
 			updateShares(holding),
@@ -98,7 +98,7 @@ quoteForm.addEventListener("submit", async (e) => {
 			holding.valueCell.textContent = holding.sharesCell.textContent = "$--";
 			holding.valueCell.style.color = holding.sharesCell.style.color = "red";
 		} else {
-			holding.valueCell.style.color = ""
+			holding.valueCell.style.color = "";
 			holding.valueCell.textContent = `$${(shares * sharePrice).toFixed(2)}`;
 		}
 
@@ -107,14 +107,14 @@ quoteForm.addEventListener("submit", async (e) => {
 		priceIntervalId = setInterval(() => {
 			updatePrices(holdingMap, balance,transactionInProgress,true).then(() => {
 				if (!transactionInProgress) {
-					if (buyTotal?.textContent) buyInput.dispatchEvent(new Event("input"));
-					if (sellTotal?.textContent) sellInput.dispatchEvent(new Event("input"));
+					if (buyTotal?.textContent) holding.buyInput.dispatchEvent(new Event("input"));
+					if (sellTotal?.textContent) holding.sellInput.dispatchEvent(new Event("input"));
 				}
 			});
 		}, INTERVAL);
 	} catch (error) {
-		console.error(error)
-		message.textContent = error?.status == 422 ? "Symbol not found" : "Unexpected error";
+		console.error(error);
+		message.textContent = error?.status === 422 ? "Symbol not found" : "Unexpected error";
 	} finally {
 		quoteButton.style.display = "";
 		quoteSpinner.style.setProperty("display", "none", "important");
