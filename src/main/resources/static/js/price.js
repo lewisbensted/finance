@@ -1,3 +1,4 @@
+import { renderHolding, updateHolding } from "./holding.js";
 import { CustomError } from "./types/CustomError.js";
 const sellTotal = document.querySelector(".sell-total");
 const buyTotal = document.querySelector(".buy-total");
@@ -44,8 +45,7 @@ const calculateTotal = (holdings) => {
     });
     return Number(total.toFixed(2));
 };
-export const updatePrices = async (holdingsMap, balance, transactionInProgress, isSearch, isFirstLoad = false) => {
-    const DOMupdates = [];
+export const updatePrices = async (holdingsMap, domUpdates, balance, transactionInProgress, isSearch, isFirstLoad = false) => {
     const symbols = [...holdingsMap.keys()];
     const holdings = [...holdingsMap.values()];
     try {
@@ -60,120 +60,65 @@ export const updatePrices = async (holdingsMap, balance, transactionInProgress, 
             }
         }
         for (const holding of holdings) {
-            const symbol = holding.symbol;
+            const symbol = holding.holding.symbol;
             const stock = stockMap.get(symbol);
             if (isValidStock(symbol, stock)) {
-                holding.latestPrice = stock.latestPrice;
-                holding.value =
-                    holding.shares === null ? null : holding.shares * holding.latestPrice;
-                if (isSearch) {
-                    holding.companyName = stock.companyName;
-                    holding.nameCell.textContent = stock.companyName;
-                }
+                updateHolding(holding.holding, stock);
             }
         }
         let buySum = 0;
         for (const holding of holdings) {
-            buySum += Number(holding.buyInput.value || 0) * Number(holding.latestPrice || 0);
+            buySum +=
+                Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
         }
         for (const holding of holdings) {
-            const symbol = holding.symbol;
-            const stock = stockMap.get(symbol);
-            const { priceCell, valueCell, buyInput, sellInput } = holding;
-            if (!isValidStock(symbol, stock)) {
-                DOMupdates.push(() => {
-                    if (isFirstLoad) {
-                        priceCell.textContent = "$--";
-                        valueCell.textContent = "$--";
-                    }
-                    priceCell.style.color = "red";
-                    valueCell.style.color = "red";
-                    sellInput.disabled = true;
-                    buyInput.disabled = true;
-                });
-            }
-            else {
-                const { latestPrice, value } = holding;
-                DOMupdates.push(() => {
-                    if (isFirstLoad) {
-                        buyTotal.textContent = "";
-                        sellTotal.textContent = "";
-                    }
-                    priceCell.style.color = "";
-                    priceCell.textContent = `$${latestPrice.toFixed(2)}`;
-                    if (value) {
-                        valueCell.dataset.value = value;
-                        valueCell.style.color = "";
-                        valueCell.textContent = `$${value.toFixed(2)}`;
-                    }
-                });
-            }
+            renderHolding(holding, domUpdates);
         }
         if (balance === null)
             return;
-        for (const holding of holdings) {
-            const { symbol, latestPrice } = holding;
-            const stock = stockMap.get(symbol);
-            const { buyInput, sellInput } = holding;
-            if (isValidStock(symbol, stock)) {
-                const remaining = balance - buySum + latestPrice * (Number(buyInput.value) || 0);
-                const availableShares = Math.floor(remaining / latestPrice);
-                const availableSharesMax = Math.floor(balance / latestPrice);
-                if (availableSharesMax > 0)
-                    available++;
-                DOMupdates.push(() => {
-                    if (isFirstLoad)
-                        sellInput.disabled = false;
-                    buyInput.max = availableShares;
-                    if (!transactionInProgress)
-                        buyInput.disabled = availableSharesMax > 0 ? false : true;
-                    buyInput.min = availableShares > 0 ? 1 : 0;
-                });
-                updated++;
-            }
-        }
-        const total = calculateTotal(holdings);
-        DOMupdates.push(() => {
-            if (totalCell)
-                totalCell.style.color = updated === holdings.length ? "" : "red";
-            if (totalCell)
-                totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
-            if (isFirstLoad) {
-                sellButton.disabled = false;
-                if (balance && available > 0)
-                    buyButton.disabled = false;
-            }
-            else {
-                if (!transactionInProgress)
-                    buyButton.disabled = available === 0;
-            }
-        });
+        // for (const holding of holdings) {
+        // 	const { symbol, latestPrice } = holding;
+        // 	const stock = stockMap.get(symbol);
+        // 	const { buyInput, sellInput } = holding;
+        // 	if (isValidStock(symbol, stock)) {
+        // 		const remaining = balance - buySum + latestPrice * (Number(buyInput.value) || 0);
+        // 		const availableShares = Math.floor(remaining / latestPrice);
+        // 		const availableSharesMax = Math.floor(balance / latestPrice);
+        // 		if (availableSharesMax > 0) available++;
+        // 		domUpdates.push(() => {
+        // 			if (isFirstLoad) sellInput.disabled = false;
+        // 			buyInput.max = availableShares;
+        // 			if (!transactionInProgress)
+        // 				buyInput.disabled = availableSharesMax > 0 ? false : true;
+        // 			buyInput.min = availableShares > 0 ? 1 : 0;
+        // 		});
+        // 		updated++;
+        // 	}
+        // }
+        // const total = calculateTotal(holdings);
+        // domUpdates.push(() => {
+        // 	if (totalCell) totalCell.style.color = updated === holdings.length ? "" : "red";
+        // 	if (totalCell) totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
+        // 	if (isFirstLoad) {
+        // 		sellButton.disabled = false;
+        // 		if (balance && available > 0) buyButton.disabled = false;
+        // 	} else {
+        // 		if (!transactionInProgress) buyButton.disabled = available === 0;
+        // 	}
+        // });
     }
     catch (error) {
         console.error(error);
-        if (isFirstLoad)
+        if (isFirstLoad && isSearch)
             throw error;
-        DOMupdates.push(() => {
-            if (totalCell)
-                totalCell.style.color = "red";
-            buyButton.disabled = sellButton.disabled = true;
-            for (const holding of holdings) {
-                const { priceCell, valueCell, buyInput, sellInput } = holding;
-                priceCell.style.color = valueCell.style.color = "red";
-                buyInput.disabled = true;
-                sellInput.disabled = true;
-                if (isFirstLoad) {
-                    priceCell.textContent = valueCell.textContent = totalCell.textContent = "$--";
-                }
-            }
-        });
-        return null;
-    }
-    finally {
-        requestAnimationFrame(() => {
-            for (const update of DOMupdates) {
-                update();
-            }
-        });
+        for (const holding of holdings) {
+            holding.holding.isPriceUpToDate = false;
+            renderHolding(holding, domUpdates);
+            domUpdates.push(() => {
+                if (totalCell)
+                    totalCell.style.color = "red";
+                buyButton.disabled = sellButton.disabled = true;
+            });
+        }
     }
 };

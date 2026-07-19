@@ -63,8 +63,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorDTO> handleNotFound(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorDTO(NOT_FOUND, ex.getMessage()));
+    public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(null, new ErrorDTO(NOT_FOUND, ex.getMessage())));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

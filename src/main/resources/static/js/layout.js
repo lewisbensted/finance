@@ -1,5 +1,4 @@
 "use strict";
-localStorage.setItem("INTERVAL", 3000);
 document.addEventListener("DOMContentLoaded", async function () {
     const html = "<!DOCTYPE " +
         document.doctype.name +
