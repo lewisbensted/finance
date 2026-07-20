@@ -1,6 +1,6 @@
 import { fetchBalance } from "./balance.js";
 import { updatePrices } from "./price.js";
-import { updateShares } from "./shares.js";
+import { handleShares } from "./shares.js";
 import { CustomError } from "./types/CustomError.js";
 import { createHolding, HoldingItem } from "./types/Holding.js";
 
@@ -45,18 +45,28 @@ const setQuoteLoading = (loading: boolean) => {
 	}
 };
 
+const applyDomUpdates = (domUpdates: (() => void)[]) => {
+	const updates = domUpdates.splice(0);
+	requestAnimationFrame(() => {
+		for (const update of updates) {
+			update();
+		}
+	});
+};
+
 const quoteForm = document.getElementById("quote-form");
 quoteForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
 
-	if (priceIntervalId) {
-		clearInterval(priceIntervalId);
-		priceIntervalId = undefined;
-	}
 	const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
 	if (!shareSymbol) {
 		message.textContent = "Invalid input - please enter a symbol.";
 		return;
+	}
+
+	if (priceIntervalId) {
+		clearInterval(priceIntervalId);
+		priceIntervalId = undefined;
 	}
 
 	holding = createHolding(shareSymbol);
@@ -70,19 +80,15 @@ quoteForm.addEventListener("submit", async (e) => {
 		holdingMap.set(shareSymbol, holding);
 
 		await Promise.all([
-			updateShares(holding, domUpdates),
+			handleShares(holding, domUpdates),
 			updatePrices(holdingMap, domUpdates, balance, transactionInProgress, true, true),
 		]);
 
-		const updates = domUpdates.splice(0);
-		requestAnimationFrame(() => {
-			for (const update of updates) {
-				update();
-			}
-		});
+		applyDomUpdates(domUpdates);
 
 		quoteTable.style.display = "";
 
+		//add abortcontroller
 		priceIntervalId = setInterval(() => {
 			updatePrices(holdingMap, domUpdates, balance, transactionInProgress, true)
 				.then(() => {
@@ -92,12 +98,7 @@ quoteForm.addEventListener("submit", async (e) => {
 						if (sellTotal?.textContent)
 							holding.row.sellInput.dispatchEvent(new Event("input"));
 					}
-					const updates = domUpdates.splice(0);
-					requestAnimationFrame(() => {
-						for (const update of updates) {
-							update();
-						}
-					});
+					applyDomUpdates(domUpdates);
 				})
 				.catch((error: unknown) => {
 					console.error(error);

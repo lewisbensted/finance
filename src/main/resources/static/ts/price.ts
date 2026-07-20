@@ -1,4 +1,4 @@
-import { renderHolding, updateHolding } from "./holding.js";
+import { renderHolding, updateHolding, updateHoldingUI } from "./holding.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 import { Holding, HoldingItem } from "./types/Holding.js";
@@ -53,12 +53,16 @@ const isValidStock = (expectedSymbol: string, stock: unknown): stock is Stock =>
 	return true;
 };
 
-const calculateTotal = (holdings: Holding[]) => {
-	let total = 0;
-	holdings.forEach((holding) => {
-		total += Number(holding.valueCell?.dataset.value);
-	});
-	return Number(total.toFixed(2));
+const calculateTotal = (holdings: Holding[]) =>
+	holdings.reduce((total, holding) => total + (holding.value ?? 0), 0).toFixed(2);
+
+const sumBuyInputs = (holdings: HoldingItem[]) => {
+	let buySum = 0;
+	for (const holding of holdings) {
+		buySum +=
+			Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
+	}
+	return buySum;
 };
 
 export const updatePrices = async (
@@ -91,56 +95,44 @@ export const updatePrices = async (
 			}
 		}
 
-		let buySum = 0;
-		for (const holding of holdings) {
-			buySum +=
-				Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
-		}
+		const buySum = sumBuyInputs(holdings);
 
 		for (const holding of holdings) {
-			renderHolding(holding, domUpdates);
+			domUpdates.push(updateHoldingUI(holding, balance, buySum));
 		}
 
-		if (balance === null) return;
+		let buyButtonDisabled = true;
+		let sellButtonDisabled = true;
+		let totalValue = 0;
+		let totalValueUpToDate = true;
+		for (const holding of holdings) {
+			const { shares, latestPrice, value, isPriceUpToDate } = holding.holding;
 
-		// for (const holding of holdings) {
-		// 	const { symbol, latestPrice } = holding;
-		// 	const stock = stockMap.get(symbol);
-		// 	const { buyInput, sellInput } = holding;
-		// 	if (isValidStock(symbol, stock)) {
-		// 		const remaining = balance - buySum + latestPrice * (Number(buyInput.value) || 0);
-		// 		const availableShares = Math.floor(remaining / latestPrice);
-		// 		const availableSharesMax = Math.floor(balance / latestPrice);
-		// 		if (availableSharesMax > 0) available++;
-		// 		domUpdates.push(() => {
-		// 			if (isFirstLoad) sellInput.disabled = false;
+			totalValue += value ?? 0;
 
-		// 			buyInput.max = availableShares;
-		// 			if (!transactionInProgress)
-		// 				buyInput.disabled = availableSharesMax > 0 ? false : true;
-		// 			buyInput.min = availableShares > 0 ? 1 : 0;
-		// 		});
-		// 		updated++;
-		// 	}
-		// }
+			if (value === undefined || !isPriceUpToDate) {
+				totalValueUpToDate = false;
+			}
 
-		// const total = calculateTotal(holdings);
-		// domUpdates.push(() => {
-		// 	if (totalCell) totalCell.style.color = updated === holdings.length ? "" : "red";
-		// 	if (totalCell) totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
-		// 	if (isFirstLoad) {
-		// 		sellButton.disabled = false;
-		// 		if (balance && available > 0) buyButton.disabled = false;
-		// 	} else {
-		// 		if (!transactionInProgress) buyButton.disabled = available === 0;
-		// 	}
-		// });
+			if (typeof shares === "number" && shares > 0) sellButtonDisabled = false;
+
+			if (balance !== null && typeof latestPrice === "number" && balance >= latestPrice)
+				buyButtonDisabled = false;
+		}
+
+		domUpdates.push(() => {
+			if (totalCell) totalCell.style.color = totalValueUpToDate ? "" : "red";
+			if (totalCell) totalCell.textContent = totalValue.toFixed(2);
+
+			buyButton.disabled = buyButtonDisabled;
+			sellButton.disabled = sellButtonDisabled;
+		});
 	} catch (error) {
 		console.error(error);
 		if (isFirstLoad && isSearch) throw error;
 		for (const holding of holdings) {
 			holding.holding.isPriceUpToDate = false;
-			renderHolding(holding, domUpdates);
+			domUpdates.push(updateHoldingUI(holding, balance));
 			domUpdates.push(() => {
 				if (totalCell) totalCell.style.color = "red";
 				buyButton.disabled = sellButton.disabled = true;

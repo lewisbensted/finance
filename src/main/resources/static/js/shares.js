@@ -20,24 +20,28 @@ const fetchShares = async (symbol) => {
         throw new Error("Invalid response from server");
     return response.data.shares;
 };
-export const updateShares = async (holding, domUpdates = []) => {
+const updateUI = (holding, domUpdates) => {
+    const shares = holding.holding.shares;
+    domUpdates.push(renderHolding(holding));
+    domUpdates.push(() => {
+        if (shares === null || shares === undefined) {
+            buyForm.current_shares.value = "";
+            sellForm.current_shares.value = "";
+            sellButton.disabled = true;
+            return;
+        }
+        buyForm.current_shares.value = sellForm.current_shares.value = shares;
+        if (shares > 0) {
+            sellButton.disabled = false;
+        }
+    });
+};
+export const handleShares = async (holding, domUpdates = []) => {
     try {
         const symbol = holding.holding.symbol;
         const shares = await fetchShares(symbol);
         holding.holding.shares = shares;
-        renderHolding(holding, domUpdates);
-        domUpdates.push(() => {
-            if (shares === null) {
-                buyForm.current_shares.value = "";
-                sellForm.current_shares.value = "";
-                sellButton.disabled = true;
-                return null;
-            }
-            buyForm.current_shares.value = sellForm.current_shares.value = shares;
-            if (shares > 0) {
-                sellButton.disabled = false;
-            }
-        });
+        updateUI(holding, domUpdates);
     }
     catch (error) {
         console.error(error);

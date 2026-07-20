@@ -14,10 +14,10 @@ export const updateHolding = (holding, stock) => {
     }
 };
 //buy input needs refactoring - add max buy to holding
-export const renderHolding = (holding, domUpdates) => {
-    const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
+export const renderHolding = (holding) => {
     const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } = holding.row;
-    domUpdates.push(() => {
+    const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
+    return () => {
         nameCell.textContent = companyName;
         symbolCell.textContent = symbol;
         if (shares === null) {
@@ -76,5 +76,5 @@ export const renderHolding = (holding, domUpdates) => {
             sellInput.min = "1";
             sellInput.max = String(shares);
         }
-    });
+    };
 };

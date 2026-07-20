@@ -20,12 +20,16 @@ export const updateHolding = (holding: Holding, stock: Stock) => {
 
 //buy input needs refactoring - add max buy to holding
 
-export const renderHolding = (holding: HoldingItem, domUpdates: (() => void)[]) => {
-	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
+export const updateHoldingUI = (
+	holding: HoldingItem,
+	balance: number | null,
+	buyInputsSum?: number,
+) => {
 	const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } =
 		holding.row;
+	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
 
-	domUpdates.push(() => {
+	return () => {
 		nameCell.textContent = companyName;
 		symbolCell.textContent = symbol;
 
@@ -55,23 +59,17 @@ export const renderHolding = (holding: HoldingItem, domUpdates: (() => void)[]) 
 		if (latestPrice === undefined) {
 			priceCell.textContent = "$--";
 			priceCell.style.color = "red";
-			buyInput.disabled = true;
 		} else {
 			if (!isPriceUpToDate) {
 				priceCell.style.color = "red";
-				buyInput.disabled = true;
 			} else {
 				priceCell.textContent = String(latestPrice);
 				priceCell.style.color = "";
-				buyInput.disabled = false;
 			}
 		}
 
 		const isSellDisabled =
-			latestPrice === undefined ||
-			!isPriceUpToDate ||
-			typeof shares !== "number" ||
-			shares <= 0;
+			balance === null || latestPrice === undefined || !isPriceUpToDate || !shares;
 
 		if (isSellDisabled) {
 			sellInput.max = "0";
@@ -82,5 +80,24 @@ export const renderHolding = (holding: HoldingItem, domUpdates: (() => void)[]) 
 			sellInput.min = "1";
 			sellInput.max = String(shares);
 		}
-	});
+
+		const isBuyDisabled =
+			balance === null ||
+			latestPrice === undefined ||
+			!isPriceUpToDate ||
+			buyInputsSum === undefined;
+
+		if (isBuyDisabled) {
+			buyInput.max = "0";
+			buyInput.min = "1";
+			buyInput.disabled = true;
+		} else {
+			const remaining = balance - buyInputsSum + latestPrice * (Number(buyInput.value) || 0);
+			const availableShares = Math.floor(remaining / latestPrice);
+			const availableSharesMax = Math.floor(balance / latestPrice);
+			buyInput.max = String(availableShares);
+			buyInput.disabled = availableSharesMax > 0 ? false : true;
+			buyInput.min = String(availableShares > 0 ? 1 : 0);
+		}
+	};
 };

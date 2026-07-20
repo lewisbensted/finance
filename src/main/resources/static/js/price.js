@@ -72,7 +72,7 @@ export const updatePrices = async (holdingsMap, domUpdates, balance, transaction
                 Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
         }
         for (const holding of holdings) {
-            renderHolding(holding, domUpdates);
+            domUpdates.push(renderHolding(holding));
         }
         if (balance === null)
             return;
@@ -113,7 +113,7 @@ export const updatePrices = async (holdingsMap, domUpdates, balance, transaction
             throw error;
         for (const holding of holdings) {
             holding.holding.isPriceUpToDate = false;
-            renderHolding(holding, domUpdates);
+            domUpdates.push(renderHolding(holding));
             domUpdates.push(() => {
                 if (totalCell)
                     totalCell.style.color = "red";

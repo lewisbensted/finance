@@ -32,23 +32,29 @@ const fetchShares = async (symbol: string) => {
 	return response.data.shares;
 };
 
-export const updateShares = async (holding: HoldingItem, domUpdates: (() => void)[] = []) => {
+const updateUI = (holding: HoldingItem, domUpdates: (() => void)[]) => {
+	const shares = holding.holding.shares;
+	domUpdates.push(renderHolding(holding));
+	domUpdates.push(() => {
+		if (shares === null || shares === undefined) {
+			buyForm.current_shares.value = "";
+			sellForm.current_shares.value = "";
+			sellButton.disabled = true;
+			return;
+		}
+		buyForm.current_shares.value = sellForm.current_shares.value = shares;
+		if (shares > 0) {
+			sellButton.disabled = false;
+		}
+	});
+};
+
+export const handleShares = async (holding: HoldingItem, domUpdates: (() => void)[] = []) => {
 	try {
 		const symbol = holding.holding.symbol;
 		const shares = await fetchShares(symbol);
 		holding.holding.shares = shares;
-		renderHolding(holding, domUpdates);
-		domUpdates.push(() => {
-			if (shares === null) {
-				buyForm.current_shares.value = "";
-				sellForm.current_shares.value = "";
-				sellButton.disabled = true;
-				return null;
-			}
-			buyForm.current_shares.value = sellForm.current_shares.value = shares;
-			if (shares > 0) {
-				sellButton.disabled = false;
-			}})
+		updateUI(holding, domUpdates);
 	} catch (error) {
 		console.error(error);
 	}
