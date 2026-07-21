@@ -94,12 +94,12 @@ public class TradingService {
     }
 
     @Transactional(rollbackFor = InsufficientFundsException.class)
-    public List<TransactionResultDTO> executeTransactions(Long userId, TransactionType type, List<TransactionRequestDTO> transactions) {
+    public TransactionExecutionResult executeTransactions(Long userId, TransactionType type, List<TransactionRequestDTO> transactions) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         if (transactions.isEmpty()) {
-            return List.of();
+            return new TransactionExecutionResult(List.of(), user.getBalance()) ;
         }
 
         Map<String, StockResultDTO> prices = stockService.fetchPrices(transactions.stream().map(TransactionRequestDTO::symbol).toArray(String[]::new));
@@ -151,7 +151,7 @@ public class TradingService {
                 results.add(new TransactionResultDTO(transaction, new ItemErrorDTO(INTERNAL_ERROR, "Unexpected error")));
             }
         }
-        return results;
+        return new TransactionExecutionResult(results, user.getBalance()) ;
     }
 
     public Page<TransactionDTO> fetchTransactions(Long userId, Pageable pageable) {

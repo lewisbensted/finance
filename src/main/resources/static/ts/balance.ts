@@ -1,7 +1,7 @@
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 
-let balance: number | null = null;
+export let balance: number | null;
 
 export const fetchBalance = async () => {
 	const res = await fetch("/api/balance");
@@ -33,8 +33,7 @@ export const setBalance = (value: number) => {
 	if (typeof value === "number" && !Number.isNaN(value)) {
 		balance = value;
 	} else {
-		console.warn("Skipping invalid balance:", value);
+		console.warn("Failed to update invalid balance:", value);
 	}
 };
 
-export const getBalance = () => balance;

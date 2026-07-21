@@ -1,4 +1,5 @@
-import { renderHolding, updateHolding, updateHoldingUI } from "./holding.js";
+import { balance } from "./balance.js";
+import { updateHoldingUI, updateHolding } from "./holding.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 import { Holding, HoldingItem } from "./types/Holding.js";
@@ -9,6 +10,8 @@ const buyTotal = document.querySelector(".buy-total");
 const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
+const balanceCell = document.querySelector(".balance");
+const buySpinner = document.querySelector(".buy-spinner");
 
 const fetchPrices = async (symbols: string[]) => {
 	const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
@@ -53,9 +56,6 @@ const isValidStock = (expectedSymbol: string, stock: unknown): stock is Stock =>
 	return true;
 };
 
-const calculateTotal = (holdings: Holding[]) =>
-	holdings.reduce((total, holding) => total + (holding.value ?? 0), 0).toFixed(2);
-
 const sumBuyInputs = (holdings: HoldingItem[]) => {
 	let buySum = 0;
 	for (const holding of holdings) {
@@ -65,21 +65,72 @@ const sumBuyInputs = (holdings: HoldingItem[]) => {
 	return buySum;
 };
 
-export const updatePrices = async (
+export const updateUI = (
+	holdings: HoldingItem[],
+	domUpdates: (() => void)[],
+	resetInputs = false,
+	buySum = 0,
+) => {
+	let buyButtonDisabled = true;
+	let sellButtonDisabled = true;
+	let totalValue = 0;
+	let totalValueUpToDate = true;
+	for (const holding of holdings) {
+		if (resetInputs) {
+			holding.row.buyInput.value = "";
+			holding.row.sellInput.value = "";
+			buySpinner.style.setProperty("display", "none", "important");
+			buyButton.style.display = "";
+		}
+
+		domUpdates.push(updateHoldingUI(holding, buySum));
+
+		const { shares, latestPrice, value, isPriceUpToDate } = holding.holding;
+
+		totalValue += value ?? 0;
+
+		if (value === undefined || !isPriceUpToDate) {
+			totalValueUpToDate = false;
+		}
+
+		if (typeof shares === "number" && shares > 0) sellButtonDisabled = false;
+
+		if (balance !== null && typeof latestPrice === "number" && balance >= latestPrice)
+			buyButtonDisabled = false;
+	}
+
+	domUpdates.push(() => {
+		if (totalCell) totalCell.style.color = totalValueUpToDate ? "" : "red";
+		if (totalCell) totalCell.textContent = totalValue.toFixed(2);
+
+		buyButton.disabled = buyButtonDisabled;
+		sellButton.disabled = sellButtonDisabled;
+
+		if (balance != null) {
+			balanceCell.style.color = "";
+			balanceCell.textContent = `$${balance.toFixed(2)}`;
+		}
+	});
+};
+
+export const handleFetchPrices = async (
 	holdingsMap: Map<string, HoldingItem>,
 	domUpdates: (() => void)[],
-	balance: number | null,
-	transactionInProgress: boolean,
 	isSearch: boolean,
 	isFirstLoad = false,
 ) => {
 	const symbols = [...holdingsMap.keys()];
 	const holdings = [...holdingsMap.values()];
 	try {
-		let updated = 0;
-		let available = 0;
 		const res = await fetchPrices(symbols);
 		const stockMap = res.stocks;
+		const failures = res.error?.fields;
+
+		if (failures)
+			for (const [symbol, itemError] of Object.entries(failures)) {
+				console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
+			}
+
 		if (isSearch) {
 			const stock = stockMap.get(symbols[0]);
 			if (stockMap.size !== 1 || !isValidStock(symbols[0], stock)) {
@@ -97,36 +148,7 @@ export const updatePrices = async (
 
 		const buySum = sumBuyInputs(holdings);
 
-		for (const holding of holdings) {
-			domUpdates.push(updateHoldingUI(holding, balance, buySum));
-		}
-
-		let buyButtonDisabled = true;
-		let sellButtonDisabled = true;
-		let totalValue = 0;
-		let totalValueUpToDate = true;
-		for (const holding of holdings) {
-			const { shares, latestPrice, value, isPriceUpToDate } = holding.holding;
-
-			totalValue += value ?? 0;
-
-			if (value === undefined || !isPriceUpToDate) {
-				totalValueUpToDate = false;
-			}
-
-			if (typeof shares === "number" && shares > 0) sellButtonDisabled = false;
-
-			if (balance !== null && typeof latestPrice === "number" && balance >= latestPrice)
-				buyButtonDisabled = false;
-		}
-
-		domUpdates.push(() => {
-			if (totalCell) totalCell.style.color = totalValueUpToDate ? "" : "red";
-			if (totalCell) totalCell.textContent = totalValue.toFixed(2);
-
-			buyButton.disabled = buyButtonDisabled;
-			sellButton.disabled = sellButtonDisabled;
-		});
+		updateUI(holdings, domUpdates, false, buySum);
 	} catch (error) {
 		console.error(error);
 		if (isFirstLoad && isSearch) throw error;

@@ -1,5 +1,5 @@
 import { CustomError } from "./types/CustomError.js";
-let balance = null;
+export let balance;
 export const fetchBalance = async () => {
     const res = await fetch("/api/balance");
     const response = (await res.json());
@@ -22,7 +22,6 @@ export const setBalance = (value) => {
         balance = value;
     }
     else {
-        console.warn("Skipping invalid balance:", value);
+        console.warn("Failed to update invalid balance:", value);
     }
 };
-export const getBalance = () => balance;

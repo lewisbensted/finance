@@ -1,10 +1,13 @@
-import { renderHolding, updateHolding } from "./holding.js";
+import { balance } from "./balance.js";
+import { updateHoldingUI, updateHolding } from "./holding.js";
 import { CustomError } from "./types/CustomError.js";
 const sellTotal = document.querySelector(".sell-total");
 const buyTotal = document.querySelector(".buy-total");
 const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
+const balanceCell = document.querySelector(".balance");
+const buySpinner = document.querySelector(".buy-spinner");
 const fetchPrices = async (symbols) => {
     const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
     const response = (await res.json());
@@ -38,21 +41,61 @@ const isValidStock = (expectedSymbol, stock) => {
     }
     return true;
 };
-const calculateTotal = (holdings) => {
-    let total = 0;
-    holdings.forEach((holding) => {
-        total += Number(holding.valueCell?.dataset.value);
-    });
-    return Number(total.toFixed(2));
+const sumBuyInputs = (holdings) => {
+    let buySum = 0;
+    for (const holding of holdings) {
+        buySum +=
+            Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
+    }
+    return buySum;
 };
-export const updatePrices = async (holdingsMap, domUpdates, balance, transactionInProgress, isSearch, isFirstLoad = false) => {
+export const updateUI = (holdings, domUpdates, resetInputs = false, buySum = 0) => {
+    let buyButtonDisabled = true;
+    let sellButtonDisabled = true;
+    let totalValue = 0;
+    let totalValueUpToDate = true;
+    for (const holding of holdings) {
+        if (resetInputs) {
+            holding.row.buyInput.value = "";
+            holding.row.sellInput.value = "";
+            buySpinner.style.setProperty("display", "none", "important");
+            buyButton.style.display = "";
+        }
+        domUpdates.push(updateHoldingUI(holding, buySum));
+        const { shares, latestPrice, value, isPriceUpToDate } = holding.holding;
+        totalValue += value ?? 0;
+        if (value === undefined || !isPriceUpToDate) {
+            totalValueUpToDate = false;
+        }
+        if (typeof shares === "number" && shares > 0)
+            sellButtonDisabled = false;
+        if (balance !== null && typeof latestPrice === "number" && balance >= latestPrice)
+            buyButtonDisabled = false;
+    }
+    domUpdates.push(() => {
+        if (totalCell)
+            totalCell.style.color = totalValueUpToDate ? "" : "red";
+        if (totalCell)
+            totalCell.textContent = totalValue.toFixed(2);
+        buyButton.disabled = buyButtonDisabled;
+        sellButton.disabled = sellButtonDisabled;
+        if (balance != null) {
+            balanceCell.style.color = "";
+            balanceCell.textContent = `$${balance.toFixed(2)}`;
+        }
+    });
+};
+export const handleFetchPrices = async (holdingsMap, domUpdates, isSearch, isFirstLoad = false) => {
     const symbols = [...holdingsMap.keys()];
     const holdings = [...holdingsMap.values()];
     try {
-        let updated = 0;
-        let available = 0;
         const res = await fetchPrices(symbols);
         const stockMap = res.stocks;
+        const failures = res.error?.fields;
+        if (failures)
+            for (const [symbol, itemError] of Object.entries(failures)) {
+                console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
+            }
         if (isSearch) {
             const stock = stockMap.get(symbols[0]);
             if (stockMap.size !== 1 || !isValidStock(symbols[0], stock)) {
@@ -66,46 +109,8 @@ export const updatePrices = async (holdingsMap, domUpdates, balance, transaction
                 updateHolding(holding.holding, stock);
             }
         }
-        let buySum = 0;
-        for (const holding of holdings) {
-            buySum +=
-                Number(holding.row.buyInput.value || 0) * Number(holding.holding.latestPrice ?? 0);
-        }
-        for (const holding of holdings) {
-            domUpdates.push(renderHolding(holding));
-        }
-        if (balance === null)
-            return;
-        // for (const holding of holdings) {
-        // 	const { symbol, latestPrice } = holding;
-        // 	const stock = stockMap.get(symbol);
-        // 	const { buyInput, sellInput } = holding;
-        // 	if (isValidStock(symbol, stock)) {
-        // 		const remaining = balance - buySum + latestPrice * (Number(buyInput.value) || 0);
-        // 		const availableShares = Math.floor(remaining / latestPrice);
-        // 		const availableSharesMax = Math.floor(balance / latestPrice);
-        // 		if (availableSharesMax > 0) available++;
-        // 		domUpdates.push(() => {
-        // 			if (isFirstLoad) sellInput.disabled = false;
-        // 			buyInput.max = availableShares;
-        // 			if (!transactionInProgress)
-        // 				buyInput.disabled = availableSharesMax > 0 ? false : true;
-        // 			buyInput.min = availableShares > 0 ? 1 : 0;
-        // 		});
-        // 		updated++;
-        // 	}
-        // }
-        // const total = calculateTotal(holdings);
-        // domUpdates.push(() => {
-        // 	if (totalCell) totalCell.style.color = updated === holdings.length ? "" : "red";
-        // 	if (totalCell) totalCell.textContent = isNaN(total) ? "$--" : `$${total.toFixed(2)}`;
-        // 	if (isFirstLoad) {
-        // 		sellButton.disabled = false;
-        // 		if (balance && available > 0) buyButton.disabled = false;
-        // 	} else {
-        // 		if (!transactionInProgress) buyButton.disabled = available === 0;
-        // 	}
-        // });
+        const buySum = sumBuyInputs(holdings);
+        updateUI(holdings, domUpdates, false, buySum);
     }
     catch (error) {
         console.error(error);
@@ -113,7 +118,7 @@ export const updatePrices = async (holdingsMap, domUpdates, balance, transaction
             throw error;
         for (const holding of holdings) {
             holding.holding.isPriceUpToDate = false;
-            domUpdates.push(renderHolding(holding));
+            domUpdates.push(updateHoldingUI(holding, balance));
             domUpdates.push(() => {
                 if (totalCell)
                     totalCell.style.color = "red";

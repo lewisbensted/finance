@@ -1,6 +1,8 @@
-import { fetchBalance } from "./balance.js";
-import { updatePrices } from "./price.js";
+import { balance, fetchBalance } from "./balance.js";
+import { collectInputs, handleBuy } from "./buy.js";
+import { handleFetchPrices } from "./price.js";
 import { handleShares } from "./shares.js";
+import { setTransactionInProgress, transactionInProgress } from "./transactionInProgress.js";
 import { CustomError } from "./types/CustomError.js";
 import { createHolding } from "./types/Holding.js";
 const message = document.querySelector(".message");
@@ -11,13 +13,13 @@ const quoteButton = document.querySelector(".quote-button");
 const quoteTable = document.querySelector("table");
 const buyTotal = document.querySelector(".buy-total");
 const sellTotal = document.querySelector(".sell-total");
+const buySpinner = document.querySelector(".buy-spinner");
 let priceIntervalId = undefined;
-const transactionInProgress = false;
-let balance = null;
-let holding = null;
+let holdingsMap;
 const INTERVAL = 3000;
+const domUpdates = [];
 try {
-    balance = await fetchBalance();
+    await fetchBalance();
     if (balance === null) {
         tradingFooter.style.display = "none";
     }
@@ -59,21 +61,20 @@ quoteForm.addEventListener("submit", async (e) => {
         clearInterval(priceIntervalId);
         priceIntervalId = undefined;
     }
-    holding = createHolding(shareSymbol);
+    const holding = createHolding(shareSymbol);
+    holdingsMap = new Map();
+    holdingsMap.set(shareSymbol, holding);
     setQuoteLoading(true);
-    const domUpdates = [];
     try {
-        const holdingMap = new Map();
-        holdingMap.set(shareSymbol, holding);
         await Promise.all([
             handleShares(holding, domUpdates),
-            updatePrices(holdingMap, domUpdates, balance, transactionInProgress, true, true),
+            handleFetchPrices(holdingsMap, domUpdates, true, true),
         ]);
         applyDomUpdates(domUpdates);
         quoteTable.style.display = "";
         //add abortcontroller
         priceIntervalId = setInterval(() => {
-            updatePrices(holdingMap, domUpdates, balance, transactionInProgress, true)
+            handleFetchPrices(holdingsMap, domUpdates, true)
                 .then(() => {
                 if (!transactionInProgress) {
                     if (buyTotal?.textContent)
@@ -98,4 +99,33 @@ quoteForm.addEventListener("submit", async (e) => {
     finally {
         setQuoteLoading(false);
     }
+});
+const buyForm = document.getElementById("buy-form");
+buyForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (transactionInProgress)
+        return;
+    setTransactionInProgress(true);
+    message.textContent = "";
+    const holdings = [...holdingsMap.values()];
+    const { invalidInput, transactionRequests, purchaseTotal } = collectInputs([
+        ...holdingsMap.values(),
+    ]);
+    if (purchaseTotal > balance) {
+        message.textContent = "Could not complete trade - insufficient funds.";
+        setTransactionInProgress(false);
+        return;
+    }
+    if (invalidInput) {
+        message.textContent = "Invalid input - must be positive integers.";
+        setTransactionInProgress(false);
+        return;
+    }
+    if (!Object.keys(transactionRequests).length) {
+        message.textContent = "No shares selected to trade.";
+        setTransactionInProgress(false);
+        return;
+    }
+    await handleBuy(holdingsMap, transactionRequests, domUpdates);
+    applyDomUpdates(domUpdates);
 });

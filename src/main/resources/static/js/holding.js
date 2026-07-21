@@ -1,3 +1,4 @@
+import { balance } from "./balance.js";
 export const updateHolding = (holding, stock) => {
     const { shares } = holding;
     holding.companyName ??= stock.companyName;
@@ -13,13 +14,35 @@ export const updateHolding = (holding, stock) => {
         holding.value = shares * stock.latestPrice;
     }
 };
-//buy input needs refactoring - add max buy to holding
-export const renderHolding = (holding) => {
+const disableInput = (inputCell) => {
+    inputCell.max = "0";
+    inputCell.min = "0";
+    inputCell.disabled = true;
+};
+export const updateHoldingUI = (holding, buyInputsSum = 0) => {
     const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } = holding.row;
     const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
     return () => {
         nameCell.textContent = companyName;
         symbolCell.textContent = symbol;
+        if (latestPrice === undefined) {
+            priceCell.textContent = "$--";
+            priceCell.style.color = "red";
+        }
+        else {
+            if (!isPriceUpToDate) {
+                priceCell.style.color = "red";
+            }
+            else {
+                priceCell.textContent = `$${latestPrice.toFixed(2)}`;
+                priceCell.style.color = "";
+            }
+        }
+        if (balance == null) {
+            disableInput(buyInput);
+            disableInput(sellInput);
+            return;
+        }
         if (shares === null) {
             sharesCell.textContent = "";
         }
@@ -46,35 +69,26 @@ export const renderHolding = (holding) => {
                 valueCell.style.color = "red";
             }
         }
-        if (latestPrice === undefined) {
-            priceCell.textContent = "$--";
-            priceCell.style.color = "red";
-            buyInput.disabled = true;
-        }
-        else {
-            if (!isPriceUpToDate) {
-                priceCell.style.color = "red";
-                buyInput.disabled = true;
-            }
-            else {
-                priceCell.textContent = String(latestPrice);
-                priceCell.style.color = "";
-                buyInput.disabled = false;
-            }
-        }
-        const isSellDisabled = latestPrice === undefined ||
-            !isPriceUpToDate ||
-            typeof shares !== "number" ||
-            shares <= 0;
+        const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
         if (isSellDisabled) {
-            sellInput.max = "0";
-            sellInput.min = "1";
-            sellInput.disabled = true;
+            disableInput(sellInput);
         }
         else {
             sellInput.disabled = false;
-            sellInput.min = "1";
+            sellInput.min = "0";
             sellInput.max = String(shares);
+        }
+        const isBuyDisabled = latestPrice === undefined || !isPriceUpToDate;
+        if (isBuyDisabled) {
+            disableInput(buyInput);
+        }
+        else {
+            const remaining = balance - buyInputsSum + latestPrice * (Number(buyInput.value) || 0);
+            const availableShares = Math.floor(remaining / latestPrice);
+            const availableSharesMax = Math.floor(balance / latestPrice);
+            buyInput.max = String(availableShares);
+            buyInput.disabled = availableSharesMax > 0 ? false : true;
+            buyInput.min = String(availableShares > 0 ? 1 : 0);
         }
     };
 };

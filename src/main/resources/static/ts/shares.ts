@@ -1,4 +1,5 @@
-import { renderHolding } from "./holding.js";
+import { balance } from "./balance.js";
+import { updateHoldingUI } from "./holding.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 import { HoldingDTO, HoldingItem } from "./types/Holding.js";
@@ -34,7 +35,7 @@ const fetchShares = async (symbol: string) => {
 
 const updateUI = (holding: HoldingItem, domUpdates: (() => void)[]) => {
 	const shares = holding.holding.shares;
-	domUpdates.push(renderHolding(holding));
+	domUpdates.push(updateHoldingUI(holding));
 	domUpdates.push(() => {
 		if (shares === null || shares === undefined) {
 			buyForm.current_shares.value = "";
@@ -49,7 +50,10 @@ const updateUI = (holding: HoldingItem, domUpdates: (() => void)[]) => {
 	});
 };
 
-export const handleShares = async (holding: HoldingItem, domUpdates: (() => void)[] = []) => {
+export const handleShares = async (
+	holding: HoldingItem,
+	domUpdates: (() => void)[] = [],
+) => {
 	try {
 		const symbol = holding.holding.symbol;
 		const shares = await fetchShares(symbol);
