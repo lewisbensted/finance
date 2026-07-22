@@ -2,7 +2,7 @@ import { setBalance } from "./balance.js";
 import { updateUI } from "./price.js";
 import { CustomError } from "./types/CustomError.js";
 const buyShares = async (buyRequests) => {
-    const res = await fetch("/buy", {
+    const res = await fetch("/api/buy", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -26,7 +26,7 @@ const buyShares = async (buyRequests) => {
 };
 export const collectInputs = (holdings) => {
     let purchaseTotal = 0;
-    const buyRequests = {};
+    const buyRequests = [];
     for (const holding of holdings) {
         const { symbol, latestPrice } = holding.holding;
         const { buyInput } = holding.row;
@@ -36,23 +36,26 @@ export const collectInputs = (holdings) => {
         }
         purchaseTotal += quantity * latestPrice;
         if (quantity > 0)
-            buyRequests[symbol] = quantity;
+            buyRequests.push({ symbol: symbol, quantity: quantity });
     }
     return { invalidInput: false, transactionRequests: buyRequests, purchaseTotal: purchaseTotal };
 };
-const calculateTotal = (holdings) => holdings.reduce((total, holding) => total + (holding.holding.value ?? 0), 0).toFixed(2);
 export const handleBuy = async (holdingsMap, transactionRequests, domUpdates = []) => {
     const holdings = [...holdingsMap.values()];
     try {
         const { transactions, updatedBalance, error } = await buyShares(transactionRequests);
+        const errorMessages = [];
         if (error?.fields)
             for (const [symbol, itemError] of Object.entries(error.fields)) {
                 console.warn(`Failed transaction ${symbol}: ${itemError.message}`);
+                errorMessages.push(`${symbol}: ${itemError.message}`);
             }
         setBalance(updatedBalance);
+        const successMessage = [];
         for (const [symbol, transaction] of [...transactions.entries()]) {
             const quantity = transaction.quantity;
             const holding = holdingsMap.get(symbol);
+            successMessage.push(symbol);
             if (!holding)
                 continue;
             if (quantity) {
@@ -60,10 +63,21 @@ export const handleBuy = async (holdingsMap, transactionRequests, domUpdates = [
                 holding.holding.value = holding.holding.latestPrice * holding.holding.shares;
             }
         }
+        //showtoast
         updateUI(holdings, domUpdates, true);
-        // modal
     }
     catch (error) {
         console.error(error);
+        if (error instanceof CustomError && error.code === "OPERATION_FAILED") {
+            const errorMessages = [];
+            for (const [symbol, itemError] of Object.entries(error.fields)) {
+                console.warn(`Failed transaction ${symbol}: ${itemError.message}`);
+                errorMessages.push(`${symbol}: ${itemError.message}`);
+            }
+            //show toast
+        }
+        else {
+            //toast "Unexpected error - all transactions failed"
+        }
     }
 };

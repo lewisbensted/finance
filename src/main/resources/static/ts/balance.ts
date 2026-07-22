@@ -29,7 +29,7 @@ export const fetchBalance = async () => {
 	return balance;
 };
 
-export const setBalance = (value: number) => {
+export const setBalance = (value: number | null) => {
 	if (typeof value === "number" && !Number.isNaN(value)) {
 		balance = value;
 	} else {

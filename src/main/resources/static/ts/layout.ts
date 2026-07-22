@@ -1,4 +1,23 @@
 
+const errorModal = document.querySelector(".error-modal");
+const errorList = document.querySelector(".error-list");
+const closeModal = document.querySelector(".close-modal");
+
+closeModal.onclick = () => {
+	errorList.innerHTML = "";
+	errorModal.close();
+};
+
+export const displayMessages = (messages) => {
+	messages.forEach((message) => {
+		const li = document.createElement("li");
+		li.textContent = message;
+		errorList.appendChild(li);
+	});
+
+	errorModal.showModal();
+};
+
 document.addEventListener("DOMContentLoaded", async function () {
 	const html =
 		"<!DOCTYPE " +

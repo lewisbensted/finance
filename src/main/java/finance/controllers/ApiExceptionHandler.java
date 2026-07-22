@@ -52,8 +52,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorDTO> handleForbidden(ForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorDTO(FORBIDDEN, ex.getMessage()));
+    public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(null, new ErrorDTO(FORBIDDEN, ex.getMessage())));
     }
 
     @ExceptionHandler(AuthenticationException.class)

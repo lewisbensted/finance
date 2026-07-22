@@ -14,6 +14,7 @@ const quoteTable = document.querySelector("table");
 const buyTotal = document.querySelector(".buy-total");
 const sellTotal = document.querySelector(".sell-total");
 const buySpinner = document.querySelector(".buy-spinner");
+const buyButton = document.querySelector(".buy-button");
 let priceIntervalId = undefined;
 let holdingsMap;
 const INTERVAL = 3000;
@@ -35,6 +36,7 @@ catch (error) {
 }
 const setQuoteLoading = (loading) => {
     quoteButton.style.display = loading ? "none" : "";
+    quoteButton.disabled = false;
     quoteSpinner.style.setProperty("display", loading ? "flex" : "none", "important");
     if (loading) {
         quoteTable.style.display = "none";
@@ -107,7 +109,6 @@ buyForm.addEventListener("submit", async (e) => {
         return;
     setTransactionInProgress(true);
     message.textContent = "";
-    const holdings = [...holdingsMap.values()];
     const { invalidInput, transactionRequests, purchaseTotal } = collectInputs([
         ...holdingsMap.values(),
     ]);
@@ -126,6 +127,12 @@ buyForm.addEventListener("submit", async (e) => {
         setTransactionInProgress(false);
         return;
     }
+    buySpinner.style.setProperty("display", "flex", "important");
+    buyButton.style.display = "none";
+    //document.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
     await handleBuy(holdingsMap, transactionRequests, domUpdates);
     applyDomUpdates(domUpdates);
+    buySpinner.style.setProperty("display", "none", "important");
+    buyButton.style.display = "";
+    setTransactionInProgress(false);
 });

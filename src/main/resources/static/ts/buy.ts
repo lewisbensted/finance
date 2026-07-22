@@ -1,15 +1,13 @@
-import { balance, setBalance } from "./balance.js";
-import { updateHoldingUI } from "./holding.js";
+import { setBalance } from "./balance.js";
 import { updateUI } from "./price.js";
-import { setTransactionInProgress, transactionInProgress } from "./transactionInProgress.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CollectInputs } from "./types/CollectInputs.js";
 import { CustomError } from "./types/CustomError.js";
 import { HoldingItem } from "./types/Holding.js";
 import { Transaction, TransactionResponse } from "./types/Transaction.js";
 
-const buyShares = async (buyRequests: Record<string, number>) => {
-	const res = await fetch("/buy", {
+const buyShares = async (buyRequests: Transaction[]) => {
+	const res = await fetch("/api/buy", {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -41,7 +39,7 @@ const buyShares = async (buyRequests: Record<string, number>) => {
 
 export const collectInputs = (holdings: HoldingItem[]): CollectInputs => {
 	let purchaseTotal = 0;
-	const buyRequests: Record<string, number> = {};
+	const buyRequests: Transaction[] = [];
 
 	for (const holding of holdings) {
 		const { symbol, latestPrice } = holding.holding;
@@ -54,34 +52,35 @@ export const collectInputs = (holdings: HoldingItem[]): CollectInputs => {
 		}
 		purchaseTotal += quantity * latestPrice;
 
-		if (quantity > 0) buyRequests[symbol] = quantity;
+		if (quantity > 0) buyRequests.push({ symbol: symbol, quantity: quantity });
 	}
 
 	return { invalidInput: false, transactionRequests: buyRequests, purchaseTotal: purchaseTotal };
 };
 
-const calculateTotal = (holdings: HoldingItem[]) =>
-	holdings.reduce((total, holding) => total + (holding.holding.value ?? 0), 0).toFixed(2);
-
 export const handleBuy = async (
 	holdingsMap: Map<string, HoldingItem>,
-	transactionRequests: Record<string, number>,
+	transactionRequests: Transaction[],
 	domUpdates: (() => void)[] = [],
 ) => {
 	const holdings = [...holdingsMap.values()];
 	try {
 		const { transactions, updatedBalance, error } = await buyShares(transactionRequests);
 
+		const errorMessages: string[] = [];
 		if (error?.fields)
 			for (const [symbol, itemError] of Object.entries(error.fields)) {
 				console.warn(`Failed transaction ${symbol}: ${itemError.message}`);
+				errorMessages.push(`${symbol}: ${itemError.message}`);
 			}
 
 		setBalance(updatedBalance);
 
+		const successMessage: string[] = [];
 		for (const [symbol, transaction] of [...transactions.entries()]) {
 			const quantity = transaction.quantity;
 			const holding = holdingsMap.get(symbol);
+			successMessage.push(symbol);
 			if (!holding) continue;
 
 			if (quantity) {
@@ -90,10 +89,22 @@ export const handleBuy = async (
 			}
 		}
 
+		//showtoast
 		updateUI(holdings, domUpdates, true);
 
-		// modal
+		
 	} catch (error) {
 		console.error(error);
+		if (error instanceof CustomError && error.code === "OPERATION_FAILED") {
+			const errorMessages: string = [];
+			for (const [symbol, itemError] of Object.entries(error.fields)) {
+				console.warn(`Failed transaction ${symbol}: ${itemError.message}`);
+				errorMessages.push(`${symbol}: ${itemError.message}`);
+			}
+			//show toast
+		} else {
+			//toast "Unexpected error - all transactions failed"
+			
+		}
 	}
 };

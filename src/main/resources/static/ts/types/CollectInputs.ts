@@ -1,5 +1,7 @@
+import { Transaction } from "./Transaction";
+
 export interface CollectInputs {
 	invalidInput: boolean;
-	transactionRequests: Record<string, number> | null;
+	transactionRequests: Transaction[] | null;
 	purchaseTotal: number | null;
 }

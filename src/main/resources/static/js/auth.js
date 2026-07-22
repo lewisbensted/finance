@@ -1,19 +1,6 @@
-"use strict";
-const errorModal = document.querySelector(".error-modal");
-const errorList = document.querySelector(".error-list");
-const closeModal = document.querySelector(".close-modal");
-closeModal.onclick = () => {
-    errorList.innerHTML = "";
-    errorModal.close();
-};
-const displayMessages = (messages) => {
-    messages.forEach(message => {
-        const li = document.createElement("li");
-        li.textContent = message;
-        errorList.appendChild(li);
-    });
-    errorModal.showModal();
-};
+import { setBalance } from "./balance.js";
+import { displayMessages } from "./layout.js";
+import { CustomError } from "./types/CustomError.js";
 const loginButton = document.querySelector(".login-button");
 const loginSpinner = document.querySelector(".login-spinner");
 const loginForm = document.querySelector(".login-form");
@@ -22,9 +9,7 @@ if (loginForm) {
         event.preventDefault();
         loginButton.style.display = "none";
         loginSpinner.style.setProperty("display", "flex", "important");
-        document
-            .querySelectorAll("input, button")
-            .forEach((el) => (el.disabled = true));
+        document.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
         try {
             const res = await fetch("/api/login", {
                 method: "POST",
@@ -37,22 +22,20 @@ if (loginForm) {
                 }),
             });
             if (!res.ok) {
-                const data = await res.json();
+                const data = (await res.json());
                 if ([400, 401, 429].includes(res.status) &&
-                    data.code !== "MALFORMED_REQUEST") {
+                    data.error?.code !== "MALFORMED_REQUEST") {
                     console.error(data);
-                    if (data.code === "INVALID_REQUEST") {
-                        const messages = Object.values(data.fields)
-                            .flat();
+                    if (data.error.code === "INVALID_REQUEST") {
+                        const messages = Object.values(data.error?.fields).flat();
                         displayMessages(messages);
                     }
                     else {
-                        displayMessages([data.message]);
+                        displayMessages([data.error?.message]);
                     }
                 }
                 else {
-                    throw new Error(data?.message ||
-                        `Error ${res.status}: ${res.statusText}`);
+                    throw new CustomError(data.error.message || `Login failed ${res.status}`, res.status, data.error?.code);
                 }
                 return;
             }
@@ -65,21 +48,20 @@ if (loginForm) {
         finally {
             loginButton.style.display = "";
             loginSpinner.style.setProperty("display", "none", "important");
-            document
-                .querySelectorAll("input, button")
-                .forEach((el) => (el.disabled = false));
+            document.querySelectorAll("input, button").forEach((el) => (el.disabled = false));
         }
     });
 }
 const logoutButton = document.querySelector(".logout-button");
+console.log(logoutButton);
 if (logoutButton) {
     logoutButton.addEventListener("click", async (e) => {
         e.preventDefault();
         try {
-            const res = await fetch("api/logout", { method: "POST" });
+            const res = await fetch("/api/logout", { method: "POST" });
             if (!res.ok)
                 throw new Error(`Logout failed: ${res.status}`);
-            sessionStorage.removeItem("balance");
+            setBalance(null);
             window.location.href = "/";
         }
         catch (error) {
@@ -87,6 +69,25 @@ if (logoutButton) {
         }
     });
 }
+document.addEventListener("click", async (e) => {
+    const logoutButton = e.target.closest(".logout-button");
+    if (!logoutButton)
+        return;
+    e.preventDefault();
+    try {
+        const res = await fetch("/api/logout", {
+            method: "POST",
+        });
+        if (!res.ok) {
+            throw new Error(`Logout failed: ${res.status}`);
+        }
+        setBalance(null);
+        window.location.href = "/";
+    }
+    catch (error) {
+        console.error(error);
+    }
+});
 const registerButton = document.querySelector(".register-button");
 const registerSpinner = document.querySelector(".register-spinner");
 const registerForm = document.querySelector(".register-form");
@@ -115,8 +116,7 @@ if (registerForm) {
                 const data = await res.json();
                 if ([400, 409, 429].includes(res.status) && data.error !== "MALFORMED_REQUEST") {
                     if (data.code === "INVALID_REQUEST") {
-                        const messages = Object.values(data.fields)
-                            .flat();
+                        const messages = Object.values(data.fields).flat();
                         displayMessages(messages);
                     }
                     else {

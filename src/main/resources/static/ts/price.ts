@@ -2,7 +2,7 @@ import { balance } from "./balance.js";
 import { updateHoldingUI, updateHolding } from "./holding.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
-import { Holding, HoldingItem } from "./types/Holding.js";
+import { HoldingItem } from "./types/Holding.js";
 import { Stock, StockResponse } from "./types/Stock.js";
 
 const sellTotal = document.querySelector(".sell-total");
