@@ -52,8 +52,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorDTO> handleForbidden(ForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ErrorDTO(FORBIDDEN, ex.getMessage()));
+    public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(null, new ErrorDTO(FORBIDDEN, ex.getMessage())));
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -74,9 +75,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
+    public ResponseEntity<ApiResponse<ErrorDTO>> handleInsufficientFundsException(InsufficientFundsException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage()));
+                .body(new ApiResponse<>(null, new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage())));
     }
 
     @ExceptionHandler(InsufficientSharesException.class)

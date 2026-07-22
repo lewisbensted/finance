@@ -1,5 +1,6 @@
-import { Holding, HoldingItem } from "./types/Holding";
-import { Stock } from "./types/Stock";
+import { balance } from "./balance.js";
+import { Holding, HoldingItem } from "./types/Holding.js";
+import { Stock } from "./types/Stock.js";
 
 export const updateHolding = (holding: Holding, stock: Stock) => {
 	const { shares } = holding;
@@ -18,13 +19,13 @@ export const updateHolding = (holding: Holding, stock: Stock) => {
 	}
 };
 
-//buy input needs refactoring - add max buy to holding
+const disableInput = (inputCell: HTMLElement) => {
+	inputCell.max = "0";
+	inputCell.min = "0";
+	inputCell.disabled = true;
+};
 
-export const updateHoldingUI = (
-	holding: HoldingItem,
-	balance: number | null,
-	buyInputsSum?: number,
-) => {
+export const updateHoldingUI = (holding: HoldingItem, buyInputsSum = 0) => {
 	const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } =
 		holding.row;
 	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
@@ -32,6 +33,24 @@ export const updateHoldingUI = (
 	return () => {
 		nameCell.textContent = companyName;
 		symbolCell.textContent = symbol;
+
+		if (latestPrice === undefined) {
+			priceCell.textContent = "$--";
+			priceCell.style.color = "red";
+		} else {
+			if (!isPriceUpToDate) {
+				priceCell.style.color = "red";
+			} else {
+				priceCell.textContent = `$${latestPrice.toFixed(2)}`;
+				priceCell.style.color = "";
+			}
+		}
+
+		if (balance == null) {
+			disableInput(buyInput);
+			disableInput(sellInput);
+			return;
+		}
 
 		if (shares === null) {
 			sharesCell.textContent = "";
@@ -56,41 +75,20 @@ export const updateHoldingUI = (
 			}
 		}
 
-		if (latestPrice === undefined) {
-			priceCell.textContent = "$--";
-			priceCell.style.color = "red";
-		} else {
-			if (!isPriceUpToDate) {
-				priceCell.style.color = "red";
-			} else {
-				priceCell.textContent = String(latestPrice);
-				priceCell.style.color = "";
-			}
-		}
-
-		const isSellDisabled =
-			balance === null || latestPrice === undefined || !isPriceUpToDate || !shares;
+		const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
 
 		if (isSellDisabled) {
-			sellInput.max = "0";
-			sellInput.min = "1";
-			sellInput.disabled = true;
+			disableInput(sellInput);
 		} else {
 			sellInput.disabled = false;
-			sellInput.min = "1";
+			sellInput.min = "0";
 			sellInput.max = String(shares);
 		}
 
-		const isBuyDisabled =
-			balance === null ||
-			latestPrice === undefined ||
-			!isPriceUpToDate ||
-			buyInputsSum === undefined;
+		const isBuyDisabled = latestPrice === undefined || !isPriceUpToDate;
 
 		if (isBuyDisabled) {
-			buyInput.max = "0";
-			buyInput.min = "1";
-			buyInput.disabled = true;
+			disableInput(buyInput);
 		} else {
 			const remaining = balance - buyInputsSum + latestPrice * (Number(buyInput.value) || 0);
 			const availableShares = Math.floor(remaining / latestPrice);

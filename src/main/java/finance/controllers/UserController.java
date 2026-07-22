@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import static finance.controllers.AuthUtils.authenticateUser;
 
-
 @Controller
 public class UserController {
     UserService userService;
@@ -29,11 +28,12 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/register")
-    public ResponseEntity<UserDTO> registerUser(@RequestBody @Valid RegisterDTO body, HttpSession session) {
+    public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterDTO body,
+            HttpSession session) {
         if (session.getAttribute("USER_SESSION") != null)
             throw new ForbiddenException("Cannot register a new user while logged in");
-        User newUser = userService.register(body);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new UserDTO(newUser));
+        userService.register(body);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/login")
@@ -43,28 +43,29 @@ public class UserController {
 
     @PostMapping(value = "/api/login")
     @ResponseBody
-    public ResponseEntity<UserDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
-        if (session.getAttribute("USER_SESSION") != null) throw new ForbiddenException("Already logged in");
+    public ResponseEntity<Void> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
+        if (session.getAttribute("USER_SESSION") != null)
+            throw new ForbiddenException("Already logged in");
 
         User user = userService.login(body);
         session.setAttribute("USER_SESSION", new SessionUser(
                 user.getId(),
-                user.getUsername()
-        ));
-        return ResponseEntity.ok().body(new UserDTO(user));
+                user.getUsername()));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PostMapping(value = "/api/logout")
     public ResponseEntity<String> logout(HttpSession session) {
         session.removeAttribute("USER_SESSION");
-        return ResponseEntity.ok().body("Logged out");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PutMapping(value = "/api/password")
-    public ResponseEntity<String> changePassword(HttpSession session, @RequestBody @Valid PasswordDTO body) {
+    public ResponseEntity<Void> changePassword(HttpSession session,
+            @RequestBody @Valid PasswordDTO body) {
         SessionUser sessionUser = authenticateUser(session);
         userService.changePassword(sessionUser.id(), body);
-        return ResponseEntity.ok().body("Password updated");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }
