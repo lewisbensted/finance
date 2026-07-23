@@ -67,7 +67,6 @@ if (loginForm) {
 }
 
 const logoutButton = document.querySelector(".logout-button");
-console.log(logoutButton);
 if (logoutButton) {
 	logoutButton.addEventListener("click", async (e) => {
 		e.preventDefault();

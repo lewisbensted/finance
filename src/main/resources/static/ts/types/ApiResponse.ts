@@ -1,4 +1,4 @@
-interface ItemError {
+export interface ItemError {
 	code: string;
 	message: string;
 }
@@ -6,10 +6,13 @@ interface ItemError {
 interface ErrorDTO {
 	code: string;
 	message: string;
-	fields?: Record<string, ItemError>;
 }
 
-export interface ApiResponse<T> {
-	data: T | null
-	error: null | ErrorDTO
+export interface BatchErrorDTO extends ErrorDTO {
+	fields: Record<string, ItemError>;
+}
+
+export interface ApiResponse<T, E extends ErrorDTO = ErrorDTO> {
+	data: T | null;
+	error: null | E;
 }

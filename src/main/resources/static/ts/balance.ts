@@ -1,6 +1,11 @@
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 
+
+const balanceCell = document.querySelector(".balance");
+const tradingFooter = document.querySelector(".table-footer");
+
+
 export let balance: number | null;
 
 export const fetchBalance = async () => {
@@ -37,3 +42,18 @@ export const setBalance = (value: number | null) => {
 	}
 };
 
+export const handleFetchBalance =async () => {
+	try {
+		await fetchBalance();
+		if (balance === null) {
+			tradingFooter.style.display = "none";
+		} else {
+			balanceCell.style.color = "";
+			balanceCell.textContent = `$${balance.toFixed(2)}`;
+		}
+	} catch (error) {
+		console.error(error);
+		balanceCell.style.color = "red";
+		balanceCell.textContent = "$--";
+	}
+}

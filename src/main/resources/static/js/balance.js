@@ -1,4 +1,6 @@
 import { CustomError } from "./types/CustomError.js";
+const balanceCell = document.querySelector(".balance");
+const tradingFooter = document.querySelector(".table-footer");
 export let balance;
 export const fetchBalance = async () => {
     const res = await fetch("/api/balance");
@@ -23,5 +25,22 @@ export const setBalance = (value) => {
     }
     else {
         console.warn("Failed to update invalid balance:", value);
+    }
+};
+export const handleFetchBalance = async () => {
+    try {
+        await fetchBalance();
+        if (balance === null) {
+            tradingFooter.style.display = "none";
+        }
+        else {
+            balanceCell.style.color = "";
+            balanceCell.textContent = `$${balance.toFixed(2)}`;
+        }
+    }
+    catch (error) {
+        console.error(error);
+        balanceCell.style.color = "red";
+        balanceCell.textContent = "$--";
     }
 };
