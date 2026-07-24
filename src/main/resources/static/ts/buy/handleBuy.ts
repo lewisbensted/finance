@@ -4,41 +4,23 @@ import { updateTableUI } from "../utils/updateTableUI.js";
 import { setBalance } from "./../balance.js";
 
 import { CustomError } from "./../types/CustomError.js";
-import {
-	Transaction,
-} from "./../types/Transaction.js";
+import { Transaction } from "./../types/Transaction.js";
 import { buyShares } from "./buyShares.js";
 
-export const handleBuy = async (
-	transactionRequests: Transaction[],
-	domUpdates: (() => void)[] = [],
-) => {
-	const holdings = [...currentHoldingsMap.values()];
-	try {
-		const { transactions, updatedBalance, error } = await buyShares(transactionRequests);
+export const handleBuy = async (transactionRequests: Transaction[]) => {
+	const { successful, updatedBalance, failed } = await buyShares(transactionRequests);
 
-		setBalance(updatedBalance);
+	if (updatedBalance !== undefined) setBalance(updatedBalance);
 
-		for (const [symbol, transaction] of [...transactions.entries()]) {
-			const quantity = transaction.quantity;
-			const holding = currentHoldingsMap.get(symbol);
-			if (!holding) continue;
+	for (const [symbol, transaction] of successful) {
+		const quantity = transaction.quantity;
+		const holding = currentHoldingsMap.get(symbol);
+		if (!holding) continue;
 
-			if (quantity) {
-				holding.holding.shares += quantity;
-				holding.holding.value = holding.holding.latestPrice * holding.holding.shares;
-			}
-		}
-
-		updateTableUI(holdings, domUpdates, true);
-
-		displayToast(transactions, error?.fields, "buy");
-	} catch (error) {
-		console.error(error);
-		if (error instanceof CustomError && error.code === "OPERATION_FAILED" && error.fields) {
-			displayToast(new Map(), error.fields, "buy");
-		} else {
-			console.log("all transactions failed");
+		if (quantity) {
+			holding.holding.shares += quantity;
+			holding.holding.value = holding.holding.latestPrice * holding.holding.shares;
 		}
 	}
+	return { successful, failed };
 };

@@ -3,10 +3,13 @@ import { createHolding, currentHoldingsMap } from "../holding.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 
 import { handleFetchShares } from "../shares/handleFetchShares.js";
+import { updateSharesUI } from "../shares/updateSharesUI.js";
 
 import { transactionInProgress } from "../transactionInProgress.js";
 import { CustomError } from "../types/CustomError.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
+import { sumInputs } from "../utils/sumInputs.js";
+import { updateTableUI } from "../utils/updateTableUI.js";
 
 const message = document.querySelector(".message");
 
@@ -52,14 +55,16 @@ quoteForm.addEventListener("submit", async (e) => {
 
 	const holding = createHolding(shareSymbol);
 	currentHoldingsMap.set(shareSymbol, holding);
+	const currentHoldings = [...currentHoldingsMap.values()];
 
 	setQuoteLoading(true);
 
 	try {
-		await Promise.all([
-			handleFetchShares(holding, domUpdates),
-			handleFetchPrices(domUpdates, true, true),
-		]);
+		await Promise.all([handleFetchShares(holding), handleFetchPrices("search", true)]);
+
+		updateSharesUI(holding);
+		const buySum = sumInputs(currentHoldings);
+		updateTableUI(currentHoldings, false, buySum);
 
 		applyDomUpdates(domUpdates);
 
@@ -67,7 +72,7 @@ quoteForm.addEventListener("submit", async (e) => {
 
 		//add abortcontroller
 		priceIntervalId = setInterval(() => {
-			handleFetchPrices(domUpdates, true)
+			handleFetchPrices("search")
 				.then(() => {
 					if (!transactionInProgress) {
 						if (buyTotal?.textContent)
@@ -75,6 +80,8 @@ quoteForm.addEventListener("submit", async (e) => {
 						if (sellTotal?.textContent)
 							holding.row.sellInput.dispatchEvent(new Event("input"));
 					}
+					const buySum = sumInputs(currentHoldings);
+					updateTableUI(currentHoldings, false, buySum);
 					applyDomUpdates(domUpdates);
 				})
 				.catch((error: unknown) => {

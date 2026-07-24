@@ -12,24 +12,26 @@ export const buyShares = async (buyRequests: Transaction[]) => {
 	});
 	const response = (await res.json()) as ApiResponse<TransactionResponse, BatchErrorDTO>;
 
-	if (!res.ok) {
-		throw new CustomError(
-			response.error?.message ?? `Request failed ${res.status}`,
+	const error = response.error
+		? new CustomError(
+			response.error.message,
 			res.status,
-			response.error?.code,
-			response.error?.fields,
-		);
+			response.error.code,
+			response.error.fields,
+		)
+		: null;
+
+	if (!res.ok && error?.code !== "OPERATION_FAILED") {
+		throw error ?? new Error(`Request failed ${res.status}`);
 	}
-	if (
-		!response.data?.transactions ||
-		typeof response.data.transactions !== "object" ||
-		typeof response.data.balance !== "number"
-	) {
+
+	if (!response.data?.transactions && error?.code !== "OPERATION_FAILED") {
 		throw new Error("Invalid response from server");
 	}
+
 	return {
-		transactions: new Map<string, Transaction>(Object.entries(response.data.transactions)),
-		updatedBalance: response.data.balance,
-		error: response.error ?? null,
+		successful: new Map<string, Transaction>(Object.entries(response.data?.transactions ?? {})),
+		updatedBalance: response.data?.balance,
+		failed: error?.fields ?? {}
 	};
 };

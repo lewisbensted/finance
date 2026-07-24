@@ -12,7 +12,16 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 		holding.row;
 	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
 
-	return () => {
+	const availableSharesMax =
+		balance != null && latestPrice !== undefined ? Math.floor(balance / latestPrice) : 0;
+
+	const isBuyDisabled =
+		balance == null || latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
+
+	const isSellDisabled =
+		balance == null || latestPrice === undefined || !isPriceUpToDate || !shares;
+
+	const domUpdate = () => {
 		nameCell.textContent = companyName;
 		symbolCell.textContent = symbol;
 
@@ -57,8 +66,6 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 			}
 		}
 
-		const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
-
 		if (isSellDisabled) {
 			disableInput(sellInput);
 		} else {
@@ -67,17 +74,16 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 			sellInput.max = String(shares);
 		}
 
-		const isBuyDisabled = latestPrice === undefined || !isPriceUpToDate;
-
 		if (isBuyDisabled) {
 			disableInput(buyInput);
 		} else {
+			buyInput.disabled = false;
 			const remaining = balance - buyInputsSum + latestPrice * (Number(buyInput.value) || 0);
 			const availableShares = Math.floor(remaining / latestPrice);
-			const availableSharesMax = Math.floor(balance / latestPrice);
 			buyInput.max = String(availableShares);
-			buyInput.disabled = availableSharesMax > 0 ? false : true;
 			buyInput.min = String(availableShares > 0 ? 1 : 0);
 		}
 	};
+
+	return { isSellDisabled, isBuyDisabled, domUpdate };
 };

@@ -7,6 +7,7 @@ import { updateHolding } from "../utils/updateHolding.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { currentHoldingsMap } from "../holding.js";
 import { Page } from "../types/Transaction.js";
+import { domUpdates } from "../utils/domUpdates.js";
 
 const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
@@ -36,22 +37,16 @@ const checkValidStock = (expectedSymbol: string, stock: unknown): stock is Stock
 	return true;
 };
 
-export const handleFetchPrices = async (
-	domUpdates: (() => void)[],
-	page: Page,
-	isFirstLoad = false,
-) => {
+export const handleFetchPrices = async (page: Page, isFirstLoad = false) => {
 	const symbols = [...currentHoldingsMap.keys()];
 	const holdings = [...currentHoldingsMap.values()];
 	try {
 		const res = await fetchPrices(symbols);
-		const stockMap = res.stocks;
-		const failures = res.error?.fields;
+		const stockMap = res.successful;
+		const failed = res.failed;
 
-		if (failures)
-			for (const [symbol, itemError] of Object.entries(failures)) {
-				console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
-			}
+		for (const [symbol, itemError] of Object.entries(failed))
+			console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
 
 		if (page === "search") {
 			const stock = stockMap.get(symbols[0]);
@@ -70,17 +65,18 @@ export const handleFetchPrices = async (
 
 		const buySum = sumInputs(holdings);
 
-		updateTableUI(holdings, domUpdates, false, buySum);
+		updateTableUI(holdings, false, buySum);
+
+		return { stockMap, failed };
 	} catch (error) {
 		console.error(error);
 		if (isFirstLoad && page === "search") throw error;
 		for (const holding of holdings) {
 			holding.holding.isPriceUpToDate = false;
-			domUpdates.push(updateRowUI(holding));
-			domUpdates.push(() => {
-				if (totalCell) totalCell.style.color = "red";
-				buyButton.disabled = sellButton.disabled = true;
-			});
+			//domUpdates.push(updateRowUI(holding));
+
+			//if (totalCell) totalCell.style.color = "red";
+			//buyButton.disabled = sellButton.disabled = true;
 		}
 	}
 };

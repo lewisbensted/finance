@@ -5,18 +5,26 @@ import { Stock, StockResponse } from "./../types/Stock.js";
 export const fetchPrices = async (symbols: string[]) => {
 	const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
 	const response = (await res.json()) as ApiResponse<StockResponse, BatchErrorDTO>;
-	if (!res.ok)
-		throw new CustomError(
-			response.error?.message ?? `Request failed ${res.status}`,
+
+	const error = response.error
+		? new CustomError(
+			response.error.message,
 			res.status,
-			response.error?.code,
-		);
-	if (!response.data?.stocks || typeof response.data.stocks !== "object") {
+			response.error.code,
+			response.error.fields,
+		)
+		: null;
+
+	if (!res.ok && error?.code !== "OPERATION_FAILED") {
+		throw error ?? new Error(`Request failed ${res.status}`);
+	}
+
+	if (!response.data?.stocks && error?.code !== "OPERATION_FAILED") {
 		throw new Error("Invalid response from server");
 	}
 
 	return {
-		stocks: new Map<string, Stock>(Object.entries(response.data.stocks)),
-		error: response.error ?? null,
+		successful: new Map<string, Stock>(Object.entries(response.data?.stocks ?? {})),
+		failed: error?.fields ?? {}
 	};
 };

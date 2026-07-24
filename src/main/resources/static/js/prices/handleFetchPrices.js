@@ -1,6 +1,5 @@
 import { fetchPrices } from "./fetchPrices.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
-import { updateRowUI } from "../utils/updateRowUI.js";
 import { updateHolding } from "../utils/updateHolding.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { currentHoldingsMap } from "../holding.js";
@@ -27,17 +26,15 @@ const checkValidStock = (expectedSymbol, stock) => {
     }
     return true;
 };
-export const handleFetchPrices = async (domUpdates, page, isFirstLoad = false) => {
+export const handleFetchPrices = async (page, isFirstLoad = false) => {
     const symbols = [...currentHoldingsMap.keys()];
     const holdings = [...currentHoldingsMap.values()];
     try {
         const res = await fetchPrices(symbols);
-        const stockMap = res.stocks;
-        const failures = res.error?.fields;
-        if (failures)
-            for (const [symbol, itemError] of Object.entries(failures)) {
-                console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
-            }
+        const stockMap = res.successful;
+        const failed = res.failed;
+        for (const [symbol, itemError] of Object.entries(failed))
+            console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
         if (page === "search") {
             const stock = stockMap.get(symbols[0]);
             if (stockMap.size !== 1 || !checkValidStock(symbols[0], stock)) {
@@ -52,7 +49,8 @@ export const handleFetchPrices = async (domUpdates, page, isFirstLoad = false) =
             }
         }
         const buySum = sumInputs(holdings);
-        updateTableUI(holdings, domUpdates, false, buySum);
+        updateTableUI(holdings, false, buySum);
+        return { stockMap, failed };
     }
     catch (error) {
         console.error(error);
@@ -60,12 +58,9 @@ export const handleFetchPrices = async (domUpdates, page, isFirstLoad = false) =
             throw error;
         for (const holding of holdings) {
             holding.holding.isPriceUpToDate = false;
-            domUpdates.push(updateRowUI(holding));
-            domUpdates.push(() => {
-                if (totalCell)
-                    totalCell.style.color = "red";
-                buyButton.disabled = sellButton.disabled = true;
-            });
+            //domUpdates.push(updateRowUI(holding));
+            //if (totalCell) totalCell.style.color = "red";
+            //buyButton.disabled = sellButton.disabled = true;
         }
     }
 };

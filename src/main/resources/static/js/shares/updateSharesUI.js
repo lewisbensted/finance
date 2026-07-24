@@ -1,18 +1,16 @@
+import { domUpdates } from "../utils/domUpdates.js";
 import { updateRowUI } from "../utils/updateRowUI.js";
 const sellButton = document.querySelector(".sell-button");
 const buyForm = document.querySelector("#buy-form");
 const sellForm = document.querySelector("#sell-form");
-export const updateSharesUI = (holding, domUpdates) => {
+export const updateSharesUI = (holding) => {
     const shares = holding.holding.shares;
-    domUpdates.push(updateRowUI(holding));
+    domUpdates.push(updateRowUI(holding).domUpdate);
     domUpdates.push(() => {
         if (shares === null || shares === undefined) {
-            buyForm.current_shares.value = "";
-            sellForm.current_shares.value = "";
             sellButton.disabled = true;
             return;
         }
-        buyForm.current_shares.value = sellForm.current_shares.value = shares;
         if (shares > 0) {
             sellButton.disabled = false;
         }

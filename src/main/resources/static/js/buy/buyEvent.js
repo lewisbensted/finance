@@ -2,8 +2,10 @@ import { balance } from "../balance.js";
 import { currentHoldingsMap } from "../holding.js";
 import { setTransactionInProgress, transactionInProgress } from "../transactionInProgress.js";
 import { collectInputs } from "../utils/collectInputs.js";
+import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
+import { updateTableUI } from "../utils/updateTableUI.js";
 import { handleBuy } from "./handleBuy.js";
 const message = document.querySelector(".message");
 const buySpinner = document.querySelector(".buy-spinner");
@@ -35,10 +37,19 @@ buyForm.addEventListener("submit", async (e) => {
     }
     buySpinner.style.setProperty("display", "flex", "important");
     buyButton.style.display = "none";
-    //document.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
-    await handleBuy(transactionRequests, domUpdates);
-    applyDomUpdates(domUpdates);
-    buySpinner.style.setProperty("display", "none", "important");
-    buyButton.style.display = "";
-    setTransactionInProgress(false);
+    try {
+        const { successful, failed } = await handleBuy(transactionRequests);
+        updateTableUI(holdings, true);
+        displayToast(successful, failed, "buy");
+    }
+    catch (error) {
+        console.error(error);
+        //toast error
+    }
+    finally {
+        applyDomUpdates(domUpdates);
+        buySpinner.style.setProperty("display", "none", "important");
+        buyButton.style.display = "";
+        setTransactionInProgress(false);
+    }
 });

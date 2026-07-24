@@ -1,5 +1,6 @@
 import { balance } from "./../balance.js";
 import { HoldingItem } from "./../types/Holding.js";
+import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 
 const totalCell = document.querySelector(".total");
@@ -8,12 +9,7 @@ const sellButton = document.querySelector(".sell-button");
 const balanceCell = document.querySelector(".balance");
 const buySpinner = document.querySelector(".buy-spinner");
 
-export const updateTableUI = (
-	holdings: HoldingItem[],
-	domUpdates: (() => void)[],
-	resetInputs = false,
-	buySum = 0,
-) => {
+export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buySum = 0) => {
 	let buyButtonDisabled = true;
 	let sellButtonDisabled = true;
 	let totalValue = 0;
@@ -26,9 +22,11 @@ export const updateTableUI = (
 			buyButton.style.display = "";
 		}
 
-		domUpdates.push(updateRowUI(holding, buySum));
+		const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, buySum);
 
-		const { shares, latestPrice, value, isPriceUpToDate } = holding.holding;
+		domUpdates.push(domUpdate);
+
+		const { shares, value, isPriceUpToDate } = holding.holding;
 
 		totalValue += value ?? 0;
 
@@ -36,15 +34,14 @@ export const updateTableUI = (
 			totalValueUpToDate = false;
 		}
 
-		if (typeof shares === "number" && shares > 0) sellButtonDisabled = false;
+		if (!isSellDisabled) sellButtonDisabled = false;
 
-		if (balance !== null && typeof latestPrice === "number" && balance >= latestPrice)
-			buyButtonDisabled = false;
+		if (!isBuyDisabled) buyButtonDisabled = false;
 	}
 
 	domUpdates.push(() => {
 		if (totalCell) totalCell.style.color = totalValueUpToDate ? "" : "red";
-		if (totalCell) totalCell.textContent = totalValue.toFixed(2);
+		if (totalCell && totalValueUpToDate) totalCell.textContent = totalValue.toFixed(2);
 
 		buyButton.disabled = buyButtonDisabled;
 		sellButton.disabled = sellButtonDisabled;
