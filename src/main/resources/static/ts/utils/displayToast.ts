@@ -1,9 +1,9 @@
-import { ItemError } from "../types/ApiResponse.js";
+import { ErrorDTO } from "../types/ApiResponse.js";
 import { OperationType, Transaction } from "../types/Transaction.js";
 
 export const displayToast = (
 	successes: Map<string, Transaction>,
-	failures: Record<string, ItemError> | undefined,
+	failures: Record<string, ErrorDTO> | undefined,
 	operation: OperationType,
 ) => {
 	console.log("This will be converted into a Toast");

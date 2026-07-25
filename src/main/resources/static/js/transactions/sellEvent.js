@@ -16,7 +16,7 @@ sellForm.addEventListener("submit", async (e) => {
     setTransactionInProgress(true);
     const holdings = [...currentHoldingsMap.values()];
     message.textContent = "";
-    const { invalidInput, transactionRequests } = collectInputs(holdings, "sell");
+    const { invalidInput, transactionRequests } = collectInputs(holdings, "SELL");
     if (invalidInput) {
         message.textContent = "Invalid input - must be positive integers.";
         setTransactionInProgress(false);
@@ -30,9 +30,9 @@ sellForm.addEventListener("submit", async (e) => {
     sellSpinner.style.setProperty("display", "flex", "important");
     sellButton.style.display = "none";
     try {
-        const { successful, failed } = await handleTransaction(transactionRequests, "sell");
+        const { successful, failed } = await handleTransaction(transactionRequests, "SELL");
         updateTableUI(holdings, true);
-        displayToast(successful, failed, "sell");
+        displayToast(successful, failed, "SELL");
     }
     catch (error) {
         console.error(error);

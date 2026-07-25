@@ -8,7 +8,7 @@ export const collectInputs = (holdings: HoldingItem[], type: TransactionType): C
 	for (const holding of holdings) {
 		const { buyInput, sellInput } = holding.row;
 
-		const input = type === "buy" ? buyInput : sellInput;
+		const input = type === "BUY" ? buyInput : sellInput;
 
 		const quantity = Number(input?.value);
 

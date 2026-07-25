@@ -10,7 +10,7 @@ export const handleTransaction = async (
 ) => {
 	const { successful, updatedBalance, failed } = await executeTransaction(
 		transactionRequests,
-		"buy",
+		"BUY",
 	);
 
 	if (updatedBalance !== undefined) setBalance(updatedBalance);
@@ -21,7 +21,7 @@ export const handleTransaction = async (
 		if (!holding) throw new Error(`Holding for ${symbol} not found.`);
 
 		if (quantity) {
-			const delta = type === "buy" ? quantity : -quantity;
+			const delta = type === "BUY" ? quantity : -quantity;
 			holding.holding.shares = holding.holding.shares + delta;
 			holding.holding.value = holding.holding.latestPrice * holding.holding.shares;
 		}

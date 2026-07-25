@@ -1,7 +1,9 @@
 import { CustomError } from "./../types/CustomError.js";
 export const fetchPrices = async (symbols) => {
     const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);
-    const response = (await res.json());
+    const response = (await res.json().catch(() => {
+        throw new Error("Invalid response from server");
+    }));
     const error = response.error
         ? new CustomError(response.error.message, res.status, response.error.code, response.error.fields)
         : null;
@@ -13,6 +15,6 @@ export const fetchPrices = async (symbols) => {
     }
     return {
         successful: new Map(Object.entries(response.data?.stocks ?? {})),
-        failed: error?.fields ?? {}
+        failed: error?.fields ?? {},
     };
 };

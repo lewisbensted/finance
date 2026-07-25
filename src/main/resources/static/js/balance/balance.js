@@ -1,22 +1,28 @@
 import { CustomError } from "../types/CustomError.js";
+import { isErrorDTO } from "../utils/isErrorDTO.js";
 const balanceCell = document.querySelector(".balance");
 const tradingFooter = document.querySelector(".table-footer");
 export let balance;
 export const fetchBalance = async () => {
     const res = await fetch("/api/balance");
-    const response = (await res.json());
+    const body = await res.json().catch(() => {
+        throw new Error("Invalid response from server");
+    });
     if (!res.ok) {
-        if (response.error?.code === "UNAUTHENTICATED") {
+        if (!isErrorDTO(body)) {
+            throw new Error(`Request failed ${res.status}`);
+        }
+        if (body.code === "UNAUTHENTICATED") {
             sessionStorage.removeItem("USER_SESSION");
             balance = null;
             return null;
         }
-        throw new CustomError(response.error?.message ?? `Request failed ${res.status}`, res.status, response.error?.code);
+        throw new CustomError(body.message, res.status, body.code);
     }
-    if (typeof response.data !== "number" || Number.isNaN(response.data)) {
+    if (typeof body !== "number" || Number.isNaN(body)) {
         throw new Error("Invalid or missing balance");
     }
-    balance = response.data;
+    balance = body;
     return balance;
 };
 export const setBalance = (value) => {

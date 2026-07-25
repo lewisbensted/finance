@@ -1,4 +1,4 @@
-import { balance, fetchBalance, handleFetchBalance } from "../balance/balance.js";
+import { handleFetchBalance } from "../balance/balance.js";
 import { createHolding, currentHoldingsMap } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 
@@ -13,8 +13,6 @@ import { updateTableUI } from "../utils/updateTableUI.js";
 
 const message = document.querySelector(".message");
 
-const balanceCell = document.querySelector(".balance");
-const tradingFooter = document.querySelector(".table-footer");
 
 const quoteSpinner = document.querySelector(".quote-spinner");
 const quoteButton = document.querySelector(".quote-button");
@@ -60,7 +58,7 @@ quoteForm.addEventListener("submit", async (e) => {
 	setQuoteLoading(true);
 
 	try {
-		await Promise.all([handleFetchShares(holding), handleFetchPrices("search", true)]);
+		await Promise.all([handleFetchShares(holding), handleFetchPrices("SEARCH", true)]);
 
 		updateSharesUI(holding);
 		const buySum = sumInputs(currentHoldings);
@@ -72,7 +70,7 @@ quoteForm.addEventListener("submit", async (e) => {
 
 		//add abortcontroller
 		priceIntervalId = setInterval(() => {
-			handleFetchPrices("search")
+			handleFetchPrices("SEARCH")
 				.then(() => {
 					if (!transactionInProgress) {
 						if (buyTotal?.textContent)

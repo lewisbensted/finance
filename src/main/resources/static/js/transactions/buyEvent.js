@@ -18,7 +18,7 @@ buyForm.addEventListener("submit", async (e) => {
     setTransactionInProgress(true);
     const holdings = [...currentHoldingsMap.values()];
     message.textContent = "";
-    const { invalidInput, transactionRequests } = collectInputs(holdings, "buy");
+    const { invalidInput, transactionRequests } = collectInputs(holdings, "BUY");
     const totalValue = sumInputs(holdings);
     if (totalValue > balance) {
         message.textContent = "Could not complete trade - insufficient funds.";
@@ -38,13 +38,13 @@ buyForm.addEventListener("submit", async (e) => {
     buySpinner.style.setProperty("display", "flex", "important");
     buyButton.style.display = "none";
     try {
-        const { successful, failed } = await handleTransaction(transactionRequests, 'buy');
+        const { successful, failed } = await handleTransaction(transactionRequests, "buy");
         updateTableUI(holdings, true);
-        displayToast(successful, failed, "buy");
+        displayToast(successful, failed, "BUY");
     }
     catch (error) {
         console.error(error);
-        //toast error
+        console.log("There will be toast here");
         updateTableUI(holdings, false);
     }
     finally {

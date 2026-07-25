@@ -8,7 +8,6 @@ import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 import { handleTransaction } from "./handleTransaction.js";
 
-
 const message = document.querySelector(".message");
 const buySpinner = document.querySelector(".buy-spinner");
 const buyButton = document.querySelector(".buy-button");
@@ -23,7 +22,7 @@ buyForm.addEventListener("submit", async (e) => {
 
 	message.textContent = "";
 
-	const { invalidInput, transactionRequests } = collectInputs(holdings, "buy");
+	const { invalidInput, transactionRequests } = collectInputs(holdings, "BUY");
 
 	const totalValue = sumInputs(holdings);
 
@@ -46,12 +45,12 @@ buyForm.addEventListener("submit", async (e) => {
 	buyButton.style.display = "none";
 
 	try {
-		const { successful, failed } = await handleTransaction(transactionRequests, 'buy');
+		const { successful, failed } = await handleTransaction(transactionRequests, "buy");
 		updateTableUI(holdings, true);
-		displayToast(successful, failed, "buy");
+		displayToast(successful, failed, "BUY");
 	} catch (error) {
 		console.error(error);
-		//toast error
+		console.log("There will be toast here");
 		updateTableUI(holdings, false);
 	} finally {
 		applyDomUpdates(domUpdates);

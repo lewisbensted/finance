@@ -1,13 +1,15 @@
 import { CustomError } from "../types/CustomError.js";
 export const executeTransaction = async (buyRequests, type) => {
-    const res = await fetch(`/api/${type}`, {
+    const res = await fetch(`/api/${type.toLowerCase()}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(buyRequests),
     });
-    const response = (await res.json());
+    const response = (await res.json().catch(() => {
+        throw new Error("Invalid response from server");
+    }));
     const error = response.error
         ? new CustomError(response.error.message, res.status, response.error.code, response.error.fields)
         : null;

@@ -46,10 +46,10 @@ public class HoldingController {
     }
 
     @GetMapping(value = "/api/holding")
-    ResponseEntity<ApiResponse<HoldingDTO>> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
+    ResponseEntity<HoldingDTO> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
         SessionUser sessionUser = authenticateUser(session);
 
         HoldingDTO holding = holdingService.fetchHolding(sessionUser.id(), symbol);
-        return ResponseEntity.ok().body(new ApiResponse<>(holding, null));
+        return ResponseEntity.ok().body(holding);
     }
 }

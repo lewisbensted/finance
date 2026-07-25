@@ -1,15 +1,10 @@
-export interface ItemError {
-	code: string;
-	message: string;
-}
-
-interface ErrorDTO {
+export interface ErrorDTO {
 	code: string;
 	message: string;
 }
 
 export interface BatchErrorDTO extends ErrorDTO {
-	fields: Record<string, ItemError>;
+	fields: Record<string, ErrorDTO>;
 }
 
 export interface ApiResponse<T, E extends ErrorDTO = ErrorDTO> {

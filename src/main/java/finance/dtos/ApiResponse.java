@@ -1,6 +1,6 @@
 package finance.dtos;
 
 public record ApiResponse<T>(
-    T data,
-    ErrorDTO error
-) {}
+        T data,
+        ErrorDTO error) {
+}

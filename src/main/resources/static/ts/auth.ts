@@ -137,7 +137,7 @@ if (registerForm) {
 						displayMessages([data.message]);
 					}
 				} else {
-					throw new Error(data?.error || `Error ${res.status}: ${res.statusText}`);
+					throw new Error(data?.error ?? `Error ${res.status}: ${res.statusText}`);
 				}
 				return;
 			}

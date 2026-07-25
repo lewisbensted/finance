@@ -42,7 +42,7 @@ export const handleFetchPrices = async (page: Page, isFirstLoad = false) => {
 		for (const [symbol, itemError] of Object.entries(failed))
 			console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
 
-		if (page === "search") {
+		if (page === "SEARCH") {
 			const stock = stockMap.get(symbols[0]);
 			if (stockMap.size !== 1 || !checkValidStock(symbols[0], stock)) {
 				throw new Error(`Invalid stock response for ${symbols[0]}`);
@@ -64,7 +64,7 @@ export const handleFetchPrices = async (page: Page, isFirstLoad = false) => {
 		return { stockMap, failed };
 	} catch (error) {
 		console.error(error);
-		if (isFirstLoad && page === "search") throw error;
+		if (isFirstLoad && page === "SEARCH") throw error;
 		for (const holding of holdings) {
 			holding.holding.isPriceUpToDate = false;
 		}

@@ -26,7 +26,7 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 
 		domUpdates.push(domUpdate);
 
-		const { shares, value, isPriceUpToDate } = holding.holding;
+		const { value, isPriceUpToDate } = holding.holding;
 
 		totalValue += value ?? 0;
 

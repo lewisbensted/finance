@@ -9,8 +9,6 @@ import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 const message = document.querySelector(".message");
-const balanceCell = document.querySelector(".balance");
-const tradingFooter = document.querySelector(".table-footer");
 const quoteSpinner = document.querySelector(".quote-spinner");
 const quoteButton = document.querySelector(".quote-button");
 const quoteTable = document.querySelector("table");
@@ -45,7 +43,7 @@ quoteForm.addEventListener("submit", async (e) => {
     const currentHoldings = [...currentHoldingsMap.values()];
     setQuoteLoading(true);
     try {
-        await Promise.all([handleFetchShares(holding), handleFetchPrices("search", true)]);
+        await Promise.all([handleFetchShares(holding), handleFetchPrices("SEARCH", true)]);
         updateSharesUI(holding);
         const buySum = sumInputs(currentHoldings);
         updateTableUI(currentHoldings, false, buySum);
@@ -53,7 +51,7 @@ quoteForm.addEventListener("submit", async (e) => {
         quoteTable.style.display = "";
         //add abortcontroller
         priceIntervalId = setInterval(() => {
-            handleFetchPrices("search")
+            handleFetchPrices("SEARCH")
                 .then(() => {
                 if (!transactionInProgress) {
                     if (buyTotal?.textContent)

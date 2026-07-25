@@ -1,28 +1,27 @@
-import { ApiResponse } from "./../types/ApiResponse.js";
+import { isErrorDTO } from "../utils/isErrorDTO.js";
 import { CustomError } from "./../types/CustomError.js";
-import { HoldingDTO } from "./../types/Holding.js";
-
 
 export const fetchShares = async (symbol: string) => {
 	const res = await fetch(`/api/holding?symbol=${encodeURIComponent(symbol)}`);
-	const response = (await res.json()) as ApiResponse<HoldingDTO>;
+	const body: unknown = await res.json().catch(() => {
+		throw new Error("Invalid response from server");
+	});
 
 	if (!res.ok) {
-		switch (response.error?.code) {
+		if (!isErrorDTO(body)) {
+			throw new Error(`Request failed ${res.status}`);
+		}
+		switch (body.code) {
 			case "UNAUTHENTICATED":
 				return null;
 			case "NOT_FOUND":
 				return 0;
 			default:
-				throw new CustomError(
-					response.error?.message ?? `Request failed ${res.status}`,
-					res.status,
-					response.error?.code,
-				);
+				throw new CustomError(body.message, res.status, body.code);
 		}
 	}
 
-	if (response.data?.shares === undefined || typeof response.data.shares !== "number")
+	if (body.shares === undefined || typeof body.shares !== "number")
 		throw new Error("Invalid response from server");
-	return response.data.shares;
+	return body.shares;
 };

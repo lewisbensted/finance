@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping(value = "/api/logout")
-    public ResponseEntity<String> logout(HttpSession session) {
+    public ResponseEntity<Void> logout(HttpSession session) {
         session.removeAttribute("USER_SESSION");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }

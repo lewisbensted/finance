@@ -20,7 +20,7 @@ export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
         }
         const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, buySum);
         domUpdates.push(domUpdate);
-        const { shares, value, isPriceUpToDate } = holding.holding;
+        const { value, isPriceUpToDate } = holding.holding;
         totalValue += value ?? 0;
         if (value === undefined || !isPriceUpToDate) {
             totalValueUpToDate = false;

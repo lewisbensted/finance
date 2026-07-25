@@ -21,7 +21,7 @@ sellForm.addEventListener("submit", async (e) => {
 
 	message.textContent = "";
 
-	const { invalidInput, transactionRequests } = collectInputs(holdings, "sell");
+	const { invalidInput, transactionRequests } = collectInputs(holdings, "SELL");
 
 	if (invalidInput) {
 		message.textContent = "Invalid input - must be positive integers.";
@@ -38,9 +38,9 @@ sellForm.addEventListener("submit", async (e) => {
 	sellButton.style.display = "none";
 
 	try {
-		const { successful, failed } = await handleTransaction(transactionRequests, "sell");
+		const { successful, failed } = await handleTransaction(transactionRequests, "SELL");
 		updateTableUI(holdings, true);
-		displayToast(successful, failed, "sell");
+		displayToast(successful, failed, "SELL");
 	} catch (error) {
 		console.error(error);
 		//toast error

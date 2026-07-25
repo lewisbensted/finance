@@ -52,21 +52,21 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ApiResponse<Void>> handleForbidden(ForbiddenException ex) {
+    public ResponseEntity<ErrorDTO> handleForbidden(ForbiddenException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ApiResponse<>(null, new ErrorDTO(FORBIDDEN, ex.getMessage())));
+                .body(new ErrorDTO(FORBIDDEN, ex.getMessage()));
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiResponse<Void>> handleUnauthenticated(AuthenticationException ex) {
+    public ResponseEntity<ErrorDTO> handleUnauthenticated(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiResponse<>(null, new ErrorDTO(ex.getCode(), ex.getMessage())));
+                .body(new ErrorDTO(ex.getCode(), ex.getMessage()));
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleNotFound(NotFoundException ex) {
+    public ResponseEntity<ErrorDTO> handleNotFound(NotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(null, new ErrorDTO(NOT_FOUND, ex.getMessage())));
+                .body(new ErrorDTO(NOT_FOUND, ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
@@ -75,9 +75,9 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
-    public ResponseEntity<ApiResponse<ErrorDTO>> handleInsufficientFundsException(InsufficientFundsException ex) {
+    public ResponseEntity<ErrorDTO> handleInsufficientFundsException(InsufficientFundsException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new ApiResponse<>(null, new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage())));
+                .body(new ErrorDTO(INSUFFICIENT_FUNDS, ex.getMessage()));
     }
 
     @ExceptionHandler(InsufficientSharesException.class)
