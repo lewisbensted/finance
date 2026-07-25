@@ -1,12 +1,12 @@
 import { balance } from "../balance/balance.js";
-import { currentHoldingsMap } from "../holding.js";
+import { currentHoldingsMap } from "../holding/holdingOperations.js";
 import { setTransactionInProgress, transactionInProgress } from "../transactionInProgress.js";
 import { collectInputs } from "../utils/collectInputs.js";
 import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
-import { handleBuy } from "./handleTransaction.js";
+import { handleTransaction } from "./handleTransaction.js";
 const message = document.querySelector(".message");
 const buySpinner = document.querySelector(".buy-spinner");
 const buyButton = document.querySelector(".buy-button");
@@ -38,7 +38,7 @@ buyForm.addEventListener("submit", async (e) => {
     buySpinner.style.setProperty("display", "flex", "important");
     buyButton.style.display = "none";
     try {
-        const { successful, failed } = await handleBuy(transactionRequests);
+        const { successful, failed } = await handleTransaction(transactionRequests, 'buy');
         updateTableUI(holdings, true);
         displayToast(successful, failed, "buy");
     }

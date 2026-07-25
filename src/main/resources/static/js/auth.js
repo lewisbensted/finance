@@ -1,4 +1,4 @@
-import { setBalance } from "./balance.js";
+import { setBalance } from "./balance/balance.js";
 import { displayMessages } from "./layout.js";
 import { CustomError } from "./types/CustomError.js";
 const loginButton = document.querySelector(".login-button");

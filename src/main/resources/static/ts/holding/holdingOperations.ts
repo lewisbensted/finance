@@ -1,4 +1,5 @@
-import { HoldingItem } from "./types/Holding";
+import { Holding, HoldingItem } from "../types/Holding";
+import { Stock } from "../types/Stock";
 
 export const currentHoldingsMap = new Map<string, HoldingItem>();
 
@@ -25,3 +26,20 @@ export const createHolding = (symbol: string): HoldingItem => ({
 		sellInput: document.querySelector(".sell-input"),
 	},
 });
+
+export const updateHolding = (holding: Holding, stock: Stock) => {
+	const { shares } = holding;
+
+	holding.companyName ??= stock.companyName;
+
+	holding.latestPrice = stock.latestPrice;
+	holding.isPriceUpToDate = true;
+
+	if (shares === undefined) {
+		holding.value = undefined;
+	} else if (shares === null) {
+		holding.value = null;
+	} else {
+		holding.value = shares * stock.latestPrice;
+	}
+};

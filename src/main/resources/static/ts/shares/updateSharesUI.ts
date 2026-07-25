@@ -4,8 +4,6 @@ import { updateRowUI } from "../utils/updateRowUI.js";
 import { HoldingItem } from "./../types/Holding.js";
 
 const sellButton = document.querySelector(".sell-button");
-const buyForm = document.querySelector("#buy-form");
-const sellForm = document.querySelector("#sell-form");
 
 export const updateSharesUI = (holding: HoldingItem) => {
 	const shares = holding.holding.shares;

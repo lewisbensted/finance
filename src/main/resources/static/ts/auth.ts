@@ -1,8 +1,7 @@
-import { setBalance } from "./balance.js";
+import { setBalance } from "./balance/balance.js";
 import { displayMessages } from "./layout.js";
 import { ApiResponse } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
-
 
 const loginButton = document.querySelector(".login-button");
 const loginSpinner = document.querySelector(".login-spinner");

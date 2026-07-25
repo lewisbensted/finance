@@ -1,9 +1,9 @@
-import { ApiResponse, BatchErrorDTO } from "./../types/ApiResponse.js";
-import { CustomError } from "./../types/CustomError.js";
-import { Transaction, TransactionResponse } from "./../types/Transaction.js";
+import { ApiResponse, BatchErrorDTO } from "../types/ApiResponse.js";
+import { CustomError } from "../types/CustomError.js";
+import { Transaction, TransactionResponse, TransactionType } from "../types/Transaction.js";
 
-export const buyShares = async (buyRequests: Transaction[]) => {
-	const res = await fetch("/api/buy", {
+export const executeTransaction = async (buyRequests: Transaction[], type: TransactionType) => {
+	const res = await fetch(`/api/${type}`, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
@@ -32,6 +32,6 @@ export const buyShares = async (buyRequests: Transaction[]) => {
 	return {
 		successful: new Map<string, Transaction>(Object.entries(response.data?.transactions ?? {})),
 		updatedBalance: response.data?.balance,
-		failed: error?.fields ?? {}
+		failed: error?.fields ?? {},
 	};
 };

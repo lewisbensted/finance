@@ -1,4 +1,4 @@
-import { balance } from "./../balance.js";
+import { balance } from "../balance/balance.js";
 import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 const totalCell = document.querySelector(".total");

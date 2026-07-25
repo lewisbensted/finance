@@ -1,30 +1,22 @@
-import { balance } from "../balance/balance.js";
-import { currentHoldingsMap } from "../holding.js";
+import { currentHoldingsMap } from "../holding/holdingOperations.js";
 import { setTransactionInProgress, transactionInProgress } from "../transactionInProgress.js";
 import { collectInputs } from "../utils/collectInputs.js";
 import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
-import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
-import { handleBuy } from "./handleTransaction.js";
+import { handleTransaction } from "./handleTransaction.js";
 const message = document.querySelector(".message");
-const buySpinner = document.querySelector(".buy-spinner");
-const buyButton = document.querySelector(".buy-button");
-const buyForm = document.getElementById("buy-form");
-buyForm.addEventListener("submit", async (e) => {
+const sellSpinner = document.querySelector(".sell-spinner");
+const sellButton = document.querySelector(".sell-button");
+const sellForm = document.getElementById("sell-form");
+sellForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (transactionInProgress)
         return;
     setTransactionInProgress(true);
     const holdings = [...currentHoldingsMap.values()];
     message.textContent = "";
-    const { invalidInput, transactionRequests } = collectInputs(holdings, "buy");
-    const totalValue = sumInputs(holdings);
-    if (totalValue > balance) {
-        message.textContent = "Could not complete trade - insufficient funds.";
-        setTransactionInProgress(false);
-        return;
-    }
+    const { invalidInput, transactionRequests } = collectInputs(holdings, "sell");
     if (invalidInput) {
         message.textContent = "Invalid input - must be positive integers.";
         setTransactionInProgress(false);
@@ -35,12 +27,12 @@ buyForm.addEventListener("submit", async (e) => {
         setTransactionInProgress(false);
         return;
     }
-    buySpinner.style.setProperty("display", "flex", "important");
-    buyButton.style.display = "none";
+    sellSpinner.style.setProperty("display", "flex", "important");
+    sellButton.style.display = "none";
     try {
-        const { successful, failed } = await handleBuy(transactionRequests);
+        const { successful, failed } = await handleTransaction(transactionRequests, "sell");
         updateTableUI(holdings, true);
-        displayToast(successful, failed, "buy");
+        displayToast(successful, failed, "sell");
     }
     catch (error) {
         console.error(error);
@@ -49,8 +41,8 @@ buyForm.addEventListener("submit", async (e) => {
     }
     finally {
         applyDomUpdates(domUpdates);
-        buySpinner.style.setProperty("display", "none", "important");
-        buyButton.style.display = "";
+        sellSpinner.style.setProperty("display", "none", "important");
+        sellButton.style.display = "";
         setTransactionInProgress(false);
     }
 });

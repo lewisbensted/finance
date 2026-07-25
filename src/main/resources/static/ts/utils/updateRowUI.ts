@@ -1,4 +1,4 @@
-import { balance } from "../balance.js";
+import { balance } from "../balance/balance.js";
 import { HoldingItem } from "../types/Holding.js";
 
 const disableInput = (inputCell: HTMLElement) => {

@@ -2,16 +2,10 @@ import { Stock } from "../types/Stock.js";
 
 import { fetchPrices } from "./fetchPrices.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
-import { updateRowUI } from "../utils/updateRowUI.js";
-import { updateHolding } from "../utils/updateHolding.js";
-import { sumInputs } from "../utils/sumInputs.js";
-import { currentHoldingsMap } from "../holding.js";
-import { Page } from "../types/Transaction.js";
-import { domUpdates } from "../utils/domUpdates.js";
 
-const totalCell = document.querySelector(".total");
-const buyButton = document.querySelector(".buy-button");
-const sellButton = document.querySelector(".sell-button");
+import { sumInputs } from "../utils/sumInputs.js";
+import { currentHoldingsMap, updateHolding } from "../holding/holdingOperations.js";
+import { Page } from "../types/Transaction.js";
 
 const checkValidStock = (expectedSymbol: string, stock: unknown): stock is Stock => {
 	if (
@@ -73,10 +67,6 @@ export const handleFetchPrices = async (page: Page, isFirstLoad = false) => {
 		if (isFirstLoad && page === "search") throw error;
 		for (const holding of holdings) {
 			holding.holding.isPriceUpToDate = false;
-			//domUpdates.push(updateRowUI(holding));
-
-			//if (totalCell) totalCell.style.color = "red";
-			//buyButton.disabled = sellButton.disabled = true;
 		}
 	}
 };

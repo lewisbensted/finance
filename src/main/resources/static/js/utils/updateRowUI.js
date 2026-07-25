@@ -1,4 +1,4 @@
-import { balance } from "../balance.js";
+import { balance } from "../balance/balance.js";
 const disableInput = (inputCell) => {
     inputCell.max = "0";
     inputCell.min = "0";
