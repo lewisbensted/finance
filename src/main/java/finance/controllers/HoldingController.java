@@ -1,6 +1,5 @@
 package finance.controllers;
 
-import finance.dtos.ApiResponse;
 import finance.dtos.HoldingDTO;
 import finance.dtos.PageResponse;
 import finance.services.HoldingService;
@@ -13,14 +12,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import static finance.controllers.AuthUtils.authenticateUser;
 
-@RestController
+@Controller
 @Validated
 public class HoldingController {
     HoldingService holdingService;
@@ -30,16 +29,14 @@ public class HoldingController {
     }
 
     @GetMapping(value = "/api/holdings")
-    ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session, @PageableDefault(
-            size = 10
-    ) Pageable pageable) {
+    ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
+            @PageableDefault(size = 10) Pageable pageable) {
         SessionUser sessionUser = authenticateUser(session);
 
         Pageable safePageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
-                Sort.by(Sort.Direction.ASC, "id.symbol")
-        );
+                Sort.by(Sort.Direction.ASC, "id.symbol"));
 
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
         return ResponseEntity.ok().body(PageResponse.from(holdings));
@@ -52,4 +49,14 @@ public class HoldingController {
         HoldingDTO holding = holdingService.fetchHolding(sessionUser.id(), symbol);
         return ResponseEntity.ok().body(holding);
     }
+
+    @GetMapping("/portfolio")
+    public String portfolio(HttpSession session, Model model) {
+        SessionUser sessionUser = authenticateUser(session);
+        Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), PageRequest.of(0, 5));
+
+        model.addAttribute("holdings", holdings);
+        return "portfolio";
+    }
+
 }

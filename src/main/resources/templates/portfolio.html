@@ -1,0 +1,172 @@
+<!doctype html>
+<html
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layout}"
+>
+	<head>
+		<title>Holdings</title>
+	</head>
+
+	<body>
+		<main layout:fragment="content">
+			<h1>Portfolio</h1>
+
+			<th:block th:if="${holdings != null}">
+				<div class="table-container">
+					<table>
+						<thead>
+							<tr>
+								<th>Company Name</th>
+								<th>Symbol</th>
+								<th>Shares</th>
+								<th>Price</th>
+								<th>Value</th>
+								<th>Sell</th>
+								<th>Buy</th>
+							</tr>
+						</thead>
+
+						<tbody>
+							<tr class="holding" th:each="holding : ${holdings.content}">
+								<td th:text="${holding.companyName}"></td>
+
+								<td class="symbol" th:text="${holding.symbol}"></td>
+
+								<td class="current-shares" th:text="${holding.shares}"></td>
+
+								<td class="price">
+									<div
+										class="spinner-border spinner-border-sm text-primary"
+										role="status"
+									>
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</td>
+
+								<td class="value">
+									<div
+										class="spinner-border spinner-border-sm text-primary"
+										role="status"
+									>
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</td>
+
+								<td>
+									<input
+										type="number"
+										class="sell-input"
+										form="sell-form"
+										disabled
+										step="1"
+									/>
+								</td>
+
+								<td>
+									<input
+										type="number"
+										class="buy-input"
+										form="buy-form"
+										disabled
+										step="1"
+									/>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot class="table-footer">
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td class="footer">Total</td>
+								<td>
+									<div
+										class="spinner-border spinner-border-sm text-primary"
+										role="status"
+									>
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</td>
+								<td class="sell-total"></td>
+								<td class="buy-total"></td>
+							</tr>
+
+							<tr>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td class="footer">Balance</td>
+
+								<td class="balance">
+									<div
+										class="spinner-border spinner-border-sm text-primary"
+										role="status"
+									>
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</td>
+
+								<td>
+									<form id="sell-form">
+										<input type="hidden" name="symbol" />
+										<input type="hidden" name="price" />
+
+										<button
+											type="submit"
+											class="btn btn-primary sell-button"
+											disabled
+										>
+											Sell
+										</button>
+
+										<div
+											class="spinner-border text-primary sell-spinner"
+											role="status"
+										>
+											<span class="visually-hidden">Loading...</span>
+										</div>
+									</form>
+								</td>
+
+								<td>
+									<form id="buy-form">
+										<input type="hidden" name="symbol" />
+										<input type="hidden" name="price" />
+
+										<button
+											type="submit"
+											class="btn btn-primary buy-button"
+											disabled
+										>
+											Buy
+										</button>
+
+										<div
+											class="spinner-border text-primary buy-spinner"
+											role="status"
+										>
+											<span class="visually-hidden">Loading...</span>
+										</div>
+									</form>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<div class="message-container">
+					<span class="message"></span>
+					<button class="btn btn-outline-primary btn-sm open-modal">Info</button>
+				</div>
+			</th:block>
+
+			<span th:unless="${holdings != null}"> Error loading holdings </span>
+		</main>
+
+		<th:block layout:fragment="scripts">
+			<script type="module" th:src="@{/js/transactions/buyEvent.js}"></script>
+			<script type="module" th:src="@{/js/transactions/sellEvent.js}"></script>
+		</th:block>
+	</body>
+</html>
