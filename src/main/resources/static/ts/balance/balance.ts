@@ -1,4 +1,3 @@
-import { ApiResponse, ErrorDTO } from "../types/ApiResponse.js";
 import { CustomError } from "../types/CustomError.js";
 import { isErrorDTO } from "../utils/isErrorDTO.js";
 

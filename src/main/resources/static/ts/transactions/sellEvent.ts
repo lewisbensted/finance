@@ -4,6 +4,7 @@ import { collectInputs } from "../utils/collectInputs.js";
 import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
+import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
 
 const message = document.querySelector(".message");
@@ -54,3 +55,9 @@ sellForm.addEventListener("submit", async (e) => {
 		setTransactionInProgress(false);
 	}
 });
+
+document
+	.querySelectorAll<HTMLInputElement>(".sell-input")
+	.forEach((input) => {
+		input.addEventListener("input", updateTradeTotals);
+	});

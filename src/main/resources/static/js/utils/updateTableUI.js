@@ -1,4 +1,5 @@
 import { balance } from "../balance/balance.js";
+import { transactionInProgress } from "../transactionInProgress.js";
 import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 const totalCell = document.querySelector(".total");
@@ -6,37 +7,56 @@ const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
 const balanceCell = document.querySelector(".balance");
 const buySpinner = document.querySelector(".buy-spinner");
+const buyTotalCell = document.querySelector(".buy-total");
+const sellTotalCell = document.querySelector(".sell-total");
 export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
     let buyButtonDisabled = true;
     let sellButtonDisabled = true;
     let totalValue = 0;
-    let totalValueUpToDate = true;
+    let sellTotal = 0;
+    let buyTotal = 0;
+    let totalsUpToDate = true;
     for (const holding of holdings) {
+        const { buyInput, sellInput } = holding.row;
         if (resetInputs) {
-            holding.row.buyInput.value = "";
-            holding.row.sellInput.value = "";
+            buyInput.value = "";
+            sellInput.value = "";
             buySpinner.style.setProperty("display", "none", "important");
             buyButton.style.display = "";
         }
         const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, buySum);
         domUpdates.push(domUpdate);
-        const { value, isPriceUpToDate } = holding.holding;
+        const { value, isPriceUpToDate, latestPrice } = holding.holding;
         totalValue += value ?? 0;
         if (value === undefined || !isPriceUpToDate) {
-            totalValueUpToDate = false;
+            totalsUpToDate = false;
         }
         if (!isSellDisabled)
             sellButtonDisabled = false;
         if (!isBuyDisabled)
             buyButtonDisabled = false;
+        const buyValue = Number(buyInput.value) * latestPrice;
+        if (Number.isFinite(buyValue)) {
+            buyTotal += buyValue;
+        }
+        const sellValue = Number(sellInput.value) * latestPrice;
+        if (Number.isFinite(sellValue)) {
+            sellTotal += sellValue;
+        }
     }
+    if (transactionInProgress)
+        return;
     domUpdates.push(() => {
-        if (totalCell)
-            totalCell.style.color = totalValueUpToDate ? "" : "red";
-        if (totalCell && totalValueUpToDate)
-            totalCell.textContent = totalValue.toFixed(2);
         buyButton.disabled = buyButtonDisabled;
         sellButton.disabled = sellButtonDisabled;
+        if (totalCell)
+            totalCell.style.color = totalsUpToDate ? "" : "red";
+        if (totalCell && totalsUpToDate)
+            totalCell.textContent = `$${totalValue.toFixed(2)}`;
+        buyTotalCell.style.color = totalsUpToDate ? "" : "red";
+        buyTotalCell.textContent = `$${buyTotal.toFixed(2)}`;
+        sellTotalCell.style.color = totalsUpToDate ? "" : "red";
+        sellTotalCell.textContent = `$${sellTotal.toFixed(2)}`;
         if (balance != null) {
             balanceCell.style.color = "";
             balanceCell.textContent = `$${balance.toFixed(2)}`;

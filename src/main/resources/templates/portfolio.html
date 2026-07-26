@@ -12,7 +12,7 @@
 		<main layout:fragment="content">
 			<h1>Portfolio</h1>
 
-			<th:block th:if="${holdings != null}">
+			<th:block th:if="${holdings.hasContent()}">
 				<div class="table-container">
 					<table>
 						<thead>
@@ -161,7 +161,7 @@
 				</div>
 			</th:block>
 
-			<span th:unless="${holdings != null}"> Error loading holdings </span>
+			<span th:unless="${holdings.hasContent()}"> No holdings to display! </span>
 		</main>
 
 		<th:block layout:fragment="scripts">

@@ -2,6 +2,7 @@ package finance.controllers;
 
 import finance.dtos.HoldingDTO;
 import finance.dtos.PageResponse;
+import finance.exceptions.AuthenticationException;
 import finance.services.HoldingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
@@ -28,19 +29,20 @@ public class HoldingController {
         this.holdingService = holdingService;
     }
 
-    @GetMapping(value = "/api/holdings")
-    ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
-            @PageableDefault(size = 10) Pageable pageable) {
-        SessionUser sessionUser = authenticateUser(session);
+    // probably don't need
+    // @GetMapping(value = "/api/holdings")
+    // ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
+    //         @PageableDefault(size = 10) Pageable pageable) {
+    //     SessionUser sessionUser = authenticateUser(session);
 
-        Pageable safePageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.ASC, "id.symbol"));
+    //     Pageable safePageable = PageRequest.of(
+    //             pageable.getPageNumber(),
+    //             pageable.getPageSize(),
+    //             Sort.by(Sort.Direction.ASC, "id.symbol"));
 
-        Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
-        return ResponseEntity.ok().body(PageResponse.from(holdings));
-    }
+    //     Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
+    //     return ResponseEntity.ok().body(PageResponse.from(holdings));
+    // }
 
     @GetMapping(value = "/api/holding")
     ResponseEntity<HoldingDTO> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
@@ -52,7 +54,13 @@ public class HoldingController {
 
     @GetMapping("/portfolio")
     public String portfolio(HttpSession session, Model model) {
-        SessionUser sessionUser = authenticateUser(session);
+        SessionUser sessionUser;
+
+        try {
+            sessionUser = AuthUtils.authenticateUser(session);
+        } catch (AuthenticationException e) {
+            return "redirect:/search";
+        }
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), PageRequest.of(0, 5));
 
         model.addAttribute("holdings", holdings);

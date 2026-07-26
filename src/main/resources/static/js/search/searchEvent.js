@@ -1,10 +1,8 @@
 import { handleFetchBalance } from "../balance/balance.js";
-import { createHolding, currentHoldingsMap } from "../holding/holdingOperations.js";
+import { createHolding, currentHoldingsMap, resetHoldings } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { handleFetchShares } from "../shares/handleFetchShares.js";
 import { updateSharesUI } from "../shares/updateSharesUI.js";
-import { transactionInProgress } from "../transactionInProgress.js";
-import { CustomError } from "../types/CustomError.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
@@ -38,12 +36,21 @@ quoteForm.addEventListener("submit", async (e) => {
         clearInterval(priceIntervalId);
         priceIntervalId = undefined;
     }
+    resetHoldings();
     const holding = createHolding(shareSymbol);
     currentHoldingsMap.set(shareSymbol, holding);
     const currentHoldings = [...currentHoldingsMap.values()];
     setQuoteLoading(true);
     try {
-        await Promise.all([handleFetchShares(holding), handleFetchPrices("SEARCH", true)]);
+        const [, { stockMap }] = await Promise.all([
+            handleFetchShares(holding),
+            handleFetchPrices("SEARCH", true),
+        ]);
+        console.log(stockMap);
+        if (!stockMap.size) {
+            message.textContent = "Symbol not found";
+            return;
+        }
         updateSharesUI(holding);
         const buySum = sumInputs(currentHoldings);
         updateTableUI(currentHoldings, false, buySum);
@@ -53,12 +60,6 @@ quoteForm.addEventListener("submit", async (e) => {
         priceIntervalId = setInterval(() => {
             handleFetchPrices("SEARCH")
                 .then(() => {
-                if (!transactionInProgress) {
-                    if (buyTotal?.textContent)
-                        holding.row.buyInput.dispatchEvent(new Event("input"));
-                    if (sellTotal?.textContent)
-                        holding.row.sellInput.dispatchEvent(new Event("input"));
-                }
                 const buySum = sumInputs(currentHoldings);
                 updateTableUI(currentHoldings, false, buySum);
                 applyDomUpdates(domUpdates);
@@ -70,10 +71,7 @@ quoteForm.addEventListener("submit", async (e) => {
     }
     catch (error) {
         console.error(error);
-        message.textContent =
-            error instanceof CustomError && error.code === "OPERATION_FAILED"
-                ? "Symbol not found"
-                : "Unexpected error";
+        message.textContent = "Unexpected error";
     }
     finally {
         setQuoteLoading(false);

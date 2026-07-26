@@ -4,6 +4,7 @@ import { collectInputs } from "../utils/collectInputs.js";
 import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
+import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
 const message = document.querySelector(".message");
 const sellSpinner = document.querySelector(".sell-spinner");
@@ -45,4 +46,9 @@ sellForm.addEventListener("submit", async (e) => {
         sellButton.style.display = "";
         setTransactionInProgress(false);
     }
+});
+document
+    .querySelectorAll(".sell-input")
+    .forEach((input) => {
+    input.addEventListener("input", updateTradeTotals);
 });

@@ -11,4 +11,9 @@ public class PageExceptionHandler {
     public String handleInvalidUrl() {
         return "redirect:/";
     }
+
+    @ExceptionHandler(Exception.class)
+    public String handleGeneralError() {
+        return "error";
+    }
 }

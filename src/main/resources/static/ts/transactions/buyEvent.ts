@@ -6,6 +6,7 @@ import { displayToast } from "../utils/displayToast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
+import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
 
 const message = document.querySelector(".message");
@@ -45,7 +46,7 @@ buyForm.addEventListener("submit", async (e) => {
 	buyButton.style.display = "none";
 
 	try {
-		const { successful, failed } = await handleTransaction(transactionRequests, "buy");
+		const { successful, failed } = await handleTransaction(transactionRequests, "BUY");
 		updateTableUI(holdings, true);
 		displayToast(successful, failed, "BUY");
 	} catch (error) {
@@ -60,4 +61,8 @@ buyForm.addEventListener("submit", async (e) => {
 
 		setTransactionInProgress(false);
 	}
+});
+
+document.querySelectorAll<HTMLInputElement>(".buy-input").forEach((input) => {
+	input.addEventListener("input", updateTradeTotals);
 });

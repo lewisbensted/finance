@@ -23,7 +23,10 @@ public class UserController {
     }
 
     @GetMapping("/register")
-    public String registerPage() {
+    public String registerPage(HttpSession session) {
+        if (session.getAttribute("USER_SESSION") != null) {
+            return "redirect:/search";
+        }
         return "register";
     }
 
@@ -37,7 +40,10 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(HttpSession session) {
+        if (session.getAttribute("USER_SESSION") != null) {
+            return "redirect:/search";
+        }
         return "login";
     }
 
