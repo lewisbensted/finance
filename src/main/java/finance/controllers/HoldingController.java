@@ -64,6 +64,7 @@ public class HoldingController {
         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), PageRequest.of(0, 5));
 
         model.addAttribute("holdings", holdings);
+        model.addAttribute("holdingsList", holdings.getContent());
         return "portfolio";
     }
 

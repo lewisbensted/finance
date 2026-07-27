@@ -4,16 +4,13 @@ import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { handleFetchShares } from "../shares/handleFetchShares.js";
 import { updateSharesUI } from "../shares/updateSharesUI.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
+import { startPricePolling, stopPricePolling } from "../utils/pollPrices.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 const message = document.querySelector(".message");
 const quoteSpinner = document.querySelector(".quote-spinner");
 const quoteButton = document.querySelector(".quote-button");
 const quoteTable = document.querySelector("table");
-const buyTotal = document.querySelector(".buy-total");
-const sellTotal = document.querySelector(".sell-total");
-let priceIntervalId = undefined;
-const INTERVAL = 3000;
 void handleFetchBalance();
 const setQuoteLoading = (loading) => {
     quoteButton.style.display = loading ? "none" : "";
@@ -32,21 +29,18 @@ quoteForm.addEventListener("submit", async (e) => {
         message.textContent = "Invalid input - please enter a symbol.";
         return;
     }
-    if (priceIntervalId) {
-        clearInterval(priceIntervalId);
-        priceIntervalId = undefined;
-    }
+    stopPricePolling();
     resetHoldings();
-    const holding = createHolding(shareSymbol);
+    const row = document.querySelector("tr.holding");
+    const holding = createHolding(row, shareSymbol);
     currentHoldingsMap.set(shareSymbol, holding);
     const currentHoldings = [...currentHoldingsMap.values()];
     setQuoteLoading(true);
     try {
         const [, { stockMap }] = await Promise.all([
             handleFetchShares(holding),
-            handleFetchPrices("SEARCH", true),
+            handleFetchPrices(true),
         ]);
-        console.log(stockMap);
         if (!stockMap.size) {
             message.textContent = "Symbol not found";
             return;
@@ -56,18 +50,7 @@ quoteForm.addEventListener("submit", async (e) => {
         updateTableUI(currentHoldings, false, buySum);
         applyDomUpdates(domUpdates);
         quoteTable.style.display = "";
-        //add abortcontroller
-        priceIntervalId = setInterval(() => {
-            handleFetchPrices("SEARCH")
-                .then(() => {
-                const buySum = sumInputs(currentHoldings);
-                updateTableUI(currentHoldings, false, buySum);
-                applyDomUpdates(domUpdates);
-            })
-                .catch((error) => {
-                console.error(error);
-            });
-        }, INTERVAL);
+        startPricePolling();
     }
     catch (error) {
         console.error(error);

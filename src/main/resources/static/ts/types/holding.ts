@@ -8,13 +8,13 @@ export interface Holding {
 }
 
 interface HoldingRow {
-	nameCell: HTMLElement | null;
-	symbolCell: HTMLElement | null;
-	sharesCell: HTMLElement | null;
-	priceCell: HTMLElement | null;
-	valueCell: HTMLElement | null;
-	buyInput: HTMLInputElement | null;
-	sellInput: HTMLInputElement | null;
+	nameCell: HTMLElement;
+	symbolCell: HTMLElement;
+	sharesCell: HTMLElement;
+	priceCell: HTMLElement;
+	valueCell: HTMLElement;
+	buyInput: HTMLInputElement;
+	sellInput: HTMLInputElement;
 }
 
 export interface HoldingItem {
@@ -24,7 +24,6 @@ export interface HoldingItem {
 
 export interface HoldingDTO {
 	symbol: string;
-	companyName: string | null;
-	shares: number | null;
+	companyName: string;
+	shares: number;
 }
-

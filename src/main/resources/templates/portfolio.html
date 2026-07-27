@@ -28,7 +28,13 @@
 						</thead>
 
 						<tbody>
-							<tr class="holding" th:each="holding : ${holdings.content}">
+							<tr
+								class="holding"
+								th:each="holding : ${holdings.content}"
+								th:data-symbol="${holding.symbol}"
+								th:data-company-name="${holding.companyName}"
+								th:data-shares="${holding.shares}"
+							>
 								<td th:text="${holding.companyName}"></td>
 
 								<td class="symbol" th:text="${holding.symbol}"></td>
@@ -80,7 +86,7 @@
 								<td></td>
 								<td></td>
 								<td class="footer">Total</td>
-								<td>
+								<td class="total">
 									<div
 										class="spinner-border spinner-border-sm text-primary"
 										role="status"
@@ -100,7 +106,7 @@
 
 								<td class="balance">
 									<div
-										class="spinner-border spinner-border-sm text-primary"
+										class="spinner-border spinner-border-sm text-primary balance-spinner"
 										role="status"
 									>
 										<span class="visually-hidden">Loading...</span>
@@ -165,6 +171,11 @@
 		</main>
 
 		<th:block layout:fragment="scripts">
+			<script th:inline="javascript">
+				window.initialHoldings = /*[[${holdingsList}]]*/ [];
+			</script>
+
+			<script type="module" th:src="@{/js/portfolio/portfolio.js}"></script>
 			<script type="module" th:src="@{/js/transactions/buyEvent.js}"></script>
 			<script type="module" th:src="@{/js/transactions/sellEvent.js}"></script>
 		</th:block>

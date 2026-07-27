@@ -1,6 +1,4 @@
 import { fetchPrices } from "./fetchPrices.js";
-import { updateTableUI } from "../utils/updateTableUI.js";
-import { sumInputs } from "../utils/sumInputs.js";
 import { currentHoldingsMap, updateHolding } from "../holding/holdingOperations.js";
 const checkValidStock = (expectedSymbol, stock) => {
     if (typeof stock !== "object" ||
@@ -22,7 +20,7 @@ const checkValidStock = (expectedSymbol, stock) => {
     }
     return true;
 };
-export const handleFetchPrices = async (page, isFirstLoad = false) => {
+export const handleFetchPrices = async (throwOnError = false) => {
     const symbols = [...currentHoldingsMap.keys()];
     const holdings = [...currentHoldingsMap.values()];
     try {
@@ -31,12 +29,6 @@ export const handleFetchPrices = async (page, isFirstLoad = false) => {
         const failed = res.failed;
         for (const [symbol, itemError] of Object.entries(failed))
             console.warn(`Failed to fetch price ${symbol}: ${itemError.message}`);
-        // if (page === "SEARCH") {
-        // 	const stock = stockMap.get(symbols[0]);
-        // 	if (stockMap.size !== 1 || !checkValidStock(symbols[0], stock)) {
-        // 		throw new Error(`Invalid stock response for ${symbols[0]}`);
-        // 	}
-        // }
         for (const holding of holdings) {
             const symbol = holding.holding.symbol;
             const stock = stockMap.get(symbol);
@@ -44,12 +36,10 @@ export const handleFetchPrices = async (page, isFirstLoad = false) => {
                 updateHolding(holding.holding, stock);
             }
         }
-        const buySum = sumInputs(holdings);
-        updateTableUI(holdings, false, buySum);
         return { stockMap, failed };
     }
     catch (error) {
-        if (isFirstLoad && page === "SEARCH")
+        if (throwOnError)
             throw error;
         console.error(error);
         for (const holding of holdings) {

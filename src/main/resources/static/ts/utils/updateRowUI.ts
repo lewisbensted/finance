@@ -22,7 +22,7 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 		balance == null || latestPrice === undefined || !isPriceUpToDate || !shares;
 
 	const domUpdate = () => {
-		nameCell.textContent = companyName;
+		if (nameCell) nameCell.textContent = companyName;
 		symbolCell.textContent = symbol;
 
 		if (latestPrice === undefined) {

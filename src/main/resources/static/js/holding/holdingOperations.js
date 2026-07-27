@@ -2,23 +2,23 @@ export const currentHoldingsMap = new Map();
 export const resetHoldings = () => {
     currentHoldingsMap.clear();
 };
-export const createHolding = (symbol) => ({
+export const createHolding = (row, symbol, companyName, shares) => ({
     holding: {
         symbol: symbol,
-        companyName: undefined,
-        shares: undefined,
+        companyName: companyName,
+        shares: shares,
         latestPrice: undefined,
         isPriceUpToDate: undefined,
         value: undefined,
     },
     row: {
-        nameCell: document.querySelector(".name"),
-        symbolCell: document.querySelector(".symbol"),
-        sharesCell: document.querySelector(".current-shares"),
-        priceCell: document.querySelector(".price"),
-        valueCell: document.querySelector(".value"),
-        buyInput: document.querySelector(".buy-input"),
-        sellInput: document.querySelector(".sell-input"),
+        nameCell: row.querySelector(".name"),
+        symbolCell: row.querySelector(".symbol"),
+        sharesCell: row.querySelector(".current-shares"),
+        priceCell: row.querySelector(".price"),
+        valueCell: row.querySelector(".value"),
+        buyInput: row.querySelector(".buy-input"),
+        sellInput: row.querySelector(".sell-input"),
     },
 });
 export const updateHolding = (holding, stock) => {

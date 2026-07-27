@@ -10,11 +10,11 @@ export const fetchPrices = async (symbols: string[]) => {
 
 	const error = response.error
 		? new CustomError(
-				response.error.message,
-				res.status,
-				response.error.code,
-				response.error.fields,
-			)
+			response.error.message,
+			res.status,
+			response.error.code,
+			response.error.fields,
+		)
 		: null;
 
 	if (!res.ok && error?.code !== "OPERATION_FAILED") {

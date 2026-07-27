@@ -38,3 +38,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.register("dev") {
+    dependsOn "compileTypescript"
+    finalizedBy "bootRun"
+}
+
+tasks.register("compileTypescript", Exec) {
+    commandLine "cmd", "/c", "npx", "tsc"
+    ignoreExitValue = true
+}

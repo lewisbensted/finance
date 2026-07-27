@@ -6,6 +6,7 @@
     "allowJs": false,
     "checkJs": false,
     "noEmit": false,
+    "noEmitOnError": false,
     "outDir": "./src/main/resources/static/js",
 		"rootDir": "./src/main/resources/static/ts",
     

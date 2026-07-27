@@ -1,13 +1,11 @@
 import { handleFetchBalance } from "../balance/balance.js";
 import { createHolding, currentHoldingsMap, resetHoldings } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
-
 import { handleFetchShares } from "../shares/handleFetchShares.js";
 import { updateSharesUI } from "../shares/updateSharesUI.js";
 
-import { transactionInProgress } from "../transactionInProgress.js";
-import { CustomError } from "../types/CustomError.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
+import { startPricePolling, stopPricePolling } from "../utils/pollPrices.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 
@@ -16,12 +14,6 @@ const message = document.querySelector(".message");
 const quoteSpinner = document.querySelector(".quote-spinner");
 const quoteButton = document.querySelector(".quote-button");
 const quoteTable = document.querySelector("table");
-
-const buyTotal = document.querySelector(".buy-total");
-const sellTotal = document.querySelector(".sell-total");
-
-let priceIntervalId: number | undefined = undefined;
-const INTERVAL = 3000;
 
 void handleFetchBalance();
 
@@ -45,13 +37,11 @@ quoteForm.addEventListener("submit", async (e) => {
 		return;
 	}
 
-	if (priceIntervalId) {
-		clearInterval(priceIntervalId);
-		priceIntervalId = undefined;
-	}
+	stopPricePolling();
 
 	resetHoldings();
-	const holding = createHolding(shareSymbol);
+	const row = document.querySelector("tr.holding");
+	const holding = createHolding(row, shareSymbol);
 	currentHoldingsMap.set(shareSymbol, holding);
 	const currentHoldings = [...currentHoldingsMap.values()];
 
@@ -60,7 +50,7 @@ quoteForm.addEventListener("submit", async (e) => {
 	try {
 		const [, { stockMap }] = await Promise.all([
 			handleFetchShares(holding),
-			handleFetchPrices("SEARCH", true),
+			handleFetchPrices(true),
 		]);
 
 		if (!stockMap.size) {
@@ -69,25 +59,14 @@ quoteForm.addEventListener("submit", async (e) => {
 		}
 
 		updateSharesUI(holding);
-		
+
 		const buySum = sumInputs(currentHoldings);
 		updateTableUI(currentHoldings, false, buySum);
 		applyDomUpdates(domUpdates);
 
 		quoteTable.style.display = "";
 
-		//add abortcontroller
-		priceIntervalId = setInterval(() => {
-			handleFetchPrices("SEARCH")
-				.then(() => {
-					const buySum = sumInputs(currentHoldings);
-					updateTableUI(currentHoldings, false, buySum);
-					applyDomUpdates(domUpdates);
-				})
-				.catch((error: unknown) => {
-					console.error(error);
-				});
-		}, INTERVAL);
+		startPricePolling();
 	} catch (error) {
 		console.error(error);
 		message.textContent = "Unexpected error";
