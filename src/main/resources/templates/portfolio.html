@@ -171,10 +171,6 @@
 		</main>
 
 		<th:block layout:fragment="scripts">
-			<script th:inline="javascript">
-				window.initialHoldings = /*[[${holdingsList}]]*/ [];
-			</script>
-
 			<script type="module" th:src="@{/js/portfolio/portfolio.js}"></script>
 			<script type="module" th:src="@{/js/transactions/buyEvent.js}"></script>
 			<script type="module" th:src="@{/js/transactions/sellEvent.js}"></script>

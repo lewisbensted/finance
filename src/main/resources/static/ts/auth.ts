@@ -80,29 +80,6 @@ if (logoutButton) {
 	});
 }
 
-document.addEventListener("click", async (e) => {
-	const logoutButton = e.target.closest(".logout-button");
-
-	if (!logoutButton) return;
-
-	e.preventDefault();
-
-	try {
-		const res = await fetch("/api/logout", {
-			method: "POST",
-		});
-
-		if (!res.ok) {
-			throw new Error(`Logout failed: ${res.status}`);
-		}
-
-		setBalance(null);
-		window.location.href = "/";
-	} catch (error) {
-		console.error(error);
-	}
-});
-
 const registerButton = document.querySelector(".register-button");
 const registerSpinner = document.querySelector(".register-spinner");
 const registerForm = document.querySelector(".register-form");
