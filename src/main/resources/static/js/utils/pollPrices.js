@@ -4,27 +4,31 @@ import { applyDomUpdates, domUpdates } from "./domUpdates.js";
 import { sumInputs } from "./sumInputs.js";
 import { updateTableUI } from "./updateTableUI.js";
 let priceIntervalId;
+let isPolling = false;
 const INTERVAL = 3000;
-export function stopPricePolling() {
+export const stopPollPrices = () => {
+    isPolling = false;
     if (priceIntervalId !== undefined) {
-        clearInterval(priceIntervalId);
+        clearTimeout(priceIntervalId);
         priceIntervalId = undefined;
     }
-}
-export function startPricePolling() {
-    if (priceIntervalId !== undefined) {
+};
+export const startPollPrices = () => {
+    isPolling = true;
+    void pollPrices();
+};
+export const pollPrices = async () => {
+    if (!isPolling)
         return;
+    try {
+        await handleFetchPrices();
+        const currentHoldings = [...currentHoldingsMap.values()];
+        const buySum = sumInputs(currentHoldings);
+        updateTableUI(currentHoldings, false, buySum);
+        applyDomUpdates(domUpdates);
     }
-    priceIntervalId = window.setInterval(async () => {
-        try {
-            await handleFetchPrices();
-            const currentHoldings = [...currentHoldingsMap.values()];
-            const buySum = sumInputs(currentHoldings);
-            updateTableUI(currentHoldings, false, buySum);
-            applyDomUpdates(domUpdates);
-        }
-        catch (error) {
-            console.error(error);
-        }
-    }, INTERVAL);
-}
+    catch (error) {
+        console.error(error);
+    }
+    priceIntervalId = window.setTimeout(pollPrices, INTERVAL);
+};

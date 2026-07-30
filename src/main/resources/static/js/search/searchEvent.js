@@ -4,7 +4,7 @@ import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { handleFetchShares } from "../shares/handleFetchShares.js";
 import { updateSharesUI } from "../shares/updateSharesUI.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
-import { startPricePolling, stopPricePolling } from "../utils/pollPrices.js";
+import { startPollPrices, stopPollPrices } from "../utils/pollPrices.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 const message = document.querySelector(".message");
@@ -29,7 +29,7 @@ quoteForm.addEventListener("submit", async (e) => {
         message.textContent = "Invalid input - please enter a symbol.";
         return;
     }
-    stopPricePolling();
+    void stopPollPrices();
     resetHoldings();
     const row = document.querySelector("tr.holding");
     const holding = createHolding(row, shareSymbol);
@@ -50,7 +50,7 @@ quoteForm.addEventListener("submit", async (e) => {
         updateTableUI(currentHoldings, false, buySum);
         applyDomUpdates(domUpdates);
         quoteTable.style.display = "";
-        startPricePolling();
+        startPollPrices();
     }
     catch (error) {
         console.error(error);

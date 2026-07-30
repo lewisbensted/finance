@@ -7,6 +7,11 @@ export const updateTradeTotals = () => {
     let totalsUpToDate = true;
     for (const holding of currentHoldingsMap.values()) {
         const { latestPrice, value, isPriceUpToDate } = holding.holding;
+        if (value === undefined || !isPriceUpToDate) {
+            totalsUpToDate = false;
+        }
+        if (latestPrice === undefined)
+            continue;
         const buyValue = Number(holding.row.buyInput.value) * latestPrice;
         if (Number.isFinite(buyValue)) {
             buyTotal += buyValue;
@@ -14,9 +19,6 @@ export const updateTradeTotals = () => {
         const sellValue = Number(holding.row.sellInput.value) * latestPrice;
         if (Number.isFinite(sellValue)) {
             sellTotal += sellValue;
-        }
-        if (value === undefined || !isPriceUpToDate) {
-            totalsUpToDate = false;
         }
     }
     buyTotalCell.style.color = totalsUpToDate ? "" : "red";

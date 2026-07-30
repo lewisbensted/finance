@@ -2,7 +2,7 @@ import { handleFetchBalance } from "../balance/balance.js";
 import { createHolding, currentHoldingsMap, resetHoldings } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
-import { startPricePolling, stopPricePolling } from "../utils/pollPrices.js";
+import { startPollPrices, stopPollPrices} from "../utils/pollPrices.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 
 resetHoldings();
@@ -23,6 +23,6 @@ await handleFetchPrices();
 updateTableUI([...currentHoldingsMap.values()], false);
 applyDomUpdates(domUpdates);
 
-stopPricePolling();
+void stopPollPrices();
 
-startPricePolling();
+startPollPrices();

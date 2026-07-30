@@ -35,6 +35,8 @@ export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
             sellButtonDisabled = false;
         if (!isBuyDisabled)
             buyButtonDisabled = false;
+        if (latestPrice === undefined)
+            continue;
         const buyValue = Number(buyInput.value) * latestPrice;
         if (Number.isFinite(buyValue)) {
             buyTotal += buyValue;

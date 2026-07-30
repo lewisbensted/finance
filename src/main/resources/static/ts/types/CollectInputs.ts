@@ -2,5 +2,5 @@ import { Transaction } from "./Transaction";
 
 export interface CollectInputs {
 	invalidInput: boolean;
-	transactionRequests: Transaction[] | null;
+	transactionRequests: Transaction[];
 }

@@ -7,12 +7,12 @@ import { updateTableUI } from "../utils/updateTableUI.js";
 import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
 
-const message = document.querySelector(".message");
+const message = document.querySelector(".message")!;
 
-const sellSpinner = document.querySelector(".sell-spinner");
-const sellButton = document.querySelector(".sell-button");
+const sellSpinner = document.querySelector(".sell-spinner")!;
+const sellButton = document.querySelector(".sell-button")!;
 
-const sellForm = document.getElementById("sell-form");
+const sellForm = document.getElementById("sell-form")!;
 sellForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	if (transactionInProgress) return;

@@ -10,15 +10,15 @@ export const collectInputs = (holdings: HoldingItem[], type: TransactionType): C
 
 		const input = type === "BUY" ? buyInput : sellInput;
 
-		const quantity = Number(input?.value);
+		const quantity = Number(input.value);
 
-		if (quantity < 0 || !Number.isInteger(quantity) || !input?.checkValidity()) {
-			return { invalidInput: true, transactionRequests: null };
+		if (quantity < 0 || !Number.isInteger(quantity) || !input.checkValidity()) {
+			return { invalidInput: true, transactionRequests: [] };
 		}
 
 		if (quantity > 0)
 			transactionRequests.push({ symbol: holding.holding.symbol, quantity: quantity });
 	}
 
-	return { invalidInput: false, transactionRequests: transactionRequests };
+	return { invalidInput: false, transactionRequests };
 };

@@ -6,8 +6,8 @@ export const displayToast = (
 	failures: Record<string, ErrorDTO> | undefined,
 	operation: OperationType,
 ) => {
-	const title = document.getElementById("toastTitle");
-	const list = document.getElementById("toastList");
+	const title = document.getElementById("toastTitle")!;
+	const list = document.getElementById("toastList")!;
 
 	title.textContent = `${operation === "BUY" ? "Purchase" : "Sale"} Results`;
 	list.replaceChildren();

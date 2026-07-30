@@ -1,7 +1,7 @@
 
-const errorModalElement = document.querySelector(".error-modal");
-const errorList = document.querySelector(".error-list");
-const closeModal = document.querySelector(".close-modal");
+const errorModalElement = document.querySelector(".error-modal")!;
+const errorList = document.querySelector(".error-list")!;
+const closeModal = document.querySelector(".close-modal")!;
 
 const errorModal = new bootstrap.Modal(errorModalElement);
 

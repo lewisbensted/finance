@@ -11,7 +11,7 @@ export const updateRowUI = (holding, buyInputsSum = 0) => {
     const isBuyDisabled = balance == null || latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
     const isSellDisabled = balance == null || latestPrice === undefined || !isPriceUpToDate || !shares;
     const domUpdate = () => {
-        if (nameCell)
+        if (nameCell && companyName)
             nameCell.textContent = companyName;
         symbolCell.textContent = symbol;
         if (latestPrice === undefined) {

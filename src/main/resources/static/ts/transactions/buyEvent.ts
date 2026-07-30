@@ -9,11 +9,11 @@ import { updateTableUI } from "../utils/updateTableUI.js";
 import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
 
-const message = document.querySelector(".message");
-const buySpinner = document.querySelector(".buy-spinner");
-const buyButton = document.querySelector(".buy-button");
+const message = document.querySelector(".message")!;
+const buySpinner = document.querySelector(".buy-spinner")!;
+const buyButton = document.querySelector(".buy-button")!;
 
-const buyForm = document.getElementById("buy-form");
+const buyForm = document.getElementById("buy-form")!;
 buyForm.addEventListener("submit", async (e) => {
 	e.preventDefault();
 	if (transactionInProgress) return;

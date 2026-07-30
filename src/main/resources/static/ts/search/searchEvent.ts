@@ -5,15 +5,16 @@ import { handleFetchShares } from "../shares/handleFetchShares.js";
 import { updateSharesUI } from "../shares/updateSharesUI.js";
 
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
-import { startPricePolling, stopPricePolling } from "../utils/pollPrices.js";
+import {  startPollPrices, stopPollPrices } from "../utils/pollPrices.js";
+
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 
-const message = document.querySelector(".message");
+const message = document.querySelector(".message")!;
 
-const quoteSpinner = document.querySelector(".quote-spinner");
-const quoteButton = document.querySelector(".quote-button");
-const quoteTable = document.querySelector("table");
+const quoteSpinner = document.querySelector(".quote-spinner")!;
+const quoteButton = document.querySelector(".quote-button")!;
+const quoteTable = document.querySelector("table")!;
 
 void handleFetchBalance();
 
@@ -37,7 +38,7 @@ quoteForm.addEventListener("submit", async (e) => {
 		return;
 	}
 
-	stopPricePolling();
+	void stopPollPrices();
 
 	resetHoldings();
 	const row = document.querySelector("tr.holding");
@@ -66,7 +67,7 @@ quoteForm.addEventListener("submit", async (e) => {
 
 		quoteTable.style.display = "";
 
-		startPricePolling();
+		startPollPrices();
 	} catch (error) {
 		console.error(error);
 		message.textContent = "Unexpected error";

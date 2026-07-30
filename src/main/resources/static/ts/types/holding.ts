@@ -8,7 +8,7 @@ export interface Holding {
 }
 
 interface HoldingRow {
-	nameCell: HTMLElement;
+	nameCell: HTMLElement | null;
 	symbolCell: HTMLElement;
 	sharesCell: HTMLElement;
 	priceCell: HTMLElement;

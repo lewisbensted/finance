@@ -1,7 +1,7 @@
 import { balance } from "../balance/balance.js";
 import { HoldingItem } from "../types/Holding.js";
 
-const disableInput = (inputCell: HTMLElement) => {
+const disableInput = (inputCell: HTMLInputElement) => {
 	inputCell.max = "0";
 	inputCell.min = "0";
 	inputCell.disabled = true;
@@ -22,7 +22,7 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 		balance == null || latestPrice === undefined || !isPriceUpToDate || !shares;
 
 	const domUpdate = () => {
-		if (nameCell) nameCell.textContent = companyName;
+		if (nameCell && companyName) nameCell.textContent = companyName;
 		symbolCell.textContent = symbol;
 
 		if (latestPrice === undefined) {

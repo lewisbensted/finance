@@ -1,7 +1,7 @@
 import { currentHoldingsMap } from "../holding/holdingOperations.js";
 
-const buyTotalCell = document.querySelector(".buy-total");
-const sellTotalCell = document.querySelector(".sell-total");
+const buyTotalCell = document.querySelector(".buy-total")!;
+const sellTotalCell = document.querySelector(".sell-total")!;
 
 export const updateTradeTotals = () => {
 	let buyTotal = 0;
@@ -10,6 +10,12 @@ export const updateTradeTotals = () => {
 
 	for (const holding of currentHoldingsMap.values()) {
 		const { latestPrice, value, isPriceUpToDate } = holding.holding;
+
+		if (value === undefined || !isPriceUpToDate) {
+			totalsUpToDate = false;
+		}
+
+		if (latestPrice === undefined) continue;
 
 		const buyValue = Number(holding.row.buyInput.value) * latestPrice;
 		if (Number.isFinite(buyValue)) {
@@ -21,9 +27,6 @@ export const updateTradeTotals = () => {
 			sellTotal += sellValue;
 		}
 
-		if (value === undefined || !isPriceUpToDate) {
-			totalsUpToDate = false;
-		}
 	}
 
 	buyTotalCell.style.color = totalsUpToDate ? "" : "red";
