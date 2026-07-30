@@ -85,7 +85,7 @@ table {
 	display: none;
 }
 
-.modal {
+/* .modal {
 	display: none;
 	position: fixed;
 	inset: 0;
@@ -119,7 +119,7 @@ table {
 	background: none;
 	border: none;
 	z-index: 9999	
-}
+} */
 
 .message-container{
 	display: flex;

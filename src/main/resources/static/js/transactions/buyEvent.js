@@ -2,7 +2,7 @@ import { balance } from "../balance/balance.js";
 import { currentHoldingsMap } from "../holding/holdingOperations.js";
 import { setTransactionInProgress, transactionInProgress } from "../transactionInProgress.js";
 import { collectInputs } from "../utils/collectInputs.js";
-import { displayToast } from "../utils/displayToast.js";
+import { displayToast } from "../toast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { sumInputs } from "../utils/sumInputs.js";
 import { updateTableUI } from "../utils/updateTableUI.js";

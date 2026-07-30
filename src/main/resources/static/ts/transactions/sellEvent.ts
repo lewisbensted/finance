@@ -1,7 +1,7 @@
 import { currentHoldingsMap } from "../holding/holdingOperations.js";
 import { setTransactionInProgress, transactionInProgress } from "../transactionInProgress.js";
 import { collectInputs } from "../utils/collectInputs.js";
-import { displayToast } from "../utils/displayToast.js";
+import { displayToast } from "../toast.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 import { updateTradeTotals } from "../utils/updateTradeTotals.js";
@@ -56,8 +56,6 @@ sellForm.addEventListener("submit", async (e) => {
 	}
 });
 
-document
-	.querySelectorAll<HTMLInputElement>(".sell-input")
-	.forEach((input) => {
-		input.addEventListener("input", updateTradeTotals);
-	});
+document.querySelectorAll<HTMLInputElement>(".sell-input").forEach((input) => {
+	input.addEventListener("input", updateTradeTotals);
+});

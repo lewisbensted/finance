@@ -96,12 +96,36 @@
 			</form>
 		</footer>
 
-		<dialog class="error-modal">
-			<ul class="error-list"></ul>
-			<button class="close-modal">Close</button>
-		</dialog>
+		<div class="modal fade error-modal" tabindex="-1">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Errors</h5>
+						<button
+							type="button"
+							class="btn-close close-modal"
+							data-bs-dismiss="modal"
+						></button>
+					</div>
+					<div class="modal-body"><ul class="error-list"></ul></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="toast-container position-fixed top-0 end-0 p-3">
+			<div id="transactionToast" class="toast" role="alert">
+				<div class="toast-header">
+					<strong id="toastTitle" class="me-auto">Transaction Results</strong>
+					<button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+				</div>
+
+				<div id="toastBody" class="toast-body">
+					<ul id="toastList" class="list-unstyled mb-0"></ul>
+				</div>
+			</div>
+		</div>
 
 		<script type="module" th:src="@{/js/auth.js}"></script>
-		<script type="module" th:src="@{/js/layout.js}"></script>
+		<th:block layout:fragment="scripts"></th:block>
 	</body>
 </html>

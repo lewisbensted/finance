@@ -1,6 +1,6 @@
 import { setBalance } from "./balance/balance.js";
-import { displayMessages } from "./layout.js";
-import { ApiResponse } from "./types/ApiResponse.js";
+import { displayMessages } from "./modal.js";
+import { BatchErrorDTO, ErrorDTO } from "./types/ApiResponse.js";
 import { CustomError } from "./types/CustomError.js";
 
 const loginButton = document.querySelector(".login-button");
@@ -28,24 +28,21 @@ if (loginForm) {
 			});
 
 			if (!res.ok) {
-				const data = (await res.json()) as ApiResponse<null>;
+				const data = (await res.json()) as BatchErrorDTO;
 
-				if (
-					[400, 401, 429].includes(res.status) &&
-					data.error?.code !== "MALFORMED_REQUEST"
-				) {
+				if ([400, 401, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
 					console.error(data);
-					if (data.error.code === "INVALID_REQUEST") {
-						const messages = Object.values(data.error?.fields).flat();
+					if (data.code === "INVALID_REQUEST") {
+						const messages = Object.values(data.fields).flat();
 						displayMessages(messages);
 					} else {
-						displayMessages([data.error?.message]);
+						displayMessages([data.message]);
 					}
 				} else {
 					throw new CustomError(
-						data.error.message || `Login failed ${res.status}`,
+						data.message || `Login failed ${res.status}`,
 						res.status,
-						data.error?.code,
+						data.code,
 					);
 				}
 
@@ -105,8 +102,8 @@ if (registerForm) {
 				}),
 			});
 			if (!res.ok) {
-				const data = await res.json();
-				if ([400, 409, 429].includes(res.status) && data.error !== "MALFORMED_REQUEST") {
+				const data = (await res.json()) as BatchErrorDTO;
+				if ([400, 409, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
 					if (data.code === "INVALID_REQUEST") {
 						const messages = Object.values(data.fields).flat();
 						displayMessages(messages);
@@ -114,7 +111,11 @@ if (registerForm) {
 						displayMessages([data.message]);
 					}
 				} else {
-					throw new Error(data?.error ?? `Error ${res.status}: ${res.statusText}`);
+					throw new CustomError(
+						data.message || `Register failed ${res.status}`,
+						res.status,
+						data.code,
+					);
 				}
 				return;
 			}

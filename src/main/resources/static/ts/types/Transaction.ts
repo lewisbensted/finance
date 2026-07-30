@@ -8,6 +8,6 @@ export interface TransactionResponse {
 	balance: number;
 }
 
-export type OperationType = "BUY" | "SELL" | "FETCH";
+export type OperationType = "BUY" | "SELL" | "FETCH" | "DEPOSIT" | "WITHDRAW" ;
 export type TransactionType = "BUY" | "SELL";
 export type Page = "SEARCH" | "PORTFOLIO";

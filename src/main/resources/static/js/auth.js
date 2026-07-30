@@ -1,5 +1,5 @@
 import { setBalance } from "./balance/balance.js";
-import { displayMessages } from "./layout.js";
+import { displayMessages } from "./modal.js";
 import { CustomError } from "./types/CustomError.js";
 const loginButton = document.querySelector(".login-button");
 const loginSpinner = document.querySelector(".login-spinner");
@@ -23,19 +23,18 @@ if (loginForm) {
             });
             if (!res.ok) {
                 const data = (await res.json());
-                if ([400, 401, 429].includes(res.status) &&
-                    data.error?.code !== "MALFORMED_REQUEST") {
+                if ([400, 401, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
                     console.error(data);
-                    if (data.error.code === "INVALID_REQUEST") {
-                        const messages = Object.values(data.error?.fields).flat();
+                    if (data.code === "INVALID_REQUEST") {
+                        const messages = Object.values(data.fields).flat();
                         displayMessages(messages);
                     }
                     else {
-                        displayMessages([data.error?.message]);
+                        displayMessages([data.message]);
                     }
                 }
                 else {
-                    throw new CustomError(data.error.message || `Login failed ${res.status}`, res.status, data.error?.code);
+                    throw new CustomError(data.message || `Login failed ${res.status}`, res.status, data.code);
                 }
                 return;
             }
@@ -53,7 +52,6 @@ if (loginForm) {
     });
 }
 const logoutButton = document.querySelector(".logout-button");
-console.log(logoutButton);
 if (logoutButton) {
     logoutButton.addEventListener("click", async (e) => {
         e.preventDefault();
@@ -94,8 +92,8 @@ if (registerForm) {
                 }),
             });
             if (!res.ok) {
-                const data = await res.json();
-                if ([400, 409, 429].includes(res.status) && data.error !== "MALFORMED_REQUEST") {
+                const data = (await res.json());
+                if ([400, 409, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
                     if (data.code === "INVALID_REQUEST") {
                         const messages = Object.values(data.fields).flat();
                         displayMessages(messages);
@@ -105,7 +103,7 @@ if (registerForm) {
                     }
                 }
                 else {
-                    throw new Error(data?.error ?? `Error ${res.status}: ${res.statusText}`);
+                    throw new CustomError(data.message || `Register failed ${res.status}`, res.status, data.code);
                 }
                 return;
             }
