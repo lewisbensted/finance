@@ -54,7 +54,7 @@ public class UserTests {
                 new HttpEntity<>(new PasswordDTO("password123!", "password321!"), headers),
                 String.class
         );
-        assertEquals(HttpStatus.OK, passwordResponse.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, passwordResponse.getStatusCode());
         restTemplate.exchange(
                 "/api/logout",
                 HttpMethod.POST,
@@ -62,6 +62,6 @@ public class UserTests {
                 String.class
         );
         assertEquals(HttpStatus.UNAUTHORIZED, testUtils.login(testUtils.loginUser).getStatusCode());
-        assertEquals(HttpStatus.OK, testUtils.login(new LoginDTO("testuser", "password321!")).getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, testUtils.login(new LoginDTO("testuser", "password321!")).getStatusCode());
     }
 }

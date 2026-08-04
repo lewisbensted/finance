@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -44,16 +45,18 @@ public class StockTests {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<StockResponseDTO> response = restTemplate.exchange(
+        ResponseEntity<ApiResponse<StockResponseDTO>> response = restTemplate.exchange(
                 "/api/prices?symbolsStr=AAPL,MSFT,ORCL",
                 HttpMethod.GET,
                 new HttpEntity<>(headers),
-                StockResponseDTO.class
+                new ParameterizedTypeReference<ApiResponse<StockResponseDTO>>(){}
         );
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertThat(response.getBody().stocks())
-                .containsExactlyInAnyOrder(APPLE_STOCK, MICROSOFT_STOCK, ORACLE_STOCK
-                );
+        assertNull(response.getBody().error());
+        assertThat(response.getBody().data().stocks())
+                .containsEntry("AAPL", APPLE_STOCK)
+                .containsEntry("MSFT", MICROSOFT_STOCK)
+                .containsEntry("ORCL", ORACLE_STOCK);
     }
 }

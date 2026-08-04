@@ -69,8 +69,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/register")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isCreated())
-                    .andExpect(jsonPath("$.username").value("testuser"));
+                    .andExpect(status().isNoContent());
         }
 
         @Test
@@ -174,8 +173,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.username").value("testuser"))
+                    .andExpect(status().isNoContent())
                     .andExpect(request().sessionAttribute("USER_SESSION", testSessionUser));
         }
 
@@ -247,8 +245,7 @@ public class UserControllerTests {
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Logged out"))
+                    .andExpect(status().isNoContent())
                     .andExpect(request().sessionAttributeDoesNotExist("USER_SESSION"));
         }
 
@@ -256,8 +253,7 @@ public class UserControllerTests {
         void test403NotLoggedIn() throws Exception {
             mockMvc.perform(post("/api/logout")
                             .contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Logged out"));
+                    .andExpect(status().isNoContent());
         }
     }
 
@@ -326,8 +322,7 @@ public class UserControllerTests {
                             .contentType(MediaType.APPLICATION_JSON)
                             .sessionAttr("USER_SESSION", testSessionUser)
                             .content(objectMapper.writeValueAsString(newTestPassword)))
-                    .andExpect(status().isOk())
-                    .andExpect(content().string("Password updated"));
+                    .andExpect(status().isNoContent());
         }
     }
 }

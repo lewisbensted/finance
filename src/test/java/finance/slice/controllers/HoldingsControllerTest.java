@@ -25,8 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(HoldingController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -121,7 +120,28 @@ public class HoldingsControllerTest {
                     .andExpect(jsonPath("$.code").value("NOT_FOUND"))
                     .andExpect(jsonPath("$.message").value("Holding not found"));
         }
+    }
 
+    @Nested
+    class PortfolioController {
+        @Test
+        void test401Redirect() throws Exception{
+            mockMvc.perform(get("/portfolio"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/search"));
+        }
 
+        @Test
+        void test200Success() throws Exception{
+            when(holdingService.fetchHoldings(any(), any())).thenReturn(new PageImpl<>(List.of(appleHoldingDTO(40L), microsoftHoldingDTO(50L))));
+
+            mockMvc.perform(get("/portfolio")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .sessionAttr("USER_SESSION", testSessionUser))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("portfolio"))
+                    .andExpect(model().attributeExists("holdings"))
+                    .andExpect(model().attributeExists("holdingsList"));
+        }
     }
 }

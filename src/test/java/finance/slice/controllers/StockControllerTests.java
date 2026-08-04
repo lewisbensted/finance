@@ -36,8 +36,8 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
-                .andExpect(jsonPath("$.message").value("No symbols provided"));
+                .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.error.message").value("No symbols provided"));
     }
 
     @Test
@@ -45,8 +45,8 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices?symbolsStr=")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"))
-                .andExpect(jsonPath("$.message").value("No symbols provided"));
+                .andExpect(jsonPath("$.error.code").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.error.message").value("No symbols provided"));
     }
 
     @Test
@@ -63,7 +63,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT,BANANA,GOOG")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stocks[*].symbol")
+                .andExpect(jsonPath("$.data.stocks[*].symbol")
                         .value(containsInAnyOrder("AAPL", "ORCL", "MSFT")))
                 .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                 .andExpect(jsonPath("$.error.message")
@@ -89,7 +89,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices").param("symbolsStr", "BANANA,GOOG")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.stocks").isEmpty())
+                .andExpect(jsonPath("$.data.stocks").isEmpty())
                 .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                 .andExpect(jsonPath("$.error.message")
                         .value("Failed to fetch all prices"))
@@ -116,7 +116,7 @@ public class StockControllerTests {
         mockMvc.perform(get("/api/prices").param("symbolsStr", "AAPL,ORCL,MSFT")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.stocks[*].symbol")
+                .andExpect(jsonPath("$.data.stocks[*].symbol")
                         .value(containsInAnyOrder("AAPL", "ORCL", "MSFT")))
                 .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
     }

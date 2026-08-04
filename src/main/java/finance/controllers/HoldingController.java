@@ -29,20 +29,19 @@ public class HoldingController {
         this.holdingService = holdingService;
     }
 
-    // probably don't need
-    // @GetMapping(value = "/api/holdings")
-    // ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
-    //         @PageableDefault(size = 10) Pageable pageable) {
-    //     SessionUser sessionUser = authenticateUser(session);
+     @GetMapping(value = "/api/holdings")
+     ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
+             @PageableDefault(size = 5) Pageable pageable) {
+         SessionUser sessionUser = authenticateUser(session);
 
-    //     Pageable safePageable = PageRequest.of(
-    //             pageable.getPageNumber(),
-    //             pageable.getPageSize(),
-    //             Sort.by(Sort.Direction.ASC, "id.symbol"));
+         Pageable safePageable = PageRequest.of(
+                 pageable.getPageNumber(),
+                 pageable.getPageSize(),
+                 Sort.by(Sort.Direction.ASC, "id.symbol"));
 
-    //     Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
-    //     return ResponseEntity.ok().body(PageResponse.from(holdings));
-    // }
+         Page<HoldingDTO> holdings = holdingService.fetchHoldings(sessionUser.id(), safePageable);
+         return ResponseEntity.ok().body(PageResponse.from(holdings));
+     }
 
     @GetMapping(value = "/api/holding")
     ResponseEntity<HoldingDTO> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
@@ -57,7 +56,7 @@ public class HoldingController {
         SessionUser sessionUser;
 
         try {
-            sessionUser = AuthUtils.authenticateUser(session);
+            sessionUser = authenticateUser(session);
         } catch (AuthenticationException e) {
             return "redirect:/search";
         }
@@ -67,5 +66,4 @@ public class HoldingController {
         model.addAttribute("holdingsList", holdings.getContent());
         return "portfolio";
     }
-
 }

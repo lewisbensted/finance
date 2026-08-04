@@ -189,9 +189,10 @@ public class TradingServiceTests {
         @Test
         void testEmptyList() {
             when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-            List<TransactionResultDTO> results = transactionService.executeTransactions(1L, BUY, List.of());
+            TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, BUY, List.of());
             assertEquals(BigDecimal.valueOf(100), testUser.getBalance());
-            assertTrue(results.isEmpty());
+            assertEquals(BigDecimal.valueOf(100), transactionResult.balance());
+            assertTrue(transactionResult.transactions().isEmpty());
             List<Holding> holdings = testUser.getHoldings();
             assertEquals(1, holdings.size());
             verifyNoInteractions(mockStockService);
@@ -204,7 +205,10 @@ public class TradingServiceTests {
                 List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest(4L), bananaTransactionRequest(5L), microsoftTransactionRequest(-5L), new TransactionRequestDTO("GOOG", 10L));
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
+
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, BUY, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
+
                 assertEquals(4, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -219,6 +223,7 @@ public class TradingServiceTests {
                 assertEquals("No price returned", transactions.get(3).error().message());
 
                 assertEquals(BigDecimal.valueOf(80), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(80), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 assertEquals(1, holdings.size());
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
@@ -237,7 +242,10 @@ public class TradingServiceTests {
                 List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest(4L), microsoftTransactionRequest(5L));
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
+
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, BUY, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
+
                 assertEquals(2, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -245,6 +253,7 @@ public class TradingServiceTests {
                 assertNull(transactions.get(1).error());
 
                 assertEquals(BigDecimal.valueOf(30), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(30), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 assertEquals(2, holdings.size());
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
@@ -274,7 +283,9 @@ public class TradingServiceTests {
                 List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest(4L), microsoftTransactionRequest(5L), appleTransactionRequest(4L));
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, BUY, transactionRequests);
+
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, BUY, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
                 assertEquals(3, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -283,6 +294,7 @@ public class TradingServiceTests {
                 assertEquals(transactions.get(2).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(2).error());
                 assertEquals(BigDecimal.valueOf(10), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(10), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
                 assertNotNull(appleHolding);
@@ -308,7 +320,8 @@ public class TradingServiceTests {
                 );
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
                 assertEquals(2, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -316,6 +329,7 @@ public class TradingServiceTests {
                 assertNull(transactions.get(1).error());
 
                 assertEquals(BigDecimal.valueOf(170), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(170), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
                 assertNotNull(appleHolding);
@@ -330,7 +344,8 @@ public class TradingServiceTests {
                 List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest(4L), bananaTransactionRequest(5L), microsoftTransactionRequest(-5L));
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
                 assertEquals(3, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -342,6 +357,7 @@ public class TradingServiceTests {
                 assertEquals("Transaction must be a positive number of shares", transactions.get(2).error().message());
 
                 assertEquals(BigDecimal.valueOf(120), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(120), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 assertEquals(2, holdings.size());
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
@@ -359,7 +375,8 @@ public class TradingServiceTests {
                 List<TransactionRequestDTO> transactionRequests = List.of(appleTransactionRequest(4L), microsoftTransactionRequest(5L), microsoftTransactionRequest(5L));
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
                 assertEquals(3, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -368,6 +385,7 @@ public class TradingServiceTests {
                 assertEquals(transactions.get(2).transaction(), microsoftTransactionRequest(5L));
                 assertNull(transactions.get(2).error());
                 assertEquals(BigDecimal.valueOf(220), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(220), transactionResult.balance());
                 List<Holding> holdings = testUser.getHoldings();
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
                 assertNotNull(appleHolding);
@@ -382,7 +400,8 @@ public class TradingServiceTests {
 
                 when(mockUserRepo.findById(any())).thenReturn(Optional.of(testUser));
 
-                List<TransactionResultDTO> transactions = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                TransactionExecutionResult transactionResult = transactionService.executeTransactions(1L, SELL, transactionRequests);
+                List<TransactionResultDTO> transactions = transactionResult.transactions();
                 assertEquals(3, transactions.size());
                 assertEquals(transactions.get(0).transaction(), appleTransactionRequest(4L));
                 assertNull(transactions.get(0).error());
@@ -393,6 +412,8 @@ public class TradingServiceTests {
                 assertEquals(INSUFFICIENT_SHARES, transactions.get(2).error().code());
                 assertEquals("Insufficient shares", transactions.get(2).error().message());
                 assertEquals(BigDecimal.valueOf(120), testUser.getBalance());
+                assertEquals(BigDecimal.valueOf(120), transactionResult.balance());
+
                 List<Holding> holdings = testUser.getHoldings();
                 Holding appleHolding = holdings.stream().filter(h -> h.getSymbol().equals("AAPL")).findFirst().orElse(null);
                 assertNotNull(appleHolding);

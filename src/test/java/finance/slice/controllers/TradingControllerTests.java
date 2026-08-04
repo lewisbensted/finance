@@ -94,13 +94,13 @@ public class TradingControllerTests {
         @Test
         void test422AllFailed() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(bananaTransactionResult, oracleTransactionResult));
+                    .thenReturn(new TransactionExecutionResult(List.of(bananaTransactionResult, oracleTransactionResult), BigDecimal.valueOf(100)));
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isUnprocessableEntity())
-                    .andExpect(jsonPath("$.transactions").isEmpty())
+                    .andExpect(jsonPath("$.data.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.BANANA.code")
                             .value("NOT_FOUND"))
@@ -115,13 +115,13 @@ public class TradingControllerTests {
         @Test
         void test200PartialFailure() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult, bananaTransactionResult, oracleTransactionResult));
+                    .thenReturn(new TransactionExecutionResult(List.of(appleTransactionResult, microsoftTransactionResult, bananaTransactionResult, oracleTransactionResult), BigDecimal.valueOf(100)));
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.transactions[*].symbol")
+                    .andExpect(jsonPath("$.data.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
@@ -139,14 +139,14 @@ public class TradingControllerTests {
         @Test
         void test200Success() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult));
+                    .thenReturn(new TransactionExecutionResult(List.of(appleTransactionResult, microsoftTransactionResult),BigDecimal.valueOf(100)));
 
             mockMvc.perform(post("/api/buy")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.transactions[*].symbol")
+                    .andExpect(jsonPath("$.data.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
         }
@@ -177,16 +177,16 @@ public class TradingControllerTests {
         @Test
         void test422AllFailed() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(
+                    .thenReturn(new TransactionExecutionResult(List.of(
                             new TransactionResultDTO(appleTransactionRequest(5L), new ItemErrorDTO(INSUFFICIENT_SHARES, "Insufficient shares")),
-                            oracleTransactionResult
+                            oracleTransactionResult), BigDecimal.valueOf(100)
                     ));
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestSuccess))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isUnprocessableEntity())
-                    .andExpect(jsonPath("$.transactions").isEmpty())
+                    .andExpect(jsonPath("$.data.transactions").isEmpty())
                     .andExpect(jsonPath("$.error.code").value("OPERATION_FAILED"))
                     .andExpect(jsonPath("$.error.fields.AAPL.code")
                             .value("INSUFFICIENT_SHARES"))
@@ -201,14 +201,14 @@ public class TradingControllerTests {
         @Test
         void test200PartialFailure() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult, oracleTransactionResult));
+                    .thenReturn(new TransactionExecutionResult(List.of(appleTransactionResult, microsoftTransactionResult, oracleTransactionResult), BigDecimal.valueOf(100)));
 
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.transactions[*].symbol")
+                    .andExpect(jsonPath("$.data.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
@@ -222,14 +222,14 @@ public class TradingControllerTests {
         @Test
         void test200Success() throws Exception {
             when(transactionService.executeTransactions(any(), any(), any()))
-                    .thenReturn(List.of(appleTransactionResult, microsoftTransactionResult));
+                    .thenReturn(new TransactionExecutionResult(List.of(appleTransactionResult, microsoftTransactionResult), BigDecimal.valueOf(100)));
 
             mockMvc.perform(post("/api/sell")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.transactions[*].symbol")
+                    .andExpect(jsonPath("$.data.transactions[*].symbol")
                             .value(containsInAnyOrder("AAPL", "MSFT")))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
         }
