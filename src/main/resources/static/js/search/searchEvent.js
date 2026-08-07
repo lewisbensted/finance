@@ -29,7 +29,7 @@ quoteForm.addEventListener("submit", async (e) => {
         message.textContent = "Invalid input - please enter a symbol.";
         return;
     }
-    void stopPollPrices();
+    stopPollPrices();
     resetHoldings();
     const row = document.querySelector("tr.holding");
     const holding = createHolding(row, shareSymbol);

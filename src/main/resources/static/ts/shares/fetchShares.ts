@@ -1,11 +1,12 @@
+import { HoldingDTO } from "../types/Holding.js";
 import { isErrorDTO } from "../utils/isErrorDTO.js";
 import { CustomError } from "./../types/CustomError.js";
 
 export const fetchShares = async (symbol: string) => {
 	const res = await fetch(`/api/holding?symbol=${encodeURIComponent(symbol)}`);
-	const body: unknown = await res.json().catch(() => {
+	const body = await res.json().catch(() => {
 		throw new Error("Invalid response from server");
-	});
+	}) as HoldingDTO;
 
 	if (!res.ok) {
 		if (!isErrorDTO(body)) {
@@ -21,7 +22,7 @@ export const fetchShares = async (symbol: string) => {
 		}
 	}
 
-	if (body.shares === undefined || typeof body.shares !== "number")
+	if (typeof body.shares !== "number")
 		throw new Error("Invalid response from server");
 	return body.shares;
 };

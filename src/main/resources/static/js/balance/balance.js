@@ -40,12 +40,14 @@ export const handleFetchBalance = async () => {
             tradingFooter.style.display = "none";
         }
         else {
+            tradingFooter.style.display = "";
             balanceCell.style.color = "";
             balanceCell.textContent = `$${balance.toFixed(2)}`;
         }
     }
     catch (error) {
         console.error(error);
+        tradingFooter.style.display = "";
         balanceCell.style.color = "red";
         balanceCell.textContent = "$--";
     }

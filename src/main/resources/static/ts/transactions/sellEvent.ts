@@ -9,8 +9,8 @@ import { handleTransaction } from "./handleTransaction.js";
 
 const message = document.querySelector(".message")!;
 
-const sellSpinner = document.querySelector(".sell-spinner")!;
-const sellButton = document.querySelector(".sell-button")!;
+const sellSpinner = document.querySelector<HTMLElement>(".sell-spinner")!;
+const sellButton = document.querySelector<HTMLElement>(".sell-button")!;
 
 const sellForm = document.getElementById("sell-form")!;
 sellForm.addEventListener("submit", async (e) => {

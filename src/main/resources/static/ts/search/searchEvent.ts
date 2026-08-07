@@ -12,9 +12,9 @@ import { updateTableUI } from "../utils/updateTableUI.js";
 
 const message = document.querySelector(".message")!;
 
-const quoteSpinner = document.querySelector(".quote-spinner")!;
-const quoteButton = document.querySelector(".quote-button")!;
-const quoteTable = document.querySelector("table")!;
+const quoteSpinner = document.querySelector<HTMLElement>(".quote-spinner")!;
+const quoteButton = document.querySelector<HTMLInputElement>(".quote-button")!;
+const quoteTable = document.querySelector<HTMLElement>("table")!;
 
 void handleFetchBalance();
 
@@ -29,19 +29,19 @@ const setQuoteLoading = (loading: boolean) => {
 };
 
 const quoteForm = document.getElementById("quote-form");
-quoteForm.addEventListener("submit", async (e) => {
+quoteForm!.addEventListener("submit", async (e) => {
 	e.preventDefault();
 
-	const shareSymbol = document.querySelector(".quote-input").value.trim().toUpperCase();
+	const shareSymbol = document.querySelector<HTMLInputElement>(".quote-input")!.value.trim().toUpperCase();
 	if (!shareSymbol) {
 		message.textContent = "Invalid input - please enter a symbol.";
 		return;
 	}
 
-	void stopPollPrices();
+	stopPollPrices();
 
 	resetHoldings();
-	const row = document.querySelector("tr.holding");
+	const row = document.querySelector<HTMLTableRowElement>("tr.holding")!;
 	const holding = createHolding(row, shareSymbol);
 	currentHoldingsMap.set(shareSymbol, holding);
 	const currentHoldings = [...currentHoldingsMap.values()];

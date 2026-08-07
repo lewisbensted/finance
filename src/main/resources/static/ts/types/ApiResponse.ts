@@ -7,6 +7,11 @@ export interface BatchErrorDTO extends ErrorDTO {
 	fields: Record<string, ErrorDTO>;
 }
 
+export interface ValidationErrorDTO extends ErrorDTO {
+	fields: Record<string, string[]>;
+}
+
+
 export interface ApiResponse<T, E extends ErrorDTO = ErrorDTO> {
 	data: T | null;
 	error: null | E;

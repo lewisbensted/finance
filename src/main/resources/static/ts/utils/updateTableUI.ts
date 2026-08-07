@@ -4,13 +4,13 @@ import { HoldingItem } from "./../types/Holding.js";
 import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 
-const totalCell = document.querySelector(".total");
-const buyButton = document.querySelector(".buy-button")!;
-const sellButton = document.querySelector(".sell-button")!;
-const balanceCell = document.querySelector(".balance")!;
-const buySpinner = document.querySelector(".buy-spinner")!;
-const buyTotalCell = document.querySelector(".buy-total")!;
-const sellTotalCell = document.querySelector(".sell-total")!;
+const totalCell = document.querySelector<HTMLElement>(".total");
+const buyButton = document.querySelector<HTMLButtonElement>(".buy-button")!;
+const sellButton = document.querySelector<HTMLButtonElement>(".sell-button")!;
+const balanceCell = document.querySelector<HTMLElement>(".balance")!;
+const buySpinner = document.querySelector<HTMLElement>(".buy-spinner")!;
+const buyTotalCell = document.querySelector<HTMLElement>(".buy-total")!;
+const sellTotalCell = document.querySelector<HTMLElement>(".sell-total")!;
 
 export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buySum = 0) => {
 	let buyButtonDisabled = true;

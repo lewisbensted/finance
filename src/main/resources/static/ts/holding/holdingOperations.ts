@@ -23,12 +23,12 @@ export const createHolding = (
 	},
 	row: {
 		nameCell: row.querySelector(".name"),
-		symbolCell: row.querySelector(".symbol"),
-		sharesCell: row.querySelector(".current-shares"),
-		priceCell: row.querySelector(".price"),
-		valueCell: row.querySelector(".value"),
-		buyInput: row.querySelector(".buy-input"),
-		sellInput: row.querySelector(".sell-input"),
+		symbolCell: row.querySelector(".symbol")!,
+		sharesCell: row.querySelector(".current-shares")!,
+		priceCell: row.querySelector(".price")!,
+		valueCell: row.querySelector(".value")!,
+		buyInput: row.querySelector(".buy-input")!,
+		sellInput: row.querySelector(".sell-input")!,
 	},
 });
 

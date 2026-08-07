@@ -18,7 +18,7 @@ export const fetchShares = async (symbol) => {
                 throw new CustomError(body.message, res.status, body.code);
         }
     }
-    if (body.shares === undefined || typeof body.shares !== "number")
+    if (typeof body.shares !== "number")
         throw new Error("Invalid response from server");
     return body.shares;
 };

@@ -1,8 +1,8 @@
 import { CustomError } from "../types/CustomError.js";
 import { isErrorDTO } from "../utils/isErrorDTO.js";
 
-const balanceCell = document.querySelector(".balance");
-const tradingFooter = document.querySelector(".table-footer");
+const balanceCell = document.querySelector<HTMLElement>(".balance")!;
+const tradingFooter = document.querySelector<HTMLElement>(".table-footer")!;
 
 export let balance: number | null;
 
@@ -47,11 +47,13 @@ export const handleFetchBalance = async () => {
 		if (balance === null) {
 			tradingFooter.style.display = "none";
 		} else {
+			tradingFooter.style.display = "";
 			balanceCell.style.color = "";
 			balanceCell.textContent = `$${balance.toFixed(2)}`;
 		}
 	} catch (error) {
 		console.error(error);
+		tradingFooter.style.display = "";
 		balanceCell.style.color = "red";
 		balanceCell.textContent = "$--";
 	}

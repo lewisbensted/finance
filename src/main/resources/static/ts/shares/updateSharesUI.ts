@@ -3,7 +3,7 @@ import { domUpdates } from "../utils/domUpdates.js";
 import { updateRowUI } from "../utils/updateRowUI.js";
 import { HoldingItem } from "./../types/Holding.js";
 
-const sellButton = document.querySelector(".sell-button");
+const sellButton = document.querySelector<HTMLButtonElement>(".sell-button")!;
 
 export const updateSharesUI = (holding: HoldingItem) => {
 	const shares = holding.holding.shares;

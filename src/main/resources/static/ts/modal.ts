@@ -10,7 +10,7 @@ closeModal.onclick = () => {
 	errorModal.hide();
 };
 
-export const displayMessages = (messages) => {
+export const displayMessages = (messages: string[]) => {
 	messages.forEach((message) => {
 		const li = document.createElement("li");
 		li.textContent = message;

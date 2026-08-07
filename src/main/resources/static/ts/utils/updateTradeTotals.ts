@@ -1,7 +1,7 @@
 import { currentHoldingsMap } from "../holding/holdingOperations.js";
 
-const buyTotalCell = document.querySelector(".buy-total")!;
-const sellTotalCell = document.querySelector(".sell-total")!;
+const buyTotalCell = document.querySelector<HTMLElement>(".buy-total")!;
+const sellTotalCell = document.querySelector<HTMLElement>(".sell-total")!;
 
 export const updateTradeTotals = () => {
 	let buyTotal = 0;
