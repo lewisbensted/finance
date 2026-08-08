@@ -37,7 +37,7 @@ public class TradingController {
                 SessionUser sessionUser = authenticateUser(session);
 
                 Map<String, ItemErrorDTO> errorFields = new HashMap<>();
-                Map<String, TransactionRequestDTO> successful = new HashMap<>();
+                Map<String, Long> successful = new HashMap<>();
                 TransactionExecutionResult transactionResults = transactionService.executeTransactions(sessionUser.id(),
                                 BUY,
                                 transactions);
@@ -47,7 +47,7 @@ public class TradingController {
                         if (transactionResult.error() != null)
                                 errorFields.put(symbol, transactionResult.error());
                         else
-                                successful.put(symbol, transactionResult.transaction());
+                                successful.put(symbol, transactionResult.transaction().quantity());
                 }
 
                 boolean allFailed = successful.isEmpty();
@@ -68,7 +68,7 @@ public class TradingController {
                 SessionUser sessionUser = authenticateUser(session);
 
                 Map<String, ItemErrorDTO> errorFields = new HashMap<>();
-                Map<String, TransactionRequestDTO> successful = new HashMap<>();
+                Map<String, Long> successful = new HashMap<>();
                 TransactionExecutionResult transactionResults = transactionService.executeTransactions(sessionUser.id(),
                                 SELL,
                                 transactions);
@@ -78,7 +78,7 @@ public class TradingController {
                         if (transactionResult.error() != null)
                                 errorFields.put(transactionResult.transaction().symbol(), transactionResult.error());
                         else
-                                successful.put(symbol, transactionResult.transaction());
+                                successful.put(symbol, transactionResult.transaction().quantity());
                 }
 
                 boolean allFailed = successful.isEmpty();

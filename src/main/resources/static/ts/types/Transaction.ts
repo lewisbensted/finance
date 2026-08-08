@@ -4,7 +4,7 @@ export interface Transaction {
 }
 
 export interface TransactionResponse {
-	transactions: Record<string, Transaction>;
+	transactions: Record<string, number>;
 	balance: number;
 }
 

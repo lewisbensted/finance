@@ -1,8 +1,8 @@
 import type { ErrorDTO } from "./types/ApiResponse.js";
-import type { Transaction, OperationType } from "./types/Transaction.js";
+import type { OperationType } from "./types/Transaction.js";
 
 export const displayToast = (
-	successes: Map<string, Transaction>,
+	successes: Map<string, number>,
 	failures: Record<string, ErrorDTO> | undefined,
 	operation: OperationType,
 ) => {
@@ -12,10 +12,10 @@ export const displayToast = (
 	title.textContent = `${operation === "BUY" ? "Purchase" : "Sale"} Results`;
 	list.replaceChildren();
 
-	for (const transaction of successes.values()) {
+	for (const [symbol, quantity] of successes) {
 		const li = document.createElement("li");
 		li.className = "text-success";
-		li.textContent = `✔ ${transaction.quantity} of ${transaction.symbol}`;
+		li.textContent = `✔ ${quantity} of ${symbol}`;
 		list.appendChild(li);
 	}
 

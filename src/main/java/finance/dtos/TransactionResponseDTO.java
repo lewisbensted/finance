@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 public record TransactionResponseDTO(
-                Map<String, TransactionRequestDTO> transactions,
+                Map<String, Long> transactions,
                 BigDecimal balance) {
 }

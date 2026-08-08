@@ -1,6 +1,5 @@
 package finance.controllers;
 
-import finance.dtos.ApiResponse;
 import finance.dtos.ErrorDTO;
 import finance.dtos.ValidationErrorDTO;
 import finance.exceptions.*;

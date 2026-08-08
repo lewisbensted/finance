@@ -15,8 +15,7 @@ export const handleTransaction = async (
 
 	if (updatedBalance !== undefined) setBalance(updatedBalance);
 
-	for (const [symbol, transaction] of successful) {
-		const quantity = transaction.quantity;
+	for (const [symbol, quantity] of successful) {
 		const holding = currentHoldingsMap.get(symbol);
 		if (!holding) throw new Error(`Holding for ${symbol} not found.`);
 

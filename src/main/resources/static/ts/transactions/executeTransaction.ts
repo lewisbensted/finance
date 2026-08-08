@@ -32,7 +32,7 @@ export const executeTransaction = async (buyRequests: Transaction[], type: Trans
 	}
 
 	return {
-		successful: new Map<string, Transaction>(Object.entries(response.data?.transactions ?? {})),
+		successful: new Map(Object.entries(response.data?.transactions ?? {})),
 		updatedBalance: response.data?.balance,
 		failed: error?.fields ?? {},
 	};

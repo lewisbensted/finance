@@ -3,10 +3,10 @@ export const displayToast = (successes, failures, operation) => {
     const list = document.getElementById("toastList");
     title.textContent = `${operation === "BUY" ? "Purchase" : "Sale"} Results`;
     list.replaceChildren();
-    for (const transaction of successes.values()) {
+    for (const [symbol, quantity] of successes) {
         const li = document.createElement("li");
         li.className = "text-success";
-        li.textContent = `✔ ${transaction.quantity} of ${transaction.symbol}`;
+        li.textContent = `✔ ${quantity} of ${symbol}`;
         list.appendChild(li);
     }
     if (failures) {
