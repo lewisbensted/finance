@@ -1,6 +1,6 @@
 import { ApiResponse, BatchErrorDTO } from "./../types/ApiResponse.js";
 import { CustomError } from "./../types/CustomError.js";
-import { Stock, StockResponse } from "./../types/Stock.js";
+import { Stock, StockResponse } from "../types/Stock.js";
 
 export const fetchPrices = async (symbols: string[]) => {
 	const res = await fetch(`/api/prices?symbolsStr=${encodeURIComponent(symbols.join(","))}`);

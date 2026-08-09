@@ -6,6 +6,8 @@ import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import { updateTableUI } from "../utils/updateTableUI.js";
 import { updateTradeTotals } from "../utils/updateTradeTotals.js";
 import { handleTransaction } from "./handleTransaction.js";
+import { displayMessages } from "../modal.js";
+import { CustomError } from "../types/CustomError.js";
 
 const message = document.querySelector(".message")!;
 
@@ -44,7 +46,11 @@ sellForm.addEventListener("submit", async (e) => {
 		displayToast(successful, failed, "SELL");
 	} catch (error) {
 		console.error(error);
-		//toast error
+		displayMessages(
+			error instanceof CustomError && error.code !== "INTERNAL_ERROR"
+				? [error.message]
+				: ["An unexpected error occured - please try again"],
+		);
 		updateTableUI(holdings, false);
 	} finally {
 		applyDomUpdates(domUpdates);

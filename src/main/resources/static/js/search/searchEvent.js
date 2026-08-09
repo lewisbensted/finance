@@ -54,7 +54,7 @@ quoteForm.addEventListener("submit", async (e) => {
     }
     catch (error) {
         console.error(error);
-        message.textContent = "Unexpected error";
+        message.textContent = "An unexpected error occured - please try again";
     }
     finally {
         setQuoteLoading(false);

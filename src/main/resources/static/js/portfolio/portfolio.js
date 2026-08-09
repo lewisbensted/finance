@@ -16,5 +16,5 @@ void handleFetchBalance();
 await handleFetchPrices();
 updateTableUI([...currentHoldingsMap.values()], false);
 applyDomUpdates(domUpdates);
-void stopPollPrices();
+stopPollPrices();
 startPollPrices();

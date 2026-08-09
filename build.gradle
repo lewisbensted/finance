@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.hibernate.orm:hibernate-community-dialects'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    implementation 'com.bucket4j:bucket4j_jdk17-core:8.15.0'
 }
 
 tasks.named('test') {

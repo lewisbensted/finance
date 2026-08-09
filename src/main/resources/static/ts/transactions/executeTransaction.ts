@@ -1,6 +1,7 @@
 import { ApiResponse, BatchErrorDTO } from "../types/ApiResponse.js";
 import { CustomError } from "../types/CustomError.js";
 import { Transaction, TransactionResponse, TransactionType } from "../types/Transaction.js";
+import { isErrorDTO } from "../utils/isErrorDTO.js";
 
 export const executeTransaction = async (buyRequests: Transaction[], type: TransactionType) => {
 	const res = await fetch(`/api/${type.toLowerCase()}`, {
@@ -10,30 +11,27 @@ export const executeTransaction = async (buyRequests: Transaction[], type: Trans
 		},
 		body: JSON.stringify(buyRequests),
 	});
-	const response = (await res.json().catch(() => {
+	const body: unknown = await res.json().catch(() => {
 		throw new Error("Invalid response from server");
-	})) as ApiResponse<TransactionResponse, BatchErrorDTO>;
+	});
 
-	const error = response.error
-		? new CustomError(
-			response.error.message,
-			res.status,
-			response.error.code,
-			response.error.fields,
-		)
-		: null;
-
-	if (!res.ok && error?.code !== "OPERATION_FAILED") {
-		throw error ?? new Error(`Request failed ${res.status}`);
+	if (!res.ok) {
+		if (isErrorDTO(body)) throw new CustomError(body.message, res.status, body.code);
+		const response = body as ApiResponse<TransactionResponse, BatchErrorDTO>;
+		if (response.error?.code !== "OPERATION_FAILED")
+			throw new Error(`Request failed ${res.status}`);
 	}
 
-	if (!response.data?.transactions && error?.code !== "OPERATION_FAILED") {
+	const transaction = body as ApiResponse<TransactionResponse, BatchErrorDTO>;
+	if (!transaction.data && transaction.error?.code !== "OPERATION_FAILED") {
 		throw new Error("Invalid response from server");
 	}
+
+	const { data, error } = transaction;
 
 	return {
-		successful: new Map(Object.entries(response.data?.transactions ?? {})),
-		updatedBalance: response.data?.balance,
+		successful: new Map(Object.entries(data?.transactions ?? {})),
+		updatedBalance: data?.balance,
 		failed: error?.fields ?? {},
 	};
 };

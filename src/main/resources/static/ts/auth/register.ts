@@ -1,16 +1,17 @@
 import { displayMessages } from "../modal.js";
-import { ValidationErrorDTO } from "../types/ApiResponse.js";
+import { ErrorDTO, ValidationErrorDTO } from "../types/ApiResponse.js";
 import { CustomError } from "../types/CustomError.js";
+import { RegisterForm } from "../types/htmlForms.js";
 
 const registerButton = document.querySelector<HTMLButtonElement>(".register-button")!;
 const registerSpinner = document.querySelector<HTMLElement>(".register-spinner")!;
-const registerForm = document.querySelector<HTMLElement>(".register-form")!;
+const registerForm = document.querySelector<RegisterForm>(".register-form")!;
 
 registerForm.addEventListener("submit", async (event) => {
 	event.preventDefault();
 	registerButton.style.display = "none";
 	registerSpinner.style.setProperty("display", "flex", "important");
-	document.querySelectorAll("input, button").forEach((el) => (el.disabled = true));
+	document.querySelectorAll<HTMLInputElement>("input, button").forEach((el) => (el.disabled = true));
 	try {
 		const res = await fetch("/api/register", {
 			method: "POST",
@@ -27,10 +28,11 @@ registerForm.addEventListener("submit", async (event) => {
 			}),
 		});
 		if (!res.ok) {
-			const data = (await res.json()) as ValidationErrorDTO;
+			const data = (await res.json()) as ErrorDTO;
 			if ([400, 409, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
 				if (data.code === "INVALID_REQUEST") {
-					const messages = Object.values(data.fields).flat();
+					const validationData = data as ValidationErrorDTO;
+					const messages = Object.values(validationData.fields).flat();
 					displayMessages(messages);
 				} else {
 					displayMessages([data.message]);
@@ -48,10 +50,10 @@ registerForm.addEventListener("submit", async (event) => {
 		setTimeout(() => (window.location.href = "/login"), 1200);
 	} catch (error) {
 		console.error(error);
-		displayMessages(["Unexpected error"]);
+		displayMessages(["An unexpected error occured - please try again"]);
 	} finally {
 		registerButton.style.display = "";
 		registerSpinner.style.setProperty("display", "none", "important");
-		document.querySelectorAll("input, button").forEach((el) => (el.disabled = false));
+		document.querySelectorAll<HTMLInputElement>("input, button").forEach((el) => (el.disabled = false));
 	}
 });

@@ -27,7 +27,8 @@ registerForm.addEventListener("submit", async (event) => {
             const data = (await res.json());
             if ([400, 409, 429].includes(res.status) && data.code !== "MALFORMED_REQUEST") {
                 if (data.code === "INVALID_REQUEST") {
-                    const messages = Object.values(data.fields).flat();
+                    const validationData = data;
+                    const messages = Object.values(validationData.fields).flat();
                     displayMessages(messages);
                 }
                 else {
@@ -44,7 +45,7 @@ registerForm.addEventListener("submit", async (event) => {
     }
     catch (error) {
         console.error(error);
-        displayMessages(["Unexpected error"]);
+        displayMessages(["An unexpected error occured - please try again"]);
     }
     finally {
         registerButton.style.display = "";

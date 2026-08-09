@@ -12,11 +12,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+
 import static finance.controllers.AuthUtils.authenticateUser;
+import static finance.dtos.ErrorCode.TOO_MANY_REQUESTS;
 
 @Controller
 public class UserController {
     UserService userService;
+
+    private final RateLimiter loginRateLimiter = new RateLimiter(5, Duration.ofMinutes(1));
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -49,7 +54,11 @@ public class UserController {
 
     @PostMapping(value = "/api/login")
     @ResponseBody
-    public ResponseEntity<Void> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
+    public ResponseEntity<ErrorDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
+        if (!loginRateLimiter.allowRequest())
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new ErrorDTO(TOO_MANY_REQUESTS, "Too many requests - Try again later"));
+
         if (session.getAttribute("USER_SESSION") != null)
             throw new ForbiddenException("Already logged in");
 

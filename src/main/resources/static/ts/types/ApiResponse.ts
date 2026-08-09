@@ -8,9 +8,9 @@ export interface BatchErrorDTO extends ErrorDTO {
 }
 
 export interface ValidationErrorDTO extends ErrorDTO {
+	code: "INVALID_REQUEST";
 	fields: Record<string, string[]>;
 }
-
 
 export interface ApiResponse<T, E extends ErrorDTO = ErrorDTO> {
 	data: T | null;
