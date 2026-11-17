@@ -121,8 +121,8 @@ public class TradingControllerTests {
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.transactions[*].symbol")
-                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.data.transactions.MSFT").value(10))
+                    .andExpect(jsonPath("$.data.transactions.AAPL").value(5))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
@@ -146,8 +146,8 @@ public class TradingControllerTests {
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.transactions[*].symbol")
-                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.data.transactions.MSFT").value(10))
+                    .andExpect(jsonPath("$.data.transactions.AAPL").value(5))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
         }
     }
@@ -208,8 +208,8 @@ public class TradingControllerTests {
                             .content(objectMapper.writeValueAsString(requestPartial))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.transactions[*].symbol")
-                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.data.transactions.MSFT").value(10))
+                    .andExpect(jsonPath("$.data.transactions.AAPL").value(5))
                     .andExpect(jsonPath("$.error.code").value("OPERATION_PARTIALLY_FAILED"))
                     .andExpect(jsonPath("$.error.message")
                             .value("Failed to execute some transactions"))
@@ -229,8 +229,8 @@ public class TradingControllerTests {
                             .content(objectMapper.writeValueAsString(requestFailure))
                             .sessionAttr("USER_SESSION", testSessionUser))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.data.transactions[*].symbol")
-                            .value(containsInAnyOrder("AAPL", "MSFT")))
+                    .andExpect(jsonPath("$.data.transactions.MSFT").value(10))
+                    .andExpect(jsonPath("$.data.transactions.AAPL").value(5))
                     .andExpect(jsonPath("$.error").value(Matchers.nullValue()));
         }
     }

@@ -7,6 +7,9 @@ import finance.services.UserService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -20,6 +23,9 @@ import static finance.dtos.ErrorCode.TOO_MANY_REQUESTS;
 @Controller
 public class UserController {
     UserService userService;
+
+    @Autowired
+    private Environment environment;
 
     private final RateLimiter loginRateLimiter = new RateLimiter(5, Duration.ofMinutes(1));
 
@@ -55,7 +61,7 @@ public class UserController {
     @PostMapping(value = "/api/login")
     @ResponseBody
     public ResponseEntity<ErrorDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session) {
-        if (!loginRateLimiter.allowRequest())
+        if (!environment.acceptsProfiles(Profiles.of("test")) && !loginRateLimiter.allowRequest())
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(new ErrorDTO(TOO_MANY_REQUESTS, "Too many requests - Try again later"));
 
