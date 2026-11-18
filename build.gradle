@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.lewis'
 version = '0.0.1-SNAPSHOT'
-description = 'CS50 Finance'
+description = 'Finance'
 
 java {
     toolchain {
@@ -48,3 +48,4 @@ tasks.register("compileTypescript", Exec) {
     commandLine "cmd", "/c", "npx", "tsc"
     ignoreExitValue = true
 }
+

@@ -36,7 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-finance.db
+# SQLite databases
+*.db
 
 /node_modules
 package-lock.json
