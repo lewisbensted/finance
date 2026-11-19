@@ -89,4 +89,10 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorDTO> handleRegistrationException(RegistrationException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorDTO(REGISTRATION_FAILED, ex.getMessage()));
     }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ErrorDTO> handleTooManyRequests(TooManyRequestsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(new ErrorDTO(TOO_MANY_REQUESTS, ex.getMessage()));
+    }
 }

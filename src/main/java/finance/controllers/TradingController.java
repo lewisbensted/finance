@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static finance.controllers.AuthUtils.authenticateUser;
+import static finance.controllers.ControllerUtils.authenticateUser;
 import static finance.dtos.ErrorCode.OPERATION_FAILED;
 import static finance.dtos.ErrorCode.OPERATION_PARTIALLY_FAILED;
 import static finance.entities.TransactionType.BUY;

@@ -47,6 +47,8 @@ public class UserTests {
     @Test
     void registerLoginAndChangePassword() {
         testUtils.register(testUtils.newUser);
+        ResponseEntity<Void> loginResponse = testUtils.login(testUtils.loginUser);
+        assertEquals(HttpStatus.NO_CONTENT, loginResponse.getStatusCode());
         HttpHeaders headers = testUtils.authenticateHeaders(testUtils.login(testUtils.loginUser));
         ResponseEntity<String> passwordResponse = restTemplate.exchange(
                 "/api/password",

@@ -1,17 +1,29 @@
 package finance.controllers;
 
+import finance.dtos.ErrorDTO;
 import finance.exceptions.AuthenticationException;
+import finance.exceptions.TooManyRequestsException;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import javax.sound.midi.SysexMessage;
+
+import static finance.dtos.ErrorCode.TOO_MANY_REQUESTS;
 import static finance.dtos.ErrorCode.UNAUTHENTICATED;
 
-public class AuthUtils {
+public class ControllerUtils {
     public static SessionUser authenticateUser(HttpSession session) {
         SessionUser activeUser = (SessionUser) session.getAttribute("USER_SESSION");
         if (activeUser == null) {
             throw new AuthenticationException(UNAUTHENTICATED, "Not logged in");
         }
         return activeUser;
+    }
+
+    public static void checkRequestAllowed(RateLimiter rateLimiter, String key) {
+        if (!rateLimiter.allowRequest(key))
+            throw new TooManyRequestsException("Too many requests - Try again later");
     }
 }

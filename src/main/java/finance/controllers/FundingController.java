@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 
-import static finance.controllers.AuthUtils.authenticateUser;
+import static finance.controllers.ControllerUtils.authenticateUser;
 
 @RestController
 public class FundingController {

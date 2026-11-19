@@ -12,6 +12,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -45,7 +46,7 @@ public class TestUtils {
         );
     }
 
-    protected ResponseEntity<UserDTO> login(LoginDTO loginBody) {
+    protected ResponseEntity<Void> login(LoginDTO loginBody) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -55,11 +56,11 @@ public class TestUtils {
                 "/api/login",
                 HttpMethod.POST,
                 entity,
-                UserDTO.class
+                Void.class
         );
     }
 
-    protected HttpHeaders authenticateHeaders(ResponseEntity<UserDTO> loginResponse) {
+    protected HttpHeaders authenticateHeaders(ResponseEntity<Void> loginResponse) {
         String setCookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
 
         if (setCookie == null) {

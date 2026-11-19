@@ -1,7 +1,9 @@
 package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import finance.controllers.UserController;
+import finance.configuration.RateLimiterConfig;
+import finance.controllers.AuthController;
+import finance.controllers.RateLimiter;
 import finance.dtos.LoginDTO;
 import finance.dtos.PasswordDTO;
 import finance.dtos.RegisterDTO;
@@ -17,8 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Arrays;
 
 import static finance.dtos.ErrorCode.INVALID_CREDENTIALS;
 import static org.mockito.ArgumentMatchers.any;
@@ -29,9 +36,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
-@WebMvcTest(UserController.class)
+@WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class UserControllerTests {
+@ActiveProfiles("test")
+@Import(RateLimiterConfig.class)
+public class AuthControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -40,6 +49,9 @@ public class UserControllerTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+//    @MockBean
+//    private RateLimiter loginRateLimiter;
 
     User testUser = mock(User.class);
 
