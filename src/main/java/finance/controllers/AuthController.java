@@ -8,6 +8,7 @@ import finance.session.SessionUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -21,16 +22,13 @@ public class AuthController {
     public static final String USER_SESSION = "USER_SESSION";
 
     private final UserService userService;
-    private final RateLimiter loginRateLimiter;
-    private final RateLimiter registerRateLimiter;
+    private final RateLimiter rateLimiter;
 
     public AuthController(
             UserService userService,
-            RateLimiter loginRateLimiter,
-            RateLimiter registerRateLimiter) {
+            @Qualifier("authRateLimiter") RateLimiter rateLimiter) {
         this.userService = userService;
-        this.loginRateLimiter = loginRateLimiter;
-        this.registerRateLimiter = registerRateLimiter;
+        this.rateLimiter = rateLimiter;
     }
 
     @GetMapping("/register")
@@ -43,7 +41,8 @@ public class AuthController {
 
     @PostMapping(value = "/api/register")
     public ResponseEntity<Void> registerUser(@RequestBody @Valid RegisterDTO body,
-                                             HttpSession session) {
+                                             HttpSession session, HttpServletRequest request) {
+        checkRequestAllowed(rateLimiter, request.getRemoteAddr());
         if (session.getAttribute(USER_SESSION) != null)
             throw new ForbiddenException("Cannot register a new user while logged in");
         userService.register(body);
@@ -61,7 +60,7 @@ public class AuthController {
     @PostMapping(value = "/api/login")
     @ResponseBody
     public ResponseEntity<ErrorDTO> login(@RequestBody @Valid LoginDTO body, HttpSession session, HttpServletRequest request) {
-        checkRequestAllowed(loginRateLimiter, request.getRemoteAddr());
+        checkRequestAllowed(rateLimiter, request.getRemoteAddr());
 
         if (session.getAttribute(USER_SESSION) != null)
             throw new ForbiddenException("Already logged in");
@@ -81,7 +80,8 @@ public class AuthController {
 
     @PutMapping(value = "/api/password")
     public ResponseEntity<Void> changePassword(HttpSession session,
-                                               @RequestBody @Valid PasswordDTO body) {
+                                               @RequestBody @Valid PasswordDTO body, HttpServletRequest request) {
+        checkRequestAllowed(rateLimiter, request.getRemoteAddr());
         SessionUser sessionUser = authenticateUser(session);
         userService.changePassword(sessionUser.id(), body);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

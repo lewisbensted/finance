@@ -51,9 +51,9 @@ public class TradingTests {
 
     @BeforeEach
     void setUp() {
-        jdbcTemplate.execute("DELETE FROM users");
         jdbcTemplate.execute("DELETE FROM holdings");
         jdbcTemplate.execute("DELETE FROM transactions");
+        jdbcTemplate.execute("DELETE FROM users");
 
         testUtils = new TestUtils(restTemplate);
         testUtils.register(testUtils.newUser);

@@ -7,6 +7,7 @@ import finance.services.HoldingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,20 +20,24 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import static finance.controllers.ControllerUtils.authenticateUser;
+import static finance.controllers.ControllerUtils.checkRequestAllowed;
 
 @Controller
 @Validated
 public class HoldingController {
     HoldingService holdingService;
+    private final RateLimiter rateLimiter;
 
-    HoldingController(HoldingService holdingService) {
+    HoldingController(HoldingService holdingService,  @Qualifier("tradeRateLimiter") RateLimiter rateLimiter) {
         this.holdingService = holdingService;
+        this.rateLimiter = rateLimiter;
     }
 
      @GetMapping(value = "/api/holdings")
      ResponseEntity<PageResponse<HoldingDTO>> fetchHoldings(HttpSession session,
              @PageableDefault(size = 5) Pageable pageable) {
          SessionUser sessionUser = authenticateUser(session);
+         checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
          Pageable safePageable = PageRequest.of(
                  pageable.getPageNumber(),
@@ -46,6 +51,7 @@ public class HoldingController {
     @GetMapping(value = "/api/holding")
     ResponseEntity<HoldingDTO> fetchHolding(HttpSession session, @RequestParam @NotBlank String symbol) {
         SessionUser sessionUser = authenticateUser(session);
+        checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
         HoldingDTO holding = holdingService.fetchHolding(sessionUser.id(), symbol);
         return ResponseEntity.ok().body(holding);

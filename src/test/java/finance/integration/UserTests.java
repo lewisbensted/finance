@@ -28,6 +28,8 @@ public class UserTests {
     @BeforeEach
     void setUp() {
         testUtils = new TestUtils(restTemplate);
+        jdbcTemplate.execute("DELETE FROM holdings");
+        jdbcTemplate.execute("DELETE FROM transactions");
         jdbcTemplate.execute("DELETE FROM users");
     }
 

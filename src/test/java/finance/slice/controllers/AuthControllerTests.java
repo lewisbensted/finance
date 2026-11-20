@@ -50,9 +50,6 @@ public class AuthControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-//    @MockBean
-//    private RateLimiter loginRateLimiter;
-
     User testUser = mock(User.class);
 
     @BeforeEach

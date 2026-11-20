@@ -4,6 +4,7 @@ import finance.dtos.*;
 import finance.services.TradingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static finance.controllers.ControllerUtils.authenticateUser;
+import static finance.controllers.ControllerUtils.checkRequestAllowed;
 import static finance.dtos.ErrorCode.OPERATION_FAILED;
 import static finance.dtos.ErrorCode.OPERATION_PARTIALLY_FAILED;
 import static finance.entities.TransactionType.BUY;
@@ -25,16 +27,19 @@ import static finance.entities.TransactionType.SELL;
 
 @RestController
 public class TradingController {
-        TradingService transactionService;
+        private final TradingService transactionService;
+        private final RateLimiter rateLimiter;
 
-        TradingController(TradingService transactionService) {
+        TradingController(TradingService transactionService, @Qualifier("tradeRateLimiter") RateLimiter rateLimiter) {
                 this.transactionService = transactionService;
+                this.rateLimiter = rateLimiter;
         }
 
         @PostMapping(value = "/api/buy")
         ResponseEntity<ApiResponse<TransactionResponseDTO>> buyStocks(HttpSession session,
                         @RequestBody List<TransactionRequestDTO> transactions) {
                 SessionUser sessionUser = authenticateUser(session);
+                checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
                 Map<String, ItemErrorDTO> errorFields = new HashMap<>();
                 Map<String, Long> successful = new HashMap<>();
@@ -66,6 +71,7 @@ public class TradingController {
         ResponseEntity<ApiResponse<TransactionResponseDTO>> sellStocks(HttpSession session,
                         @RequestBody List<TransactionRequestDTO> transactions) {
                 SessionUser sessionUser = authenticateUser(session);
+                checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
                 Map<String, ItemErrorDTO> errorFields = new HashMap<>();
                 Map<String, Long> successful = new HashMap<>();
@@ -98,6 +104,7 @@ public class TradingController {
                         @RequestParam(defaultValue = "DESC") Sort.Direction direction,
                         @PageableDefault(size = 10) Pageable pageable) {
                 SessionUser sessionUser = authenticateUser(session);
+                checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
                 Pageable safePageable = PageRequest.of(
                                 pageable.getPageNumber(),

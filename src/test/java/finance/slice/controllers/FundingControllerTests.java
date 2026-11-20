@@ -1,6 +1,7 @@
 package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import finance.configuration.RateLimiterConfig;
 import finance.controllers.FundingController;
 import finance.dtos.AmountDTO;
 import finance.entities.User;
@@ -13,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -28,13 +31,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @WebMvcTest(FundingController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@Import(RateLimiterConfig.class)
 public class FundingControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockBean
-    private FundingService accountService;
+    private FundingService fundingService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -71,7 +76,7 @@ public class FundingControllerTests {
 
         @Test
         void test401Unauthenticated() throws Exception {
-            when(accountService.deposit(anyLong(), any()))
+            when(fundingService.deposit(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +100,7 @@ public class FundingControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            when(accountService.deposit(anyLong(), any()))
+            when(fundingService.deposit(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/deposit")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +125,7 @@ public class FundingControllerTests {
 
         @Test
         void test401Unauthenticated() throws Exception {
-            when(accountService.withdraw(anyLong(), any()))
+            when(fundingService.withdraw(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -133,7 +138,7 @@ public class FundingControllerTests {
         @Test
         void test400WithdrawFails() throws Exception {
             doThrow(new InsufficientFundsException("Insufficient funds"))
-                    .when(accountService)
+                    .when(fundingService)
                     .withdraw(any(), any());
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +163,7 @@ public class FundingControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            when(accountService.withdraw(anyLong(), any()))
+            when(fundingService.withdraw(anyLong(), any()))
                     .thenReturn(testUser);
             mockMvc.perform(post("/api/withdraw")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -182,7 +187,7 @@ public class FundingControllerTests {
 
         @Test
         void test200Success() throws Exception {
-            when(accountService.getBalance(anyLong()))
+            when(fundingService.getBalance(anyLong()))
                     .thenReturn(BigDecimal.valueOf(10));
             mockMvc.perform(get("/api/balance")
                             .contentType(MediaType.APPLICATION_JSON)

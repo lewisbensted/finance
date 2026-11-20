@@ -1,6 +1,7 @@
 package finance.slice.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import finance.configuration.RateLimiterConfig;
 import finance.controllers.TradingController;
 import finance.dtos.*;
 import finance.services.TradingService;
@@ -13,10 +14,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -39,6 +42,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TradingController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+@Import(RateLimiterConfig.class)
 public class TradingControllerTests {
 
     @Autowired
