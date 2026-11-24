@@ -36,8 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-# SQLite databases
-*.db
+# Environment files / secrets
+.env
+!.env.example
 
 /node_modules
 package-lock.json

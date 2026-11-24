@@ -20,13 +20,18 @@ The application allows users to look up stock quotes and simulate stock trades u
 **Frontend:** HTML, CSS, TypeScript  
 **Database:** SQLite  
 **ORM:** Hibernate  
-**Build Tool:** Gradle
+**Build Tool:** Gradle  
+**Containerisation:** Docker
 
-[![My Skills](https://skillicons.dev/icons?i=java,spring,hibernate,sqlite,gradle,html,css,ts,)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=java,spring,hibernate,sqlite,gradle,html,css,ts,docker)](https://skillicons.dev)
 
 ## Requirements
 
-- Java 17 (JDK)  
+- Java 17 (JDK)
+- Docker 
+- Docker Compose
+
+*MySQL Server is provided through Docker Compose, so it does not need to be installed separately.*
 
 *Gradle does not need to be installed separately, as the project includes the Gradle Wrapper.*
 
@@ -39,39 +44,71 @@ The application allows users to look up stock quotes and simulate stock trades u
   cd finance
 ```
 
-2. Build the project.:
+2. Build the project:
 
 ```bash
-  ./gradlew build
+./gradlew build
 ```
+
+3. Create environment files:
+
+```bash
+cp .env.example .env
+cp .env.example .env.prod
+```
+Update .env and .env.prod with your local credentials and configuration.
+
 
 ## Running the Application
 
-### Development
+### Development & Testing
 
+Start the MySQL server using Docker Compose:
+
+```bash
+docker compose up -d
+```
 Start the application using the default development profile:
 
 ```bash
 ./gradlew bootRun
 ```
 
-The application will be available at:
-[http://localhost:8080](http://localhost:8080)
+The application will be available at: [http://localhost:8080](http://localhost:8080)
+
+Run tests:
+```bash
+./gradlew test
+```
+
+To stop the database server:
+```bash
+docker compose down   
+```
+To stop the database server and delete stored data:
+```bash
+docker compose down -v 
+```
+⚠️ Destructive - permanently deletes database volumes and stored data.
 
 ### Production
 
-Build the application:
-
+Start the MySQL server, as well as build and run the application:
 ```bash
-./gradlew clean build
+docker compose -p finance-prod --env-file .env.prod -f compose.prod.yaml up -d
 ```
-
-The executable JAR is generated in `build/libs/`.  
-Run the JAR in the production environment using the production profile:
-
+To stop the running containers:
 ```bash
-java -Dspring.profiles.active=prod -jar build/libs/<jar-file>.jar
+docker compose -p finance-prod --env-file .env.prod -f compose.prod.yaml down
 ```
+To stop the running containers and delete stored data:
+```bash
+docker compose -p finance-prod --env-file .env.prod -f compose.prod.yaml down -v 
+```
+⚠️ Destructive - permanently deletes database volumes and stored data.
+
+
+
 
 
 
