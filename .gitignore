@@ -37,8 +37,9 @@ out/
 .vscode/
 
 # Environment files / secrets
-.env
+.env.*
 !.env.example
 
 /node_modules
 package-lock.json
+/resouces/static/js

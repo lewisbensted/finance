@@ -2,7 +2,6 @@ import { handleFetchBalance } from "../balance/balance.js";
 import { createHolding, currentHoldingsMap, resetHoldings } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { handleFetchShares } from "../shares/handleFetchShares.js";
-import { updateSharesUI } from "../shares/updateSharesUI.js";
 
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";
 import {  startPollPrices, stopPollPrices } from "../utils/pollPrices.js";
@@ -59,7 +58,7 @@ quoteForm!.addEventListener("submit", async (e) => {
 			return;
 		}
 
-		updateSharesUI(holding);
+		//updateSharesUI(holding);
 
 		const buySum = sumInputs(currentHoldings);
 		updateTableUI(currentHoldings, false, buySum);

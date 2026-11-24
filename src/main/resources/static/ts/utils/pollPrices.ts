@@ -18,8 +18,8 @@ export const stopPollPrices = () => {
 };
 
 export const startPollPrices = () => {
-	isPolling = true;
-	void pollPrices();
+    isPolling = true;
+    priceIntervalId = window.setTimeout(pollPrices, INTERVAL);
 };
 
 export const pollPrices = async () => {

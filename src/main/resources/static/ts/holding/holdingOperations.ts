@@ -12,25 +12,33 @@ export const createHolding = (
 	symbol: string,
 	companyName?: string,
 	shares?: number,
-): HoldingItem => ({
-	holding: {
-		symbol: symbol,
-		companyName: companyName,
-		shares: shares,
-		latestPrice: undefined,
-		isPriceUpToDate: undefined,
-		value: undefined,
-	},
-	row: {
-		nameCell: row.querySelector(".name"),
-		symbolCell: row.querySelector(".symbol")!,
-		sharesCell: row.querySelector(".current-shares")!,
-		priceCell: row.querySelector(".price")!,
-		valueCell: row.querySelector(".value")!,
-		buyInput: row.querySelector(".buy-input")!,
-		sellInput: row.querySelector(".sell-input")!,
-	},
-});
+): HoldingItem => {
+	const buyInput = row.querySelector(".buy-input")!;
+	buyInput.value = ""
+
+	const sellInput = row.querySelector(".sell-input")!;
+	sellInput.value = ""
+	
+	return {
+		holding: {
+			symbol: symbol,
+			companyName: companyName,
+			shares: shares,
+			latestPrice: undefined,
+			isPriceUpToDate: undefined,
+			value: undefined,
+		},
+		row: {
+			nameCell: row.querySelector(".name"),
+			symbolCell: row.querySelector(".symbol")!,
+			sharesCell: row.querySelector(".current-shares")!,
+			priceCell: row.querySelector(".price")!,
+			valueCell: row.querySelector(".value")!,
+			buyInput: buyInput,
+			sellInput: sellInput,
+		},
+	};
+};
 
 export const updateHolding = (holding: Holding, stock: Stock) => {
 	const { shares } = holding;

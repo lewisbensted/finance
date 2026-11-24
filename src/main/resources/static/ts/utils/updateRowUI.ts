@@ -8,6 +8,8 @@ const disableInput = (inputCell: HTMLInputElement) => {
 };
 
 export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
+
+	console.log("called")
 	const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } =
 		holding.row;
 	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
@@ -37,7 +39,7 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 			}
 		}
 
-		if (balance == null) {
+		if (balance === null) {
 			disableInput(buyInput);
 			disableInput(sellInput);
 			return;
@@ -46,9 +48,10 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 		if (shares === null) {
 			sharesCell.textContent = "";
 		} else if (shares === undefined) {
-			sharesCell.textContent = "$--";
+			sharesCell.textContent = "--";
 			sharesCell.style.color = "red";
 		} else {
+			sharesCell.style.color = "";
 			sharesCell.textContent = String(shares);
 		}
 

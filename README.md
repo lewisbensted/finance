@@ -53,10 +53,10 @@ The application allows users to look up stock quotes and simulate stock trades u
 3. Create environment files:
 
 ```bash
-cp .env.example .env
-cp .env.example .env.prod
+cp .env.dev.example .env.dev (for dev and test)
+cp .env.dev.example .env.prod
 ```
-Update .env and .env.prod with your local credentials and configuration.
+Update .env.dev and .env.prod with your local credentials and configuration.
 
 
 ## Running the Application
@@ -64,14 +64,18 @@ Update .env and .env.prod with your local credentials and configuration.
 ### Development & Testing
 
 Start the MySQL server using Docker Compose:
-
 ```bash
-docker compose up -d
+docker compose -p finance-dev --env-file .env.dev -f compose.dev.yaml up -d
 ```
-Start the application using the default development profile:
 
+Connect directly to the database:
 ```bash
-./gradlew bootRun
+docker exec -it finance-dev-mysql-1 mysql -u YOUR_MYSQL_USER -p
+```
+
+Start the application using the default development profile:
+```bash
+./gradlew dev
 ```
 
 The application will be available at: [http://localhost:8080](http://localhost:8080)
@@ -83,11 +87,11 @@ Run tests:
 
 To stop the database server:
 ```bash
-docker compose down   
+docker compose -p finance-dev --env-file .env.dev -f compose.dev.yaml down   
 ```
 To stop the database server and delete stored data:
 ```bash
-docker compose down -v 
+docker compose -p finance-dev --env-file .env.dev -f compose.dev.yaml down -v 
 ```
 ⚠️ Destructive - permanently deletes database volumes and stored data.
 

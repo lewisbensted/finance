@@ -40,9 +40,7 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 
 		totalValue += value ?? 0;
 
-		if (value === undefined || !isPriceUpToDate) {
-			totalsUpToDate = false;
-		}
+		if (!isPriceUpToDate) totalsUpToDate = false;
 
 		if (!isSellDisabled) sellButtonDisabled = false;
 		if (!isBuyDisabled) buyButtonDisabled = false;
