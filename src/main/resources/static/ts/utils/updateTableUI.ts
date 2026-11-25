@@ -1,6 +1,7 @@
-import { getBalanceState, updateBalanceUI } from "../balance/balance.js";
+import { getBalanceState } from "../balance/balance.js";
+import { updateBalanceUI } from "../balance/updateBalanceUI.js";
 import { transactionInProgress } from "../transactionInProgress.js";
-import { HoldingItem } from "./../types/Holding.js";
+import { HoldingItem } from "../types/Holding.js";
 import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 
@@ -60,9 +61,8 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 		}
 	}
 
-
 	domUpdates.push(() => {
-		updateBalanceUI()
+		updateBalanceUI();
 
 		if (transactionInProgress) return;
 

@@ -1,4 +1,4 @@
-import { HoldingItem } from "./../types/Holding.js";
+import { HoldingItem } from "../types/Holding.js";
 import { fetchShares } from "./fetchShares.js";
 
 export const handleFetchShares = async (holding: HoldingItem) => {

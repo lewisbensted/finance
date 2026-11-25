@@ -1,4 +1,5 @@
-import { handleFetchBalance } from "../balance/balance.js";
+
+import { handleFetchBalance } from "../balance/handleFetchBalance.js";
 import { createHolding, currentHoldingsMap, resetHoldings } from "../holding/holdingOperations.js";
 import { handleFetchPrices } from "../prices/handleFetchPrices.js";
 import { applyDomUpdates, domUpdates } from "../utils/domUpdates.js";

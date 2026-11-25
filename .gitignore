@@ -42,4 +42,4 @@ out/
 
 /node_modules
 package-lock.json
-/resouces/static/js
+src/main/resources/static/js

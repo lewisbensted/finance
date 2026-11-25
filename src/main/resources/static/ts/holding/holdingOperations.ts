@@ -1,5 +1,5 @@
-import { Holding, HoldingItem } from "../types/Holding";
-import { Stock } from "../types/Stock";
+import { Holding, HoldingItem } from "../types/Holding.js";
+import { Stock } from "../types/Stock.js";
 
 export const currentHoldingsMap = new Map<string, HoldingItem>();
 
@@ -13,12 +13,6 @@ export const createHolding = (
 	companyName?: string,
 	shares?: number,
 ): HoldingItem => {
-	const buyInput = row.querySelector(".buy-input")!;
-	buyInput.value = ""
-
-	const sellInput = row.querySelector(".sell-input")!;
-	sellInput.value = ""
-	
 	return {
 		holding: {
 			symbol: symbol,
@@ -34,8 +28,8 @@ export const createHolding = (
 			sharesCell: row.querySelector(".current-shares")!,
 			priceCell: row.querySelector(".price")!,
 			valueCell: row.querySelector(".value")!,
-			buyInput: buyInput,
-			sellInput: sellInput,
+			buyInput:  row.querySelector(".buy-input")!,
+			sellInput: row.querySelector(".sell-input")!,
 		},
 	};
 };
