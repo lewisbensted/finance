@@ -32,11 +32,6 @@ buyForm.addEventListener("submit", async (e) => {
 	// 	return;
 	// }
 
-	// if (totalValue > balance) {
-	// 	message.textContent = "Could not complete trade - insufficient funds.";
-	// 	setTransactionInProgress(false);
-	// 	return;
-	// }
 	if (invalidInput) {
 		message.textContent = "Invalid input - must be positive integers.";
 		setTransactionInProgress(false);

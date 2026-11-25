@@ -8,8 +8,6 @@ const disableInput = (inputCell: HTMLInputElement) => {
 };
 
 export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
-
-	console.log("called")
 	const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } =
 		holding.row;
 	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
@@ -20,8 +18,7 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 	const isBuyDisabled =
 		balance == null || latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
 
-	const isSellDisabled =
-		balance == null || latestPrice === undefined || !isPriceUpToDate || !shares;
+	const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
 
 	const domUpdate = () => {
 		if (nameCell && companyName) nameCell.textContent = companyName;

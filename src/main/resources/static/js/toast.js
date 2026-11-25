@@ -1,0 +1,24 @@
+export const displayToast = (successes, failures, operation) => {
+    const title = document.getElementById("toastTitle");
+    const list = document.getElementById("toastList");
+    title.textContent = `${operation === "BUY" ? "Purchase" : "Sale"} Results`;
+    list.replaceChildren();
+    for (const [symbol, quantity] of successes) {
+        const li = document.createElement("li");
+        li.className = "text-success";
+        li.textContent = `✔ ${quantity} of ${symbol}`;
+        list.appendChild(li);
+    }
+    if (failures) {
+        for (const [symbol, error] of Object.entries(failures)) {
+            const li = document.createElement("li");
+            li.className = "text-danger";
+            li.textContent = `✖ ${symbol}: ${error.message}`;
+            list.appendChild(li);
+        }
+    }
+    const toast = bootstrap.Toast.getOrCreateInstance(document.getElementById("transactionToast"), {
+        autohide: false,
+    });
+    toast.show();
+};

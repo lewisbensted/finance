@@ -10,7 +10,7 @@ export const handleTransaction = async (
 ) => {
 	const { successful, updatedBalance, failed } = await executeTransaction(
 		transactionRequests,
-		"BUY",
+		type,
 	);
 
 	if (updatedBalance !== undefined) setBalance(updatedBalance);
