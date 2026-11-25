@@ -1,4 +1,4 @@
-import { balance } from "../balance/balance.js";
+import { getBalanceState, updateBalanceUI } from "../balance/balance.js";
 import { transactionInProgress } from "../transactionInProgress.js";
 import { HoldingItem } from "./../types/Holding.js";
 import { domUpdates } from "./domUpdates.js";
@@ -7,12 +7,14 @@ import { updateRowUI } from "./updateRowUI.js";
 const totalCell = document.querySelector<HTMLElement>(".total");
 const buyButton = document.querySelector<HTMLButtonElement>(".buy-button")!;
 const sellButton = document.querySelector<HTMLButtonElement>(".sell-button")!;
-const balanceCell = document.querySelector<HTMLElement>(".balance")!;
 const buySpinner = document.querySelector<HTMLElement>(".buy-spinner")!;
 const buyTotalCell = document.querySelector<HTMLElement>(".buy-total")!;
 const sellTotalCell = document.querySelector<HTMLElement>(".sell-total")!;
 
 export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buySum = 0) => {
+	const balanceState = getBalanceState();
+	const balance = balanceState?.balance;
+
 	let buyButtonDisabled = true;
 	let sellButtonDisabled = true;
 
@@ -32,7 +34,7 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 			buyButton.style.display = "";
 		}
 
-		const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, buySum);
+		const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, balance, buySum);
 
 		domUpdates.push(domUpdate);
 
@@ -58,8 +60,12 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 		}
 	}
 
-	if (transactionInProgress) return;
+
 	domUpdates.push(() => {
+		updateBalanceUI()
+
+		if (transactionInProgress) return;
+
 		buyButton.disabled = buyButtonDisabled;
 		sellButton.disabled = sellButtonDisabled;
 
@@ -71,10 +77,5 @@ export const updateTableUI = (holdings: HoldingItem[], resetInputs = false, buyS
 
 		sellTotalCell.style.color = totalsUpToDate ? "" : "red";
 		sellTotalCell.textContent = `$${sellTotal.toFixed(2)}`;
-
-		if (balance != null) {
-			balanceCell.style.color = "";
-			balanceCell.textContent = `$${balance.toFixed(2)}`;
-		}
 	});
 };

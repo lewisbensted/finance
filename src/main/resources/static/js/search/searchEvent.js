@@ -44,7 +44,6 @@ quoteForm.addEventListener("submit", async (e) => {
             message.textContent = "Symbol not found";
             return;
         }
-        //updateSharesUI(holding);
         const buySum = sumInputs(currentHoldings);
         updateTableUI(currentHoldings, false, buySum);
         applyDomUpdates(domUpdates);

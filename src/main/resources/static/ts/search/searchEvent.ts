@@ -58,8 +58,6 @@ quoteForm!.addEventListener("submit", async (e) => {
 			return;
 		}
 
-		//updateSharesUI(holding);
-
 		const buySum = sumInputs(currentHoldings);
 		updateTableUI(currentHoldings, false, buySum);
 		applyDomUpdates(domUpdates);

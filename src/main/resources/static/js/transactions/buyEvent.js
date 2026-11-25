@@ -20,10 +20,6 @@ buyForm.addEventListener("submit", async (e) => {
     const holdings = [...currentHoldingsMap.values()];
     message.textContent = "";
     const { invalidInput, transactionRequests } = collectInputs(holdings, "BUY");
-    transactionRequests[0].symbol = 'AAV';
-    console.log(transactionRequests);
-    transactionRequests[1].symbol = 'AAA';
-    console.log(transactionRequests);
     // const totalValue = sumInputs(holdings);
     // if (balance == null) {
     // 	displayMessages(["An unexpected error occured - please try again"]);

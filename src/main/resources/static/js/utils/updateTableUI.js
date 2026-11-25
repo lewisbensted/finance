@@ -1,15 +1,16 @@
-import { balance } from "../balance/balance.js";
+import { getBalanceState, updateBalanceUI } from "../balance/balance.js";
 import { transactionInProgress } from "../transactionInProgress.js";
 import { domUpdates } from "./domUpdates.js";
 import { updateRowUI } from "./updateRowUI.js";
 const totalCell = document.querySelector(".total");
 const buyButton = document.querySelector(".buy-button");
 const sellButton = document.querySelector(".sell-button");
-const balanceCell = document.querySelector(".balance");
 const buySpinner = document.querySelector(".buy-spinner");
 const buyTotalCell = document.querySelector(".buy-total");
 const sellTotalCell = document.querySelector(".sell-total");
 export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
+    const balanceState = getBalanceState();
+    const balance = balanceState?.balance;
     let buyButtonDisabled = true;
     let sellButtonDisabled = true;
     let totalValue = 0;
@@ -24,7 +25,7 @@ export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
             buySpinner.style.setProperty("display", "none", "important");
             buyButton.style.display = "";
         }
-        const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, buySum);
+        const { isSellDisabled, isBuyDisabled, domUpdate } = updateRowUI(holding, balance, buySum);
         domUpdates.push(domUpdate);
         const { value, isPriceUpToDate, latestPrice } = holding.holding;
         totalValue += value ?? 0;
@@ -45,9 +46,10 @@ export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
             sellTotal += sellValue;
         }
     }
-    if (transactionInProgress)
-        return;
     domUpdates.push(() => {
+        updateBalanceUI();
+        if (transactionInProgress)
+            return;
         buyButton.disabled = buyButtonDisabled;
         sellButton.disabled = sellButtonDisabled;
         if (totalCell)
@@ -58,9 +60,5 @@ export const updateTableUI = (holdings, resetInputs = false, buySum = 0) => {
         buyTotalCell.textContent = `$${buyTotal.toFixed(2)}`;
         sellTotalCell.style.color = totalsUpToDate ? "" : "red";
         sellTotalCell.textContent = `$${sellTotal.toFixed(2)}`;
-        if (balance != null) {
-            balanceCell.style.color = "";
-            balanceCell.textContent = `$${balance.toFixed(2)}`;
-        }
     });
 };

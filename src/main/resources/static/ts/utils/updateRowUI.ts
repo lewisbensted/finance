@@ -1,4 +1,3 @@
-import { balance } from "../balance/balance.js";
 import { HoldingItem } from "../types/Holding.js";
 
 const disableInput = (inputCell: HTMLInputElement) => {
@@ -7,7 +6,7 @@ const disableInput = (inputCell: HTMLInputElement) => {
 	inputCell.disabled = true;
 };
 
-export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
+export const updateRowUI = (holding: HoldingItem, balance: number | undefined, buyInputsSum = 0) => {
 	const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } =
 		holding.row;
 	const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
@@ -15,8 +14,7 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 	const availableSharesMax =
 		balance != null && latestPrice !== undefined ? Math.floor(balance / latestPrice) : 0;
 
-	const isBuyDisabled =
-		balance == null || latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
+	const isBuyDisabled = latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
 
 	const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
 
@@ -39,6 +37,11 @@ export const updateRowUI = (holding: HoldingItem, buyInputsSum = 0) => {
 		if (balance === null) {
 			disableInput(buyInput);
 			disableInput(sellInput);
+			return;
+		}
+
+		if (balance === undefined) {
+			disableInput(buyInput);
 			return;
 		}
 

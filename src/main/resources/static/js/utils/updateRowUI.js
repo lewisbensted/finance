@@ -1,14 +1,13 @@
-import { balance } from "../balance/balance.js";
 const disableInput = (inputCell) => {
     inputCell.max = "0";
     inputCell.min = "0";
     inputCell.disabled = true;
 };
-export const updateRowUI = (holding, buyInputsSum = 0) => {
+export const updateRowUI = (holding, balance, buyInputsSum = 0) => {
     const { priceCell, valueCell, buyInput, sellInput, nameCell, sharesCell, symbolCell } = holding.row;
     const { isPriceUpToDate, latestPrice, value, companyName, shares, symbol } = holding.holding;
     const availableSharesMax = balance != null && latestPrice !== undefined ? Math.floor(balance / latestPrice) : 0;
-    const isBuyDisabled = balance == null || latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
+    const isBuyDisabled = latestPrice === undefined || !isPriceUpToDate || availableSharesMax <= 0;
     const isSellDisabled = latestPrice === undefined || !isPriceUpToDate || !shares;
     const domUpdate = () => {
         if (nameCell && companyName)
@@ -30,6 +29,10 @@ export const updateRowUI = (holding, buyInputsSum = 0) => {
         if (balance === null) {
             disableInput(buyInput);
             disableInput(sellInput);
+            return;
+        }
+        if (balance === undefined) {
+            disableInput(buyInput);
             return;
         }
         if (shares === null) {
