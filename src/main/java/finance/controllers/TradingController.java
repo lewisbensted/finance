@@ -1,6 +1,7 @@
 package finance.controllers;
 
 import finance.dtos.*;
+import finance.exceptions.AuthenticationException;
 import finance.services.TradingService;
 import finance.session.SessionUser;
 import jakarta.servlet.http.HttpSession;
@@ -12,7 +13,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +28,7 @@ import static finance.dtos.ErrorCode.OPERATION_PARTIALLY_FAILED;
 import static finance.entities.TransactionType.BUY;
 import static finance.entities.TransactionType.SELL;
 
-@RestController
+@Controller
 public class TradingController {
         private final TradingService transactionService;
         private final RateLimiter rateLimiter;
@@ -57,13 +60,16 @@ public class TradingController {
 
                 boolean allFailed = successful.isEmpty();
                 return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK)
-                                .body(new ApiResponse<>(new TransactionResponseDTO(successful, transactionResults.balance()), errorFields.isEmpty()
-                                                ? null
-                                                : new ErrorDTO(allFailed ? OPERATION_FAILED
-                                                                : OPERATION_PARTIALLY_FAILED,
-                                                                String.format("Failed to execute %s transactions",
-                                                                                allFailed ? "all" : "some"),
-                                                                errorFields)));
+                                .body(new ApiResponse<>(
+                                                new TransactionResponseDTO(successful, transactionResults.balance()),
+                                                errorFields.isEmpty()
+                                                                ? null
+                                                                : new ErrorDTO(allFailed ? OPERATION_FAILED
+                                                                                : OPERATION_PARTIALLY_FAILED,
+                                                                                String.format("Failed to execute %s transactions",
+                                                                                                allFailed ? "all"
+                                                                                                                : "some"),
+                                                                                errorFields)));
 
         }
 
@@ -89,7 +95,8 @@ public class TradingController {
 
                 boolean allFailed = successful.isEmpty();
                 return ResponseEntity.status(allFailed ? HttpStatus.UNPROCESSABLE_ENTITY : HttpStatus.OK)
-                                .body(new ApiResponse<>(new TransactionResponseDTO(successful, transactionResults.balance()),
+                                .body(new ApiResponse<>(
+                                                new TransactionResponseDTO(successful, transactionResults.balance()),
                                                 errorFields.isEmpty() ? null
                                                                 : new ErrorDTO(allFailed ? OPERATION_FAILED
                                                                                 : OPERATION_PARTIALLY_FAILED,
@@ -102,7 +109,7 @@ public class TradingController {
         @GetMapping(value = "/api/transactions")
         ResponseEntity<PageResponse<TransactionDTO>> fetchTransactions(HttpSession session,
                         @RequestParam(defaultValue = "DESC") Sort.Direction direction,
-                        @PageableDefault(size = 10) Pageable pageable) {
+                        @PageableDefault(size = 5) Pageable pageable) {
                 SessionUser sessionUser = authenticateUser(session);
                 checkRequestAllowed(rateLimiter, String.valueOf(sessionUser.id()));
 
@@ -114,5 +121,22 @@ public class TradingController {
                 Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(),
                                 safePageable);
                 return ResponseEntity.ok().body(PageResponse.from(transactions));
+        }
+
+        @GetMapping("/transactions")
+        public String transactions(HttpSession session, Model model) {
+                SessionUser sessionUser;
+
+                try {
+                        sessionUser = authenticateUser(session);
+                } catch (AuthenticationException e) {
+                        return "redirect:/search";
+                }
+                Page<TransactionDTO> transactions = transactionService.fetchTransactions(sessionUser.id(),
+                                PageRequest.of(0, 5));
+
+                model.addAttribute("transactions", transactions);
+                System.out.println(transactions.getContent());
+                return "transactions";
         }
 }
